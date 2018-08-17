@@ -26,6 +26,7 @@ protected:
 		H,			/*Número de padroes de corte*/
 		P;			/*Número de padroes em empacotamento*/
 	double Maior_Forma, Menor_Forma;
+	int Maior_Valor_nos_Padroes;
 	vector<Tipo_Viga> Tipos_de_Viga;
 	vector<Padrao_Corte> Padroes_de_Corte;
 	vector<Padrao_Pack> Padroes_de_Empacotamento;

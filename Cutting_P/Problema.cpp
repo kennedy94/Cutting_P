@@ -106,15 +106,24 @@ Problema::Problema(const char* filename) {
 	ler_pat_cut >> H;
 	Padroes_de_Corte.resize(H);
 	for (int h = 0; h < H; h++){
+		double soma_cap = 0;
+
 		Padroes_de_Corte[h].index_pat = h;
 		ler_pat_cut >> Padroes_de_Corte[h].index_barra;
-		Padroes_de_Corte[h].tamanhos.resize(W + V);
-		for (int i = 0; i < W + V; i++){
+		Padroes_de_Corte[h].tamanhos.resize(Gamma + V);
+		for (int i = 0; i < Gamma + V; i++){
 			ler_pat_cut >> Padroes_de_Corte[h].tamanhos[i];
+			if (i < Gamma)
+				soma_cap += Padroes_de_Corte[h].tamanhos[i] * L[i];
+			else
+				soma_cap += Padroes_de_Corte[h].tamanhos[i] * b[i];
 		}
+		Padroes_de_Corte[h].cap = soma_cap;
 	}
 	ler_pat_cut.close();
 
+	/*Leitura dos dados e alocação*/
+	/*Padroes de empacotamento*/
 	ler_pat_pack >> P;
 	Padroes_de_Empacotamento.resize(P);
 	for (int i = 0; i < P; i++) {
@@ -142,6 +151,21 @@ Problema::Problema(const char* filename) {
 
 	}
 	ler_pat_pack.close();
+
+
+	Maior_Valor_nos_Padroes = 0; //Será usado para calcular os upper bounds das variáveis de decisão
+
+	for (int h = 0; h < H; h++)
+	{
+		for (int i = 0; i < Gamma + V; i++) {
+			if (Padroes_de_Corte[h].tamanhos[i] > Maior_Valor_nos_Padroes)
+				Maior_Valor_nos_Padroes = Padroes_de_Corte[h].tamanhos[i];
+		}
+	}
+	
+	cout << endl;
+	instancia.close();
+
 
 	for (int i = 0; i < 10; i++) cout << "_";
 	cout << endl;

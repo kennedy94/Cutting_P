@@ -4,13 +4,13 @@ Padrao_Pack::Padrao_Pack() {
 	id = -1;
 	tipo = -1;
 	n_cobertos = 0;
-	k = 0;
+	n_comprimentos = 0;
 	cap = 0;
 }
 
 void Padrao_Pack::contar() {
 	n_cobertos = 0;
-	for (int i = 0; i < k; i++)
+	for (int i = 0; i < n_comprimentos; i++)
 		if (tamanhos[i] > 0) { n_cobertos++; }
 }
 //Calcula o numero de tamanhos cobertos pelo padrao
@@ -27,9 +27,9 @@ bool Padrao_Pack::contem(int tam) {
 
 
 void Padrao_Pack::alocar_PADRAO(int k, int tipo) {
-	this->k = k;
+	this->n_comprimentos = k;
 	this->tipo = tipo;
-	tamanhos = new int[k];
+	tamanhos.resize(k);
 	for (int i = 0; i < k; i++)
 		tamanhos[i] = 0;
 
@@ -37,7 +37,7 @@ void Padrao_Pack::alocar_PADRAO(int k, int tipo) {
 
 bool Padrao_Pack::comparar_demandas(const Tipo_Viga & c1)
 {
-	if (c1.n_comprimentos != k)	return false;
+	if (c1.n_comprimentos != n_comprimentos)	return false;
 
 	for (int i = 0; i < c1.n_comprimentos; i++) {
 		if (c1.demandas[i] > tamanhos[i])
@@ -50,7 +50,7 @@ bool Padrao_Pack::comparar_demandas(const Tipo_Viga & c1)
 
 bool Padrao_Pack::comparar_demandas(const Tipo_Viga & c1, int IND_TAMANHO)
 {
-	if (c1.n_comprimentos != k)	return false;
+	if (c1.n_comprimentos != n_comprimentos)	return false;
 
 	if (c1.demandas[IND_TAMANHO] > tamanhos[IND_TAMANHO])
 		return false;
@@ -62,7 +62,7 @@ bool Padrao_Pack::comparar_demandas(const Tipo_Viga & c1, int IND_TAMANHO)
 bool operator== (const Padrao_Pack &c1, const Padrao_Pack &c2) {
 	if (c1.tipo != c2.tipo) return false;
 
-	for (int i = 0; i < c1.k; i++)
+	for (int i = 0; i < c1.n_comprimentos; i++)
 		if (c1.tamanhos[i] != c2.tamanhos[i]) return false;
 
 	return true;
