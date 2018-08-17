@@ -14,7 +14,7 @@ public:
 
 	//Construtores
 	Padrao_Pack();
-	//Estruturas
+	//Estruturasaa
 	int id, 
 		tipo,
 		n_cobertos,
