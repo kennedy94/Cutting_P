@@ -29,15 +29,24 @@ Modelo_Cplex::~Modelo_Cplex()
 void Modelo_Cplex::CPLEX_objective_function(){
 	IloExpr soma1, soma2, soma3;
 
-	for (IloInt w = 0; w < W; w++)
-		for (IloInt h = 0; h < H; h++) 
-			soma1 += (b[w] - Padroes_de_Corte[h].cap) * CPLEX_y_bi[h][w];
+	for (IloInt h = 0; h < H; h++)
+		if (!Padroes_de_Corte[h].Gera_LeftOvers(W, V))
+			for (IloInt w = 0; w < W; w++)
+				soma1 += (b[w] - Padroes_de_Corte[h].cap) * CPLEX_y_bi[h][w];
 
-	for (IloInt w = 0; w < W; w++)
-		for (IloInt v = 0; v < V; v++)
-			for (IloInt h = 0; h < H; h++)
-				soma1 += (b[w] - Padroes_de_Corte[h].cap) 
-				* CPLEX_y_tri[h][w][v];
+	for (IloInt h = 0; h < H; h++)
+		for (IloInt w = 0; w < W; w++)
+			for (IloInt v = 0; v < V; v++)
+				if(Padroes_de_Corte[h].Gera_LeftOver(w,v))
+					soma2 += (b[w] - Padroes_de_Corte[h].cap)
+							* CPLEX_y_tri[h][w][v];
+
+
+	for (IloInt h = 0; h < H; h++)
+		if (!Padroes_de_Corte[h].Gera_LeftOvers(W, V))
+			for (IloInt w = W; w < W + V; w++)
+				soma2 += (b[w] - Padroes_de_Corte[h].cap) * CPLEX_y_bi[h][w];
+
 
 
 	model.add(IloMinimize(env, soma1 + Parameter_alpha_1*soma2 + 
