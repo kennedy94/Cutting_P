@@ -31,7 +31,7 @@ public:
 	int n_cobre_naocobertos;
 	void alocar_PADRAO(int k, int tipo);
 
-
+	bool maximal(double capacidade, vector<double> comprimentos);
 };
 
 bool operator== (const Padrao_Pack &c1, const Padrao_Pack &c2);

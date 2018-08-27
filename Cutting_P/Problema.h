@@ -4,6 +4,7 @@
 #include <fstream>
 #include <algorithm>
 #include <sstream>
+#include <list>
 #include "Tipo_Viga.h"
 #include "Padrao_Corte.h"
 #include "Padrao_Pack.h"
@@ -27,12 +28,12 @@ protected:
 		P;			/*Número de padroes em empacotamento*/
 	double Maior_Forma, Menor_Forma;
 	int Maior_Valor_nos_Padroes;
-	vector<Tipo_Viga> Tipos_de_Viga;
-	vector<Padrao_Corte> Padroes_de_Corte;
-	vector<Padrao_Pack> Padroes_de_Empacotamento;
-
+	vector<Tipo_Viga> TipoVigas;
+	vector<Padrao_Corte> CutPatterns;
+	vector<Padrao_Pack> PackPatterns;
+	
 	vector<double> FORMAS, b, L, l, Menor_tamanho;
-	vector<int> d;
+	vector<int> e;
 
 public:
 	Problema(const char * filename);

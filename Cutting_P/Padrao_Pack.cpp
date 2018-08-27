@@ -35,6 +35,14 @@ void Padrao_Pack::alocar_PADRAO(int k, int tipo) {
 
 }
 
+bool Padrao_Pack::maximal(double capacidade, vector<double> comprimentos){
+	double menor = 10000;
+	for (int aux = 0; aux < n_comprimentos; aux++)
+		if (comprimentos[aux] < menor) menor = comprimentos[aux];
+
+	return (capacidade - cap) < menor;
+}
+
 bool Padrao_Pack::comparar_demandas(const Tipo_Viga & c1)
 {
 	if (c1.n_comprimentos != n_comprimentos)	return false;

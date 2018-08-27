@@ -47,7 +47,7 @@ Problema::Problema(const char* filename) {
 
 	L.resize(M); //vai ser vetor unique
 	FORMAS.resize(M);
-	Tipos_de_Viga.resize(C);
+	TipoVigas.resize(C);
 	Maior_Forma = 0;
 	Menor_Forma = INT_MAX;
 
@@ -73,81 +73,89 @@ Problema::Problema(const char* filename) {
 	for (int i = 0; i < C; i++) {
 		Menor_tamanho[i] = 100;
 
-		instancia >> Tipos_de_Viga[i].tempo_cura
-			>> Tipos_de_Viga[i].n_comprimentos
-			>> Tipos_de_Viga[i].n_barras;
-		Tipos_de_Viga[i].demandas.resize(Tipos_de_Viga[i].n_comprimentos);
-		Tipos_de_Viga[i].comprimentos.resize(Tipos_de_Viga[i].n_comprimentos);
+		instancia >> TipoVigas[i].tempo_cura
+			>> TipoVigas[i].n_comprimentos
+			>> TipoVigas[i].n_barras;
+		TipoVigas[i].demandas.resize(TipoVigas[i].n_comprimentos);
+		TipoVigas[i].comprimentos.resize(TipoVigas[i].n_comprimentos);
 
-		if (Tipos_de_Viga[i].n_comprimentos > Maior_Qc)
-			Maior_Qc = Tipos_de_Viga[i].n_comprimentos;
+		if (TipoVigas[i].n_comprimentos > Maior_Qc)
+			Maior_Qc = TipoVigas[i].n_comprimentos;
 
 
 
 		//Ler comprimentos
-		for (int k = 0; k < Tipos_de_Viga[i].n_comprimentos; k++) {
-			instancia >> Tipos_de_Viga[i].comprimentos[k];
-			if (Tipos_de_Viga[i].comprimentos[k] < Menor_tamanho[i])
-				Menor_tamanho[i] = Tipos_de_Viga[i].comprimentos[k];
+		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++) {
+			instancia >> TipoVigas[i].comprimentos[k];
+			if (TipoVigas[i].comprimentos[k] < Menor_tamanho[i])
+				Menor_tamanho[i] = TipoVigas[i].comprimentos[k];
 		}
 
 		//Demandas dos comprimentos
-		for (int k = 0; k < Tipos_de_Viga[i].n_comprimentos; k++)
-			instancia >> Tipos_de_Viga[i].demandas[k];
+		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+			instancia >> TipoVigas[i].demandas[k];
 
 	}
 
 	b.resize(W + V); //Alocar vetor com os tamanhos únicos de barras
+	e.resize(W + V);
+
+	//Ler tamanhos
+	for (int i = 0; i < W + V; i++)
+		instancia >> b[i];
+	//Ler estoque
+	for (int i = 0; i < W + V; i++)
+		instancia >> e[i];
 
 	instancia.close();
 
 	/*Leitura dos dados e alocação*/
 	/*Padroes de corte*/
 	ler_pat_cut >> H;
-	Padroes_de_Corte.resize(H);
+	CutPatterns.resize(H);
 	for (int h = 0; h < H; h++){
 		double soma_cap = 0;
 
-		Padroes_de_Corte[h].index_pat = h;
-		ler_pat_cut >> Padroes_de_Corte[h].index_barra;
-		Padroes_de_Corte[h].tamanhos.resize(Gamma + V);
+		CutPatterns[h].index_pat = h;
+		ler_pat_cut >> CutPatterns[h].index_barra;
+		CutPatterns[h].tamanhos.resize(Gamma + V);
 		for (int i = 0; i < Gamma + V; i++){
-			ler_pat_cut >> Padroes_de_Corte[h].tamanhos[i];
+			ler_pat_cut >> CutPatterns[h].tamanhos[i];
 			if (i < Gamma)
-				soma_cap += Padroes_de_Corte[h].tamanhos[i] * L[i];
+				soma_cap += CutPatterns[h].tamanhos[i] * L[i];
 			else
-				soma_cap += Padroes_de_Corte[h].tamanhos[i] * b[i];
+				soma_cap += CutPatterns[h].tamanhos[i] * b[i];
 		}
-		Padroes_de_Corte[h].cap = soma_cap;
+		CutPatterns[h].cap = soma_cap;
 	}
 	ler_pat_cut.close();
 
 	/*Leitura dos dados e alocação*/
 	/*Padroes de empacotamento*/
 	ler_pat_pack >> P;
-	Padroes_de_Empacotamento.resize(P);
+	PackPatterns.resize(P);
 	for (int i = 0; i < P; i++) {
-		Padroes_de_Empacotamento[i].id = i;
-		ler_pat_cut >> Padroes_de_Empacotamento[i].tipo;
+		PackPatterns[i].id = i;
+		ler_pat_cut >> PackPatterns[i].tipo;
 
-		Padroes_de_Empacotamento[i].n_comprimentos
-			= Tipos_de_Viga[Padroes_de_Empacotamento[i].tipo].n_comprimentos;
+		PackPatterns[i].n_comprimentos
+			= TipoVigas[PackPatterns[i].tipo].n_comprimentos;
 
 
-		Padroes_de_Empacotamento[i].tamanhos.resize(Padroes_de_Empacotamento[i].n_comprimentos);
+		PackPatterns[i].tamanhos.resize(PackPatterns[i].n_comprimentos);
 
 		int contar_cobertos = 0;
 		double soma = 0;
-		for (int k = 0; k < Padroes_de_Empacotamento[i].n_comprimentos; k++) {
-			ler_pat_cut >> Padroes_de_Empacotamento[i].tamanhos[k];
-			soma += Tipos_de_Viga[Padroes_de_Empacotamento[i].tipo].comprimentos[k]
-				* Padroes_de_Empacotamento[i].tamanhos[k];
+		for (int k = 0; k < PackPatterns[i].n_comprimentos; k++) {
+			ler_pat_cut >> PackPatterns[i].tamanhos[k];
+			soma += TipoVigas[PackPatterns[i].tipo].comprimentos[k]
+				* PackPatterns[i].tamanhos[k];
 
-			if (Padroes_de_Empacotamento[i].tamanhos[k] > 0)
+			if (PackPatterns[i].tamanhos[k] > 0)
 				contar_cobertos++;
 		}
-		Padroes_de_Empacotamento[i].n_cobertos = contar_cobertos;
-		Padroes_de_Empacotamento[i].cap = soma;
+		PackPatterns[i].n_cobertos = contar_cobertos;
+		PackPatterns[i].cap = soma;
 
 	}
 	ler_pat_pack.close();
@@ -158,8 +166,8 @@ Problema::Problema(const char* filename) {
 	for (int h = 0; h < H; h++)
 	{
 		for (int i = 0; i < Gamma + V; i++) {
-			if (Padroes_de_Corte[h].tamanhos[i] > Maior_Valor_nos_Padroes)
-				Maior_Valor_nos_Padroes = Padroes_de_Corte[h].tamanhos[i];
+			if (CutPatterns[h].tamanhos[i] > Maior_Valor_nos_Padroes)
+				Maior_Valor_nos_Padroes = CutPatterns[h].tamanhos[i];
 		}
 	}
 	
@@ -172,6 +180,8 @@ Problema::Problema(const char* filename) {
 	cout << "\t \t Leitura da instancia completa" << endl;
 	for (int i = 0; i < 10; i++) cout << "_";
 	cout << endl;
+
+
 }
 
 
