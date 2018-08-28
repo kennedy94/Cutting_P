@@ -42,7 +42,10 @@ Problema::Problema(const char* filename) {
 
 	
 	instancia >> C >> M >> T; //Só usa para padroes de empacotamento
+	cout << C << " " << M << " " << T << endl;
 	instancia >> W >> V; //Só Usa para padroes de corte
+	cout << W << " " << V << endl;
+
 
 	L.resize(M); //vai ser vetor unique
 	FORMAS.resize(M);
@@ -53,12 +56,13 @@ Problema::Problema(const char* filename) {
 	//Ler vetor das formas e seus tamanhos
 	for (int i = 0; i < M; i++) {
 		instancia >> FORMAS[i];
+		cout << FORMAS[i] << " ";
 		if (FORMAS[i] > Maior_Forma)
 			Maior_Forma = FORMAS[i];
 		if ((FORMAS[i] < Menor_Forma))
 			Menor_Forma = FORMAS[i];
 	}
-
+	cout << endl << endl;
 	L = FORMAS;
 	/*Calculo do numero de tamanhos de forma diferente e seu vetor*/
 	auto iterador_auxiliar = unique(L.begin(), L.end());//Tirar duplicados
@@ -75,6 +79,11 @@ Problema::Problema(const char* filename) {
 		instancia >> TipoVigas[i].tempo_cura
 			>> TipoVigas[i].n_comprimentos
 			>> TipoVigas[i].n_barras;
+
+		cout << endl << endl << TipoVigas[i].tempo_cura
+			<< " " << TipoVigas[i].n_comprimentos
+			<< " " << TipoVigas[i].n_barras << endl;
+
 		TipoVigas[i].demandas.resize(TipoVigas[i].n_comprimentos);
 		TipoVigas[i].comprimentos.resize(TipoVigas[i].n_comprimentos);
 
@@ -82,10 +91,10 @@ Problema::Problema(const char* filename) {
 			Maior_Qc = TipoVigas[i].n_comprimentos;
 
 
-
 		//Ler comprimentos
 		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++) {
 			instancia >> TipoVigas[i].comprimentos[k];
+			cout << TipoVigas[i].comprimentos[k] << " ";
 			if (TipoVigas[i].comprimentos[k] < Menor_tamanho[i])
 				Menor_tamanho[i] = TipoVigas[i].comprimentos[k];
 		}
@@ -99,17 +108,21 @@ Problema::Problema(const char* filename) {
 	b.resize(W + V); //Alocar vetor com os tamanhos únicos de barras
 	e.resize(W + V);
 
+	cout << endl << endl;
 	//Ler tamanhos
-	for (int i = 0; i < W + V; i++)
+	for (int i = 0; i < W + V; i++) {
 		instancia >> b[i];
+		cout << b[i] << " ";
+	}
 	//Ler estoque
+	cout << endl;
 	for (int i = 0; i < W + V; i++) {
 		instancia >> e[i];
-		e[i];
+		cout << e[i] << " ";
 	}
 
 
-
+	system("pause");
 	instancia.close();
 
 	/*Leitura dos dados e alocação*/
