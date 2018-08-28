@@ -3,6 +3,7 @@
 void Modelo_Cplex::iniciar_variaveis(){
 	Parameter_alpha_1 = 1;
 	Parameter_alpha_2 = 1;
+	char strnum[30];
 
 	//Definir os conjutos que geram ou não leftovers;
 	for (IloInt h = 0; h < H; h++) {
@@ -20,22 +21,111 @@ void Modelo_Cplex::iniciar_variaveis(){
 
 
 
-	CPLEX_y_bi = IloArray<IloIntVarArray>(env, H_menos.size());
-	for (auto h: H_menos)
-		CPLEX_y_bi[h] = IloIntVarArray(env, W+V, 0, Maior_Valor_nos_Padroes);
-	
-	CPLEX_y_tri = IloArray<IloArray<IloIntVarArray>>(env, H_mais.size());
-	for (auto h: H_mais) {
-		CPLEX_y_tri[h] = IloArray<IloIntVarArray>(env, W);
+	CPLEX_y_bi = IloArray<IloIntVarArray>(env, H);
+	for (int h = 0; h < H; h++) {
+		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, Maior_Valor_nos_Padroes);
 		for (IloInt w = 0; w < W; w++)
+		{
+			sprintf(strnum, "y(%d,%d)", h, w);
+			CPLEX_y_bi[h][w].setName(strnum);
+		}
+	}
+	
+	
+	
+	CPLEX_y_tri = IloArray<IloArray<IloIntVarArray>>(env, H);
+	for (int h = 0; h < H; h++) {
+		CPLEX_y_tri[h] = IloArray<IloIntVarArray>(env, W);
+		for (IloInt w = 0; w < W; w++) {
 			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, Maior_Valor_nos_Padroes);
+			for (IloInt v = 0; v < V; v++)
+			{
+				sprintf(strnum, "z(%d,%d,%d)", h,w,v);
+				CPLEX_y_tri[h][w][v].setName(strnum);
+			}
+		}
 	}
 	
 	CPLEX_x = IloArray<IloArray<IloBoolVarArray>>(env, P);
 	for (IloInt i = 0; i < P; i++) {
 		CPLEX_x[i] = IloArray<IloBoolVarArray>(env, M);
-		for (IloInt m = 0; m < M; m++)
+		for (IloInt m = 0; m < M; m++) {
 			CPLEX_x[i][m] = IloBoolVarArray(env, T);
+			for (IloInt t = 0; t < T; t++)
+			{
+				sprintf(strnum, "x(%d,%d,%d)", i, m, t);
+				CPLEX_x[i][m][t].setName(strnum);
+			}
+		}
+	}
+}
+
+void Modelo_Cplex::resolver_linear() {
+	//IloModel relax(env);
+	//relax.add(model);
+	//for (IloInt i = 0; i < P; i++) 
+	//	for (IloInt m = 0; m < M; m++) 
+	//		for (IloInt t = 0; t < T; T++) 
+	//			relax.add(IloConversion(env, CPLEX_x[i][m][t], ILOFLOAT));
+
+	//CPLEX_y_bi = IloArray<IloIntVarArray>(env, H_menos.size());
+	//for (auto h : H_menos)
+	//	for (int w = 0; w < W; w++)
+	//		relax.add(IloConversion(env, CPLEX_y_bi[h][w], ILOFLOAT));
+
+	//
+	//for (auto h : H_mais)
+	//	for (int w = 0; w < W; w++)
+	//		for (int v = 0; v < V; v++)
+	//			relax.add(IloConversion(env, CPLEX_y_tri[h][w][v], ILOFLOAT));
+
+	cplex = IloCplex(model);
+
+	if (!cplex.solve()) {
+		env.error() << "Otimizacao do LP mal-sucedida." << endl;
+		throw(-1);
+	}
+
+	if (true) {
+		int contador = 1;
+		for (int t = 0; t < T; t++) {
+			for (int m = 0; m < M; m++) {
+				for (int i = 0; i < P; i++) {
+					if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
+						if (cplex.isExtracted(CPLEX_x[i][m][t]) && cplex.getValue(CPLEX_x[i][m][t]) > 0.00001) {
+							cout << "     x(" << i << "," << m << "," << t << ") = " << cplex.getValue(CPLEX_x[i][m][t]) << "		";
+							if (contador % 2 == 0)
+								cout << endl;
+							contador++;
+						}
+				}
+			}
+		}
+		for (int h = 0; h < H; h++) {
+			for (int w = 0; w < W; w++) {
+				for (int v = 0; v < V; v++) {
+					if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0) {
+						cout << "     y(" << h << "," << w << "," << v << ") = " << cplex.getValue(CPLEX_y_tri[h][w][v]) << "		";
+						if (contador % 2 == 0)
+							cout << endl;
+						contador++;
+					}
+				}
+			}
+		}
+
+		for (int h = 0; h < H; h++) {
+			for (int w = 0; w < W; w++) {
+				if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0) {
+					cout << "     y(" << h << "," << w << ") = " << cplex.getValue(CPLEX_y_bi[h][w]) << "		";
+					if (contador % 2 == 0)
+						cout << endl;
+					contador++;
+				}
+			}
+		}
+
+		cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
 	}
 }
 
@@ -44,25 +134,27 @@ Modelo_Cplex::~Modelo_Cplex()
 }
 
 void Modelo_Cplex::CPLEX_objective_function(){
-	IloExpr soma1, soma2, soma3;
+	IloExpr soma1(env), soma2(env), soma3(env);
 
 
 	for (auto h: H_menos)
-		if (!CutPatterns[h].Gera_LeftOvers(W, V))
-			for (IloInt w = 0; w < W; w++)
+		for (IloInt w = 0; w < W; w++) 
+			if(b[w] - CutPatterns[h].cap >= 0)
 				soma1 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
+
+		
 
 	for (auto h: H_mais)
 		for (IloInt w = 0; w < W; w++)
 			for (IloInt v = 0; v < V; v++)
-				if(CutPatterns[h].Gera_LeftOver(w,v))
+				if (b[w] - CutPatterns[h].cap >= 0)
 					soma2 += (b[w] - CutPatterns[h].cap)
 							* CPLEX_y_tri[h][w][v];
 
 
 	for (auto h: H_menos)
-		if (!CutPatterns[h].Gera_LeftOvers(W, V))
-			for (IloInt w = W; w < W + V; w++)
+		for (IloInt w = W; w < W + V; w++)
+			if (b[w] - CutPatterns[h].cap >= 0)
 				soma2 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
 
 	model.add(IloMinimize(env, soma1 + Parameter_alpha_1*soma2 + 
@@ -171,21 +263,22 @@ void Modelo_Cplex::restricoes_estoque() {
 		for (auto h: H_menos)
 			expr += CPLEX_y_bi[h][w];
 
-		model.add(expr <= e[w]);
+		model.add(expr <= e[w]).setName("Estoque 1");
 		expr.end();
 	}
 	
 	//barras novas cortadas obedecem o estoque
 	for (IloInt w = 0; w < W; w++) {
 		IloExpr expr1(env), expr2(env);
-		for (auto h : H_menos)
+		for (auto h : H_menos) 
 			expr1 += CPLEX_y_bi[h][w];
 
-		for (IloInt v = 0; v < V; w++)
-			for (auto h : H_mais)
+		
+		for (IloInt v = 0; v < V; v++)
+			for (auto h : H_mais) 
 				expr1 += CPLEX_y_tri[h][w][v];
-
-		model.add(expr1 + expr2 <= e[w]);
+		
+		model.add(expr1 + expr2 <= e[w]).setName("Estoque 2");
 		expr1.end();
 		expr2.end();
 	}
@@ -204,12 +297,10 @@ void Modelo_Cplex::restricoes_integracao() {
 					soma1 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_bi[h][w];
 
 		for (IloInt w = 0; w < W; w++)
-			for (IloInt v = 0; v < V; w++)
+			for (IloInt v = 0; v < V; v++)
 				for (auto h : H_mais)
-					if (CutPatterns[h].index_barra == w 
-						&& CutPatterns[h].Gera_LeftOver(w,v))
-						soma2 +=
-						CutPatterns[h].tamanhos[gamma] * CPLEX_y_tri[h][w][v];
+					if (CutPatterns[h].index_barra == w && CutPatterns[h].Gera_LeftOver(w,v))
+						soma2 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_tri[h][w][v];
 
 		for (IloInt w = W; w < W+V; w++)
 			for (auto h : H_menos)
@@ -221,9 +312,9 @@ void Modelo_Cplex::restricoes_integracao() {
 			for (int t = 0; t < T; t++)
 				for (int i = 1; i < P; i++)
 					if (PackPatterns[i].cap <= FORMAS[m])
-						soma4 += TipoVigas[PackPatterns[i].tipo].n_barras*CPLEX_x[i][m][t];
+						soma4 += TipoVigas[PackPatterns[i].tipo].n_barras * CPLEX_x[i][m][t];
 
-		model.add(soma1 + soma2 + soma3 == soma4);
+		model.add(soma1 + soma2 + soma3 == soma4).setName("Integracao");;
 
 		soma1.end();
 		soma2.end();
@@ -232,3 +323,40 @@ void Modelo_Cplex::restricoes_integracao() {
 	}
 
 }
+
+
+void Modelo_Cplex::MontarModelo() {
+	try {
+		model = IloModel(env);
+
+		iniciar_variaveis();
+
+		CPLEX_objective_function();
+
+		restricoes_onlyone();
+
+		restricoes_demanda();
+
+		restricoes_sequenciamento();
+
+		restricoes_estoque();
+
+		restricoes_integracao();
+
+		
+		cplex = IloCplex(model);
+		cplex.exportModel("Modelo.lp");
+	}
+	catch (IloException& e) {
+		cerr << "Erro: " << e.getMessage() << endl;
+		cout << "\nErro ilocplex" << endl;
+		getchar();
+		return;
+	}
+	catch (const exception& e) {
+		cerr << "Erro: " << e.what() << endl;
+		getchar();
+		return;
+	}
+}
+

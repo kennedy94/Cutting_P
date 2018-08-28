@@ -21,27 +21,32 @@ private:
 
 	IloEnv env;
 	IloModel model;
+	IloCplex cplex;
 
 	IloNum Parameter_alpha_1, Parameter_alpha_2;
 
 	void CPLEX_objective_function();
 
-	void restricoes_onlyone();
+	inline void restricoes_onlyone();
 
-	void restricoes_demanda();
+	inline void restricoes_demanda();
 
 
-	void restricoes_sequenciamento();
+	inline void restricoes_sequenciamento();
 
-	void restricoes_estoque();
+	inline void restricoes_estoque();
 
-	void restricoes_integracao();
+	inline void restricoes_integracao();
+
+
+	void iniciar_variaveis();
 
 public:
 	/*Usando o construtor do pai*/
 	Modelo_Cplex(const char * filename) : Problema(filename) {}
 
-	void iniciar_variaveis();
+	void MontarModelo();
+	void resolver_linear();
 
 	~Modelo_Cplex();
 };

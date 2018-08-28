@@ -6,12 +6,11 @@ Problema::Problema(const char* filename) {
 	//Criar nome dos arquivos de padroes com base no nome da instância
 	string padroes_cut, padroes_pack;
 	nome_instancia = filename;
-	stringstream ss;
+	stringstream ss,ss2;
 	ss << filename << ".cutpat";
 	padroes_cut = ss.str();
-	ss.clear();
-	ss << filename << ".pat";
-	padroes_pack = ss.str();
+	ss2 << filename << ".pat";
+	padroes_pack = ss2.str();
 
 	ifstream instancia(filename, ifstream::in);
 	ifstream ler_pat_pack(padroes_pack, ifstream::in);
@@ -104,8 +103,12 @@ Problema::Problema(const char* filename) {
 	for (int i = 0; i < W + V; i++)
 		instancia >> b[i];
 	//Ler estoque
-	for (int i = 0; i < W + V; i++)
+	for (int i = 0; i < W + V; i++) {
 		instancia >> e[i];
+		e[i];
+	}
+
+
 
 	instancia.close();
 
@@ -136,8 +139,8 @@ Problema::Problema(const char* filename) {
 	PackPatterns.resize(P);
 	for (int i = 0; i < P; i++) {
 		PackPatterns[i].id = i;
-		ler_pat_cut >> PackPatterns[i].tipo;
-
+		ler_pat_pack >> PackPatterns[i].tipo;
+	
 		PackPatterns[i].n_comprimentos
 			= TipoVigas[PackPatterns[i].tipo].n_comprimentos;
 
@@ -147,7 +150,7 @@ Problema::Problema(const char* filename) {
 		int contar_cobertos = 0;
 		double soma = 0;
 		for (int k = 0; k < PackPatterns[i].n_comprimentos; k++) {
-			ler_pat_cut >> PackPatterns[i].tamanhos[k];
+			ler_pat_pack >> PackPatterns[i].tamanhos[k];
 			soma += TipoVigas[PackPatterns[i].tipo].comprimentos[k]
 				* PackPatterns[i].tamanhos[k];
 
@@ -174,11 +177,10 @@ Problema::Problema(const char* filename) {
 	cout << endl;
 	instancia.close();
 
-
-	for (int i = 0; i < 10; i++) cout << "_";
+	for (int i = 0; i < 50; i++) cout << "_";
 	cout << endl;
 	cout << "\t \t Leitura da instancia completa" << endl;
-	for (int i = 0; i < 10; i++) cout << "_";
+	for (int i = 0; i < 50; i++) cout << "_";
 	cout << endl;
 
 
