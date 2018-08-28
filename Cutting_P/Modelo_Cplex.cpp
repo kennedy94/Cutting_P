@@ -19,8 +19,6 @@ void Modelo_Cplex::iniciar_variaveis(){
 				G[gamma].push_back(m);
 	}
 
-
-
 	CPLEX_y_bi = IloArray<IloIntVarArray>(env, H);
 	for (int h = 0; h < H; h++) {
 		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, Maior_Valor_nos_Padroes);
@@ -291,30 +289,31 @@ void Modelo_Cplex::restricoes_integracao() {
 	{
 		IloExpr soma1(env), soma2(env), soma3(env), soma4(env);
 		
-		for (IloInt w = 0; w < W; w++)
+		for (IloInt w = 0; w < W; w++) {
 			for (auto h : H_menos)
 				if (CutPatterns[h].index_barra == w)
 					soma1 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_bi[h][w];
+		}
 
-		for (IloInt w = 0; w < W; w++)
+		for (IloInt w = 0; w < W; w++) {
 			for (IloInt v = 0; v < V; v++)
 				for (auto h : H_mais)
-					if (CutPatterns[h].index_barra == w && CutPatterns[h].Gera_LeftOver(w,v))
+					if (CutPatterns[h].index_barra == w && CutPatterns[h].Gera_LeftOver(W, v))
 						soma2 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_tri[h][w][v];
-
-		for (IloInt w = W; w < W+V; w++)
+		}
+		for (IloInt w = W; w < W + V; w++) {
 			for (auto h : H_menos)
-				if(CutPatterns[h].index_barra == w)
+				if (CutPatterns[h].index_barra == w)
 					soma3 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_bi[h][w];
+		}
 
-
-		for (auto m: G[gamma])
+		for (auto m : G[gamma]) {
 			for (int t = 0; t < T; t++)
 				for (int i = 1; i < P; i++)
 					if (PackPatterns[i].cap <= FORMAS[m])
 						soma4 += TipoVigas[PackPatterns[i].tipo].n_barras * CPLEX_x[i][m][t];
-
-		model.add(soma1 + soma2 + soma3 == soma4).setName("Integracao");;
+		}
+		model.add(soma1 + soma2 + soma3 == soma4).setName("Integracao");
 
 		soma1.end();
 		soma2.end();
