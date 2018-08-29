@@ -66,7 +66,7 @@ Problema::Problema(const char* filename) {
 	L = FORMAS;
 	/*Calculo do numero de tamanhos de forma diferente e seu vetor*/
 	auto iterador_auxiliar = unique(L.begin(), L.end());//Tirar duplicados
-	FORMAS.resize(distance(L.begin(), iterador_auxiliar));//Mudar o tamanho
+	L.resize(distance(L.begin(), iterador_auxiliar));//Mudar o tamanho
 	Gamma = L.size();//Gamma é o tamanho do vetor de comprimentos únicos de forma
 
 					 /*Para cada tipo de viga ler os n_tamanhos, tamanhos, demandas, cura e n_barras
@@ -120,9 +120,6 @@ Problema::Problema(const char* filename) {
 		instancia >> e[i];
 		cout << e[i] << " ";
 	}
-
-
-	system("pause");
 	instancia.close();
 
 	/*Leitura dos dados e alocação*/

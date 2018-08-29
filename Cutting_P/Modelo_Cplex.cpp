@@ -12,6 +12,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 		else
 			H_menos.push_back(h);
 	}
+
 	G.resize(Gamma);
 	for (int gamma = 0; gamma < Gamma; gamma++) {
 		for (int m = 0; m < M; m++)
@@ -79,52 +80,68 @@ void Modelo_Cplex::resolver_linear() {
 
 	cplex = IloCplex(model);
 
-	if (!cplex.solve()) {
-		env.error() << "Otimizacao do LP mal-sucedida." << endl;
-		throw(-1);
-	}
+	try
+	{
+		cplex.solve();
 
-	if (true) {
-		int contador = 1;
-		for (int t = 0; t < T; t++) {
-			for (int m = 0; m < M; m++) {
-				for (int i = 0; i < P; i++) {
-					if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
-						if (cplex.isExtracted(CPLEX_x[i][m][t]) && cplex.getValue(CPLEX_x[i][m][t]) > 0.00001) {
-							cout << "     x(" << i << "," << m << "," << t << ") = " << cplex.getValue(CPLEX_x[i][m][t]) << "		";
+		if (true) {
+			int contador = 1;
+			for (int t = 0; t < T; t++) {
+				for (int m = 0; m < M; m++) {
+					for (int i = 0; i < P; i++) {
+						if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
+							if (cplex.isExtracted(CPLEX_x[i][m][t]) && cplex.getValue(CPLEX_x[i][m][t]) > 0.00001) {
+								cout << "     x(" << i << "," << m << "," << t << ") = " << cplex.getValue(CPLEX_x[i][m][t]) << "		";
+								if (contador % 2 == 0)
+									cout << endl;
+								contador++;
+							}
+					}
+				}
+			}
+			for (int h = 0; h < H; h++) {
+				for (int w = 0; w < W; w++) {
+					for (int v = 0; v < V; v++) {
+						if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0) {
+							cout << "     y(" << h << "," << w << "," << v << ") = " << cplex.getValue(CPLEX_y_tri[h][w][v]) << "		";
 							if (contador % 2 == 0)
 								cout << endl;
 							contador++;
 						}
+					}
 				}
 			}
-		}
-		for (int h = 0; h < H; h++) {
-			for (int w = 0; w < W; w++) {
-				for (int v = 0; v < V; v++) {
-					if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0) {
-						cout << "     y(" << h << "," << w << "," << v << ") = " << cplex.getValue(CPLEX_y_tri[h][w][v]) << "		";
+
+			for (int h = 0; h < H; h++) {
+				for (int w = 0; w < W; w++) {
+					if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0) {
+						cout << "     y(" << h << "," << w << ") = " << cplex.getValue(CPLEX_y_bi[h][w]) << "		";
 						if (contador % 2 == 0)
 							cout << endl;
 						contador++;
 					}
 				}
 			}
-		}
 
-		for (int h = 0; h < H; h++) {
-			for (int w = 0; w < W; w++) {
-				if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0) {
-					cout << "     y(" << h << "," << w << ") = " << cplex.getValue(CPLEX_y_bi[h][w]) << "		";
-					if (contador % 2 == 0)
-						cout << endl;
-					contador++;
-				}
-			}
+			cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
 		}
-
-		cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
 	}
+	catch (IloException& e) {
+		cerr << endl << e.getMessage() << endl;
+		system("pause");
+		throw(0);
+	}
+	catch (exception& e)
+	{
+		cerr << endl << e.what() << endl;
+		system("pause");
+		throw(1);
+	}
+	catch (...) {
+		cerr << endl << "Socorro" << endl;
+		system("pause");
+	}
+	
 }
 
 Modelo_Cplex::~Modelo_Cplex()
@@ -158,7 +175,6 @@ void Modelo_Cplex::CPLEX_objective_function(){
 	model.add(IloMinimize(env, soma1 + Parameter_alpha_1*soma2 + 
 		Parameter_alpha_2*soma3));
 }
-
 
 void Modelo_Cplex::restricoes_onlyone() {
 	IloInt m, t, i;
@@ -255,6 +271,8 @@ void Modelo_Cplex::restricoes_sequenciamento() {
 void Modelo_Cplex::restricoes_estoque() {
 	//estoque de leftovers
 	
+
+
 	//leftovers cortados obedecem restricoes de estoque
 	for (IloInt w = W; w < W + V; w++) {
 		IloExpr expr(env);
@@ -273,8 +291,9 @@ void Modelo_Cplex::restricoes_estoque() {
 
 		
 		for (IloInt v = 0; v < V; v++)
-			for (auto h : H_mais) 
-				expr1 += CPLEX_y_tri[h][w][v];
+			for (auto h : H_mais)
+				if(CutPatterns[h].Gera_LeftOver(W,v))
+					expr2 += CPLEX_y_tri[h][w][v];
 		
 		model.add(expr1 + expr2 <= e[w]).setName("Estoque 2");
 		expr1.end();
@@ -285,10 +304,14 @@ void Modelo_Cplex::restricoes_estoque() {
 //#medo
 void Modelo_Cplex::restricoes_integracao() {
 
+	cout << Gamma << endl;
+
+
+
 	for (IloInt gamma = 0; gamma < Gamma; gamma++)
 	{
 		IloExpr soma1(env), soma2(env), soma3(env), soma4(env);
-		
+
 		for (IloInt w = 0; w < W; w++) {
 			for (auto h : H_menos)
 				if (CutPatterns[h].index_barra == w)
