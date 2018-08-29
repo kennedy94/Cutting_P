@@ -64,6 +64,7 @@ Problema::Problema(const char* filename) {
 	}
 	cout << endl << endl;
 	L = FORMAS;
+	sort(L.begin(), L.end());
 	/*Calculo do numero de tamanhos de forma diferente e seu vetor*/
 	auto iterador_auxiliar = unique(L.begin(), L.end());//Tirar duplicados
 	L.resize(distance(L.begin(), iterador_auxiliar));//Mudar o tamanho
