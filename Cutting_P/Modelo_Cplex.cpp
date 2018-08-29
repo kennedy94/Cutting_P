@@ -59,7 +59,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 	}
 }
 
-void Modelo_Cplex::resolver_linear() {
+void Modelo_Cplex::resolver_inteira() {
 	//IloModel relax(env);
 	//relax.add(model);
 	//for (IloInt i = 0; i < P; i++) 
@@ -195,7 +195,6 @@ void Modelo_Cplex::restricoes_onlyone() {
 		}
 	}
 }
-
 
 void Modelo_Cplex::restricoes_demanda() {
 	IloInt c, k, m, t, i;

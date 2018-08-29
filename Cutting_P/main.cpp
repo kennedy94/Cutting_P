@@ -7,7 +7,7 @@ int main() {
 	Modelo_Cplex Modelo("problema");
 
 	Modelo.MontarModelo();
-	Modelo.resolver_linear();
+	Modelo.resolver_inteira();
 	getchar();
 	return 0;
 }
