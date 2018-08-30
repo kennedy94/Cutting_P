@@ -191,17 +191,16 @@ void Modelo_Cplex::restricoes_onlyone() {
 		for (t = 0; t < T; t++) {
 			IloExpr expr(env);
 			IloNumVarArray teste(env);
-			IloNumArray vals(env);
 			teste.add(CPLEX_x[0][m][t]);
 			for (i = 1; i < P; i++) {
 				int tipo = PackPatterns[i].tipo;
 				if ((PackPatterns[i].cap <= FORMAS[m])
 					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
 					teste.add(CPLEX_x[i][m][t]);
-					vals.add(1);
+		
 				}
 			}
-			model.add(IloSOS1(env, teste, vals));
+			model.add(IloSOS1(env, teste));
 			//model.add(expr <= 1).setName("Um Padrao");
 			//expr.end();
 		}
