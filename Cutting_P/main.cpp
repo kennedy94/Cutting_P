@@ -10,6 +10,7 @@ int main() {
 	Modelo.resolver_inteira();
 	Modelo.ImprimirSolucao();
 	Modelo.ImprimirGantt();
+	Modelo.PlotarBarras();
 
 	getchar();
 	return 0;

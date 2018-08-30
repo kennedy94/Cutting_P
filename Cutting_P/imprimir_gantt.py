@@ -44,4 +44,16 @@ plt.legend(handles=[blackpatch,graypatch,whitepatch],bbox_to_anchor=(1.05, 1), l
 
 plt.tight_layout()       
 #plt.show()
-plt.savefig('grafico.png', bbox_inches='tight')
+
+nome  = sys.argv[1]
+
+if nome.endswith('.solu'):
+	nome = nome[:-5]
+	nome = nome + '_gantt.png'
+if nome.endswith('.barras'):
+	nome = nome[:-7]
+	nome = nome + '_barras.png'
+	
+
+
+plt.savefig(nome, bbox_inches='tight')

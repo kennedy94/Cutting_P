@@ -111,9 +111,12 @@ Problema::Problema(const char* filename) {
 
 	cout << endl << endl;
 	//Ler tamanhos
+	Maior_Barra = 0;
 	for (int i = 0; i < W + V; i++) {
 		instancia >> b[i];
 		cout << b[i] << " ";
+		if (b[i] > Maior_Barra)
+			Maior_Barra = b[i];
 	}
 	//Ler estoque
 	cout << endl;
@@ -128,19 +131,15 @@ Problema::Problema(const char* filename) {
 	ler_pat_cut >> H;
 	CutPatterns.resize(H);
 	for (int h = 0; h < H; h++){
-		double soma_cap = 0;
 
 		CutPatterns[h].index_pat = h;
 		ler_pat_cut >> CutPatterns[h].index_barra;
 		CutPatterns[h].tamanhos.resize(Gamma + V);
-		for (int i = 0; i < Gamma + V; i++){
+		for (int i = 0; i < Gamma + V; i++) 
 			ler_pat_cut >> CutPatterns[h].tamanhos[i];
-			if (i < Gamma)
-				soma_cap += CutPatterns[h].tamanhos[i] * L[i];
-			else
-				soma_cap += CutPatterns[h].tamanhos[i] * b[i];
-		}
-		CutPatterns[h].cap = soma_cap;
+
+		ler_pat_cut >> CutPatterns[h].cap;
+		
 	}
 	ler_pat_cut.close();
 

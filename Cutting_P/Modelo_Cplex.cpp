@@ -1,12 +1,30 @@
 #include "Modelo_Cplex.h"
 
+bool GreaterThanZero(int i) { return (i > 0); }
+
 void Modelo_Cplex::iniciar_variaveis(){
 	Parameter_alpha_1 = 1;
 	Parameter_alpha_2 = 1;
 	char strnum[30];
 
+	z = IloBoolVarArray(env, T);
+	for (int t = 0; t < T; t++) {
+		sprintf(strnum, "z(%d)", t);
+		z[t].setName(strnum);
+	}
+
+
+
 	//Definir os conjutos que geram ou não leftovers;
 	for (IloInt h = 0; h < H; h++) {
+		if (CutPatterns[h].cap > b[CutPatterns[h].index_barra]) {
+			cout << CutPatterns[h].index_barra << " :";
+			for (int i = 0; i < Gamma + V; i++)
+				cout << CutPatterns[h].tamanhos[i] << " ";
+			getchar();
+			cout << endl;
+		}
+
 		if (CutPatterns[h].Gera_LeftOvers(W, V))
 			H_mais.push_back(h);
 		else
@@ -77,11 +95,12 @@ void Modelo_Cplex::resolver_inteira() {
 	//	for (int w = 0; w < W; w++)
 	//		for (int v = 0; v < V; v++)
 	//			relax.add(IloConversion(env, CPLEX_y_tri[h][w][v], ILOFLOAT));
-
+	
 	cplex = IloCplex(model);
 
 	try
 	{
+		cplex.setParam(IloCplex::TiLim, 3600);
 		cplex.solve();
 	}
 	catch (IloException& e) {
@@ -110,6 +129,13 @@ void Modelo_Cplex::CPLEX_objective_function(){
 	IloExpr soma1(env), soma2(env), soma3(env);
 
 
+	IloInt t;
+
+	IloExpr costSum(env);
+	for (t = 0; t < T; t++)
+		costSum += z[t];
+
+
 	for (auto h: H_menos)
 		for (IloInt w = 0; w < W; w++) 
 			if(b[w] - CutPatterns[h].cap >= 0)
@@ -130,26 +156,54 @@ void Modelo_Cplex::CPLEX_objective_function(){
 			if (b[w] - CutPatterns[h].cap >= 0)
 				soma2 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
 
-	model.add(IloMinimize(env, soma1 + Parameter_alpha_1*soma2 + 
+	model.add(IloMinimize(env, 10*costSum + soma1 + Parameter_alpha_1*soma2 + 
 		Parameter_alpha_2*soma3));
 }
 
+//Inteira
+//void Modelo_Cplex::restricoes_onlyone() {
+//	IloInt m, t, i;
+//	//para cada forma m e periodo de tempo t
+//	for (m = 0; m < M; m++) {
+//		for (t = 0; t < T; t++) {
+//			IloExpr expr(env);
+//			expr += CPLEX_x[0][m][t];
+//			for (i = 1; i < P; i++) {
+//				int tipo = PackPatterns[i].tipo;
+//				if ((PackPatterns[i].cap <= FORMAS[m]) 
+//					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
+//					expr += CPLEX_x[i][m][t];
+//				}
+//			}
+//			model.add(expr <= 1).setName("Um Padrao");
+//			expr.end();
+//		}
+//	}
+//}
+
+
+
+//SOS
 void Modelo_Cplex::restricoes_onlyone() {
 	IloInt m, t, i;
 	//para cada forma m e periodo de tempo t
 	for (m = 0; m < M; m++) {
 		for (t = 0; t < T; t++) {
 			IloExpr expr(env);
-			expr += CPLEX_x[0][m][t];
+			IloNumVarArray teste(env);
+			IloNumArray vals(env);
+			teste.add(CPLEX_x[0][m][t]);
 			for (i = 1; i < P; i++) {
 				int tipo = PackPatterns[i].tipo;
-				if ((PackPatterns[i].cap <= FORMAS[m]) 
+				if ((PackPatterns[i].cap <= FORMAS[m])
 					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
-					expr += CPLEX_x[i][m][t];
+					teste.add(CPLEX_x[i][m][t]);
+					vals.add(1);
 				}
 			}
-			model.add(expr <= 1).setName("Um Padrao");
-			expr.end();
+			model.add(IloSOS1(env, teste, vals));
+			//model.add(expr <= 1).setName("Um Padrao");
+			//expr.end();
 		}
 	}
 }
@@ -258,9 +312,48 @@ void Modelo_Cplex::restricoes_estoque() {
 	}
 }
 
-void Modelo_Cplex::restricoes_integracao() {
+void Modelo_Cplex::restricoes_z() {
+	IloInt t, m, i;
 
-	cout << Gamma << endl;
+	for (t = 0; t < T; t++)
+	{
+		IloExpr expr(env);
+
+		for (m = 0; m < M; m++) {
+			for (i = 1; i < P; i++)
+				if(PackPatterns[i].maximal(FORMAS[m],TipoVigas[PackPatterns[i].tipo].comprimentos))
+					expr += CPLEX_x[i][m][t];
+			expr += CPLEX_x[0][m][t];
+		}
+
+		model.add(M*z[t] >= expr);
+		expr.end();
+	}
+}
+
+void Modelo_Cplex::restricoes_continuidade() {
+	IloInt m, t, i;
+
+	for (m = 0; m < M; m++) {
+		for (t = 0; t < T - 1; t++) {
+			IloExpr expr1(env), expr2(env);
+
+			for (i = 0; i < P; i++)
+				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
+					expr1 += CPLEX_x[i][m][t];
+			for (i = 0; i < P; i++)
+				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
+					expr2 += CPLEX_x[i][m][t + 1];
+
+			model.add(expr1 >= expr2);
+			expr1.end();
+			expr2.end();
+		}
+	}
+
+}
+
+void Modelo_Cplex::restricoes_integracao() {
 
 	for (IloInt gamma = 0; gamma < Gamma; gamma++)
 	{
@@ -314,6 +407,10 @@ void Modelo_Cplex::MontarModelo() {
 		restricoes_demanda();
 
 		restricoes_sequenciamento();
+
+		restricoes_z();
+
+		restricoes_continuidade();
 
 		restricoes_estoque();
 
@@ -410,5 +507,66 @@ void Modelo_Cplex::ImprimirGantt() {
 
 
 void Modelo_Cplex::PlotarBarras() {
+	char xu[100];
+	strcpy(xu, nome_instancia);
+	strcat(xu, ".barras");
+	ofstream txtsolu;
+	txtsolu.open(xu, fstream::trunc);
+
+	vector<int> UsedCutPatterns(H);
+
+
+	for (int h = 0; h < H; h++)
+		for (int w = 0; w < W; w++)
+			for (int v = 0; v < V; v++)
+				if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0)
+					UsedCutPatterns[h] += cplex.getValue(CPLEX_y_tri[h][w][v]);
+
+	for (int h = 0; h < H; h++)
+		for (int w = 0; w < W; w++)
+			if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0)
+				UsedCutPatterns[h] += cplex.getValue(CPLEX_y_bi[h][w]);
+
+
+	txtsolu << 1 << "," << 0 << "," << Maior_Barra << ",Type 0" << endl;
+
+	int contador = 0;
+	for (int h = 0; h < H; h++){
+		if (UsedCutPatterns[h] > 0) {
+
+			double aux = 0;
+			contador++;
+			
+
+			txtsolu << contador << "," << CutPatterns[h].cap << "," << b[CutPatterns[h].index_barra] << ",Type 3" << endl;
+
+
+			for (int w = 0; w < Gamma+V; w++){
+				for (int i = 0; i < CutPatterns[h].tamanhos[w]; i++){
+					if (w < Gamma) {
+						txtsolu << contador << "," << aux + 0.1 << "," << aux + L[w] - 0.1 << ",Type 1" << endl;
+						aux += L[w];
+					}
+					else {
+						txtsolu << contador << "," << aux + 0.1 << "," << aux + b[W+w - Gamma] - 0.1 << ",Type 2" << endl;
+						aux += b[w];
+					}
+				}
+			}
+
+			
+		}
+	}
+
+	txtsolu.close();
+
+	string comando_system;
+
+	stringstream ss;
+	ss << " python gerarbarras.py " << xu;
+	comando_system = ss.str();
+	system(comando_system.c_str());
+	cout << "Barras Gerado! :)" << endl;
 
 }
+

@@ -58,5 +58,23 @@
     <None Include="generate_inst.m">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="arquivoteste">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="arquivoteste.cutpat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="arquivoteste.pat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="arquivoteste2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="arquivoteste2.cutpat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="arquivoteste2.pat">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

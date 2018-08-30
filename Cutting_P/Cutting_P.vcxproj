@@ -165,6 +165,12 @@
     <ClInclude Include="Tipo_Viga.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="arquivoteste" />
+    <None Include="arquivoteste.cutpat" />
+    <None Include="arquivoteste.pat" />
+    <None Include="arquivoteste2" />
+    <None Include="arquivoteste2.cutpat" />
+    <None Include="arquivoteste2.pat" />
     <None Include="generate_inst.m" />
     <None Include="imprimir_gantt.py" />
   </ItemGroup>

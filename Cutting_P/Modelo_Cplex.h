@@ -18,10 +18,10 @@ private:
 	vector<list<int>> G; /*Vetor de conjuntos que guardam as formas
 						 de tamanho gamma*/
 		
-
 	IloEnv env;
 	IloModel model;
 	IloCplex cplex;
+	IloBoolVarArray z;
 
 	IloNum Parameter_alpha_1, Parameter_alpha_2;
 
@@ -31,10 +31,14 @@ private:
 
 	inline void restricoes_demanda();
 
+	inline void restricoes_z();
 
 	inline void restricoes_sequenciamento();
 
 	inline void restricoes_estoque();
+
+
+	void restricoes_continuidade();
 
 	inline void restricoes_integracao();
 
@@ -50,6 +54,7 @@ public:
 	void ImprimirGantt();
 	void PlotarBarras();
 	void resolver_inteira();
+
 
 	~Modelo_Cplex();
 };
