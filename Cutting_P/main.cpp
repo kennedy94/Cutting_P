@@ -8,6 +8,9 @@ int main() {
 
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
+	Modelo.ImprimirSolucao();
+	Modelo.ImprimirGantt();
+
 	getchar();
 	return 0;
 }

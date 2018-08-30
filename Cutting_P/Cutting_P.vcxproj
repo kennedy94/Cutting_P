@@ -164,6 +164,10 @@
     <ClInclude Include="Problema.h" />
     <ClInclude Include="Tipo_Viga.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="generate_inst.m" />
+    <None Include="imprimir_gantt.py" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

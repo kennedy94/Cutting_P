@@ -39,7 +39,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, Maior_Valor_nos_Padroes);
 			for (IloInt v = 0; v < V; v++)
 			{
-				sprintf(strnum, "z(%d,%d,%d)", h,w,v);
+				sprintf(strnum, "y(%d,%d,%d)", h,w,v);
 				CPLEX_y_tri[h][w][v].setName(strnum);
 			}
 		}
@@ -83,48 +83,6 @@ void Modelo_Cplex::resolver_inteira() {
 	try
 	{
 		cplex.solve();
-
-		if (true) {
-			int contador = 1;
-			for (int t = 0; t < T; t++) {
-				for (int m = 0; m < M; m++) {
-					for (int i = 0; i < P; i++) {
-						if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
-							if (cplex.isExtracted(CPLEX_x[i][m][t]) && cplex.getValue(CPLEX_x[i][m][t]) > 0.00001) {
-								cout << "     x(" << i << "," << m << "," << t << ") = " << cplex.getValue(CPLEX_x[i][m][t]) << "		";
-								if (contador % 2 == 0)
-									cout << endl;
-								contador++;
-							}
-					}
-				}
-			}
-			for (int h = 0; h < H; h++) {
-				for (int w = 0; w < W; w++) {
-					for (int v = 0; v < V; v++) {
-						if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0) {
-							cout << "     y(" << h << "," << w << "," << v << ") = " << cplex.getValue(CPLEX_y_tri[h][w][v]) << "		";
-							if (contador % 2 == 0)
-								cout << endl;
-							contador++;
-						}
-					}
-				}
-			}
-
-			for (int h = 0; h < H; h++) {
-				for (int w = 0; w < W; w++) {
-					if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0) {
-						cout << "     y(" << h << "," << w << ") = " << cplex.getValue(CPLEX_y_bi[h][w]) << "		";
-						if (contador % 2 == 0)
-							cout << endl;
-						contador++;
-					}
-				}
-			}
-
-			cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
-		}
 	}
 	catch (IloException& e) {
 		cerr << endl << e.getMessage() << endl;
@@ -300,12 +258,9 @@ void Modelo_Cplex::restricoes_estoque() {
 	}
 }
 
-//#medo
 void Modelo_Cplex::restricoes_integracao() {
 
 	cout << Gamma << endl;
-
-
 
 	for (IloInt gamma = 0; gamma < Gamma; gamma++)
 	{
@@ -381,3 +336,79 @@ void Modelo_Cplex::MontarModelo() {
 	}
 }
 
+void Modelo_Cplex::ImprimirSolucao() {
+	int contador = 1;
+	for (int t = 0; t < T; t++)
+		for (int m = 0; m < M; m++) 
+			for (int i = 0; i < P; i++) 
+				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos) || i == 0)
+					if (cplex.isExtracted(CPLEX_x[i][m][t]) && cplex.getValue(CPLEX_x[i][m][t]) > 0.00001) {
+						cout << "     x(" << i << "," << m << "," << t << ") = " << cplex.getValue(CPLEX_x[i][m][t]) << "		";
+						if (contador % 2 == 0)
+							cout << endl;
+						contador++;
+					}
+
+	for (int h = 0; h < H; h++) 
+		for (int w = 0; w < W; w++) 
+			for (int v = 0; v < V; v++) 
+				if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0) {
+					cout << "     y(" << h << "," << w << "," << v << ") = " << cplex.getValue(CPLEX_y_tri[h][w][v]) << "		";
+					if (contador % 2 == 0)
+						cout << endl;
+					contador++;
+				}
+
+	for (int h = 0; h < H; h++) 
+		for (int w = 0; w < W; w++) 
+			if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0) {
+				cout << "     y(" << h << "," << w << ") = " << cplex.getValue(CPLEX_y_bi[h][w]) << "		";
+				if (contador % 2 == 0)
+					cout << endl;
+				contador++;
+			}
+		
+
+	cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
+	
+}
+
+
+void Modelo_Cplex::ImprimirGantt() {
+	char xu[100];
+	strcpy(xu, nome_instancia);
+	strcat(xu, ".solu");
+	ofstream txtsolu;
+	txtsolu.open(xu, fstream::trunc);
+
+	txtsolu << endl;
+
+	txtsolu << 1 << "," << 0 << "," << T << ",Type 0" << endl;
+	for (int m = 0; m < M; m++) {
+		bool usou = false;
+		for (int t = 0; t < T; t++)
+			for (int i = 1; i < P; i++)
+				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos)
+					&& cplex.isExtracted(CPLEX_x[i][m][t])
+					&& cplex.getValue(CPLEX_x[i][m][t]) == 1) {
+					txtsolu << m + 1 << "," << t + 0.01 << "," << t + TipoVigas[PackPatterns[i].tipo].tempo_cura - 0.01 << ",Type " << PackPatterns[i].tipo + 1 << endl;
+					usou = true;
+				}
+		if (!usou)
+			txtsolu << m + 1 << "," << 0 << "," << T << ",Type 0" << endl;
+	}
+	txtsolu.close();
+
+	string comando_system;
+
+	stringstream ss;
+	ss << " python imprimir_gantt.py " << xu;
+	comando_system = ss.str();
+	system(comando_system.c_str());
+	cout << "Grafico de Gantt Gerado! :)" << endl;
+}
+
+
+void Modelo_Cplex::PlotarBarras() {
+
+}

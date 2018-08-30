@@ -46,6 +46,9 @@ public:
 	Modelo_Cplex(const char * filename) : Problema(filename) {}
 
 	void MontarModelo();
+	void ImprimirSolucao();
+	void ImprimirGantt();
+	void PlotarBarras();
 	void resolver_inteira();
 
 	~Modelo_Cplex();

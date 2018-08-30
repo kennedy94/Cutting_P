@@ -51,4 +51,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="imprimir_gantt.py">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="generate_inst.m">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
