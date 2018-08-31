@@ -197,7 +197,6 @@ void Modelo_Cplex::restricoes_onlyone() {
 				if ((PackPatterns[i].cap <= FORMAS[m])
 					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
 					teste.add(CPLEX_x[i][m][t]);
-		
 				}
 			}
 			model.add(IloSOS1(env, teste));

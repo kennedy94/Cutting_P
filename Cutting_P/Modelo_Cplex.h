@@ -47,7 +47,7 @@ private:
 
 public:
 	/*Usando o construtor do pai*/
-	Modelo_Cplex(const char * filename) : Problema(filename) {}
+	Modelo_Cplex(const char * filename) : Problema(filename) { };
 
 	void MontarModelo();
 	void ImprimirSolucao();

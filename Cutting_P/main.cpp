@@ -4,7 +4,7 @@ using namespace std;
 
 int main() {
 	
-	Modelo_Cplex Modelo("arquivoteste2");
+	Modelo_Cplex Modelo("cwp1");
 
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
