@@ -49,6 +49,8 @@ public:
 	/*Usando o construtor do pai*/
 	Modelo_Cplex(const char * filename) : Problema(filename) { };
 
+	void restricao_limite();
+
 	void MontarModelo();
 	void ImprimirSolucao();
 	void ImprimirGantt();

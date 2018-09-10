@@ -25,7 +25,8 @@ protected:
 		Maior_Qc,	/*Maior número de tamanhos entre os tipos
 					de viga*/
 		H,			/*Número de padroes de corte*/
-		P;			/*Número de padroes em empacotamento*/
+		P,			/*Número de padroes em empacotamento*/
+		U;			/*Limite de leftovers*/
 	double Maior_Forma, Menor_Forma;
 	double Maior_Barra;
 	int Maior_Valor_nos_Padroes;

@@ -392,6 +392,33 @@ void Modelo_Cplex::restricoes_integracao() {
 }
 
 
+void Modelo_Cplex::restricao_limite() {
+
+	IloExpr expr(env);
+	IloInt estoque_leftover = 0;
+
+	for (IloInt w = W; w < W + V; w++)
+		estoque_leftover += e[w];
+
+
+
+	for (IloInt w = 0; w < W; w++) 
+		for (IloInt v = 0; v < V; v++)
+			for (auto h : H_mais)
+				if (CutPatterns[h].Gera_LeftOver(W, v))
+					expr += CPLEX_y_tri[h][w][v];
+
+
+	for (IloInt w = W; w < W + V; w++)
+		for (auto h : H_menos)
+			expr -= CPLEX_y_bi[h][w];
+
+	U = 0;
+	model.add(expr <= U - estoque_leftover).setName("Limite de leftover");
+
+	expr.end();
+}
+
 void Modelo_Cplex::MontarModelo() {
 	try {
 		model = IloModel(env);
