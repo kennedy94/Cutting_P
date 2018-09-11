@@ -100,7 +100,7 @@ void Modelo_Cplex::resolver_inteira() {
 
 	try
 	{
-		cplex.setParam(IloCplex::TiLim, 3600);
+		cplex.setParam(IloCplex::TiLim, 150);
 		cplex.solve();
 	}
 	catch (IloException& e) {
@@ -413,7 +413,7 @@ void Modelo_Cplex::restricao_limite() {
 		for (auto h : H_menos)
 			expr -= CPLEX_y_bi[h][w];
 
-	U = 0;
+	U = 1000;
 	model.add(expr <= U - estoque_leftover).setName("Limite de leftover");
 
 	expr.end();
@@ -440,6 +440,8 @@ void Modelo_Cplex::MontarModelo() {
 		restricoes_estoque();
 
 		restricoes_integracao();
+
+		restricao_limite();
 
 		
 		cplex = IloCplex(model);
