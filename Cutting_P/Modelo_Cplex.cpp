@@ -541,18 +541,20 @@ void Modelo_Cplex::PlotarBarras() {
 	txtsolu.open(xu, fstream::trunc);
 
 	vector<int> UsedCutPatterns(H);
+	for (int h = 0; h < H; h++)
+		UsedCutPatterns[h] = 0;
 
 
 	for (int h = 0; h < H; h++)
 		for (int w = 0; w < W; w++)
 			for (int v = 0; v < V; v++)
 				if (cplex.isExtracted(CPLEX_y_tri[h][w][v]) && cplex.getValue(CPLEX_y_tri[h][w][v]) > 0)
-					UsedCutPatterns[h] += cplex.getValue(CPLEX_y_tri[h][w][v]);
+					UsedCutPatterns[h] = cplex.getValue(CPLEX_y_tri[h][w][v]);
 
 	for (int h = 0; h < H; h++)
 		for (int w = 0; w < W; w++)
 			if (cplex.isExtracted(CPLEX_y_bi[h][w]) && cplex.getValue(CPLEX_y_bi[h][w]) > 0)
-				UsedCutPatterns[h] += cplex.getValue(CPLEX_y_bi[h][w]);
+				UsedCutPatterns[h] = cplex.getValue(CPLEX_y_bi[h][w]);
 
 
 	txtsolu << 1 << "," << 0 << "," << Maior_Barra << ",Type 0" << endl;
@@ -575,8 +577,8 @@ void Modelo_Cplex::PlotarBarras() {
 						aux += L[w];
 					}
 					else {
-						txtsolu << contador << "," << aux + 0.1 << "," << aux + b[W+w - Gamma] - 0.1 << ",Type 2" << endl;
-						aux += b[w];
+						txtsolu << contador << "," << aux + 0.1 << "," << aux + b[W + w - Gamma] - 0.1 << ",Type 2" << endl;
+						aux += b[W + w - Gamma];
 					}
 				}
 			}
