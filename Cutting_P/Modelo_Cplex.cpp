@@ -100,7 +100,7 @@ void Modelo_Cplex::resolver_inteira() {
 
 	try
 	{
-		cplex.setParam(IloCplex::TiLim, 150);
+		cplex.setParam(IloCplex::TiLim, 100);
 		cplex.solve();
 	}
 	catch (IloException& e) {
@@ -567,7 +567,7 @@ void Modelo_Cplex::PlotarBarras() {
 			contador++;
 			
 
-			txtsolu << contador << "," << CutPatterns[h].cap << "," << b[CutPatterns[h].index_barra] << ",Type 3" << endl;
+			txtsolu << contador << "," << CutPatterns[h].cap + 0.1 << "," << b[CutPatterns[h].index_barra] + 0.1 << ",Type 3" << endl;
 
 
 			for (int w = 0; w < Gamma+V; w++){
