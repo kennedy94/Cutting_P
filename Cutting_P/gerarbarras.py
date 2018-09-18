@@ -10,14 +10,14 @@ df = pd.read_csv(sys.argv[1], header=None, names=["Task", "Start", "Finish", "Re
 df["Diff"] = df.Finish - df.Start
 
 
-color = {"Type 1":"0.25", "Type 2":"0.5", "Type 3":"0", "Type 0":"1"} #, "JOB3":"blue", "JOB4":"red"}
+color = {"Type 1":"0.25", "Type 2":"0.5", "Type 3":"0", "Type 0":"1", "Type 4":"blue", "Emenda":"red"} #, "JOB3":"blue", "JOB4":"red"}
 
 
 blackpatch	= mpatches.Patch(color='0.25', label='Bar')
 graypatch	= mpatches.Patch(color='0.5', label='Leftover')
 whitepatch	= mpatches.Patch(color='0', label='Waste')
-#bluepatch	= mpatches.Patch(color='blue', label='JOB4')
-#red_patch	= mpatches.Patch(color='red', label='JOB5')
+bluepatch	= mpatches.Patch(color='blue', label='Splicing Bar')
+red_patch	= mpatches.Patch(color='red', label='Welding')
 
 fig,ax=plt.subplots(figsize=(6,3))
 
@@ -40,7 +40,7 @@ ax.set_yticklabels(labels)
 fontP = FontProperties()
 fontP.set_size('small')
 #plt.legend(handles=[blackpatch,graypatch,greenpatch,bluepatch, red_patch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-plt.legend(handles=[blackpatch,graypatch,whitepatch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+plt.legend(handles=[blackpatch,graypatch,whitepatch, bluepatch, red_patch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 plt.tight_layout()       
 #plt.show()

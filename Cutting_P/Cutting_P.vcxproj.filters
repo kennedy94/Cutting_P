@@ -33,6 +33,9 @@
     <ClCompile Include="Tipo_Viga.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Padrao_Traspasse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modelo_Cplex.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tipo_Viga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Padrao_Traspasse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,6 +80,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="arquivoteste2.pat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="gerarbarras.py">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

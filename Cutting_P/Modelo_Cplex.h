@@ -7,6 +7,7 @@ class Modelo_Cplex :
 	public Problema
 {
 private:
+	IloIntVarArray CPLEX_o;
 	IloArray<IloIntVarArray> CPLEX_y_bi;
 	IloArray<IloArray<IloIntVarArray>> CPLEX_y_tri;
 	IloArray<IloArray<IloBoolVarArray>> CPLEX_x;

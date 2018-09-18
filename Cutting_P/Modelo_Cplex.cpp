@@ -1,5 +1,6 @@
 #include "Modelo_Cplex.h"
 
+
 bool GreaterThanZero(int i) { return (i > 0); }
 
 void Modelo_Cplex::iniciar_variaveis(){
@@ -13,7 +14,12 @@ void Modelo_Cplex::iniciar_variaveis(){
 		z[t].setName(strnum);
 	}
 
+	CPLEX_o = IloIntVarArray(env, O, 0, INT_MAX);
 
+	for (int mu = 0; mu < O; mu++) {
+		sprintf(strnum, "o(%d)", mu);
+		CPLEX_o[mu].setName(strnum);
+	}
 
 	//Definir os conjutos que geram ou não leftovers;
 	for (IloInt h = 0; h < H; h++) {
@@ -100,7 +106,7 @@ void Modelo_Cplex::resolver_inteira() {
 
 	try
 	{
-		cplex.setParam(IloCplex::TiLim, 100);
+		cplex.setParam(IloCplex::TiLim, 120);
 		cplex.solve();
 	}
 	catch (IloException& e) {
@@ -126,7 +132,7 @@ Modelo_Cplex::~Modelo_Cplex()
 }
 
 void Modelo_Cplex::CPLEX_objective_function(){
-	IloExpr soma1(env), soma2(env), soma3(env);
+	IloExpr soma1(env), soma2(env), soma3(env), expr(env);
 
 
 	IloInt t;
@@ -141,7 +147,9 @@ void Modelo_Cplex::CPLEX_objective_function(){
 			if(b[w] - CutPatterns[h].cap >= 0)
 				soma1 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
 
-		
+	for (auto mu : SplPatterns)
+		expr += mu.folga * CPLEX_o[mu.id];
+	
 
 	for (auto h: H_mais)
 		for (IloInt w = 0; w < W; w++)
@@ -157,54 +165,60 @@ void Modelo_Cplex::CPLEX_objective_function(){
 				soma2 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
 
 	model.add(IloMinimize(env, 10*costSum + soma1 + Parameter_alpha_1*soma2 + 
-		Parameter_alpha_2*soma3));
+		Parameter_alpha_2*(soma3 + expr)));
+
+	soma1.end();
+	soma2.end();
+	soma3.end();
+	expr.end();
+	costSum.end();
 }
 
 //Inteira
-//void Modelo_Cplex::restricoes_onlyone() {
-//	IloInt m, t, i;
-//	//para cada forma m e periodo de tempo t
-//	for (m = 0; m < M; m++) {
-//		for (t = 0; t < T; t++) {
-//			IloExpr expr(env);
-//			expr += CPLEX_x[0][m][t];
-//			for (i = 1; i < P; i++) {
-//				int tipo = PackPatterns[i].tipo;
-//				if ((PackPatterns[i].cap <= FORMAS[m]) 
-//					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
-//					expr += CPLEX_x[i][m][t];
-//				}
-//			}
-//			model.add(expr <= 1).setName("Um Padrao");
-//			expr.end();
-//		}
-//	}
-//}
-
-
-
-//SOS
 void Modelo_Cplex::restricoes_onlyone() {
 	IloInt m, t, i;
 	//para cada forma m e periodo de tempo t
 	for (m = 0; m < M; m++) {
 		for (t = 0; t < T; t++) {
 			IloExpr expr(env);
-			IloNumVarArray teste(env);
-			teste.add(CPLEX_x[0][m][t]);
+			expr += CPLEX_x[0][m][t];
 			for (i = 1; i < P; i++) {
 				int tipo = PackPatterns[i].tipo;
-				if ((PackPatterns[i].cap <= FORMAS[m])
+				if ((PackPatterns[i].cap <= FORMAS[m]) 
 					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
-					teste.add(CPLEX_x[i][m][t]);
+					expr += CPLEX_x[i][m][t];
 				}
 			}
-			model.add(IloSOS1(env, teste));
-			//model.add(expr <= 1).setName("Um Padrao");
-			//expr.end();
+			model.add(expr <= 1).setName("Um Padrao");
+			expr.end();
 		}
 	}
 }
+
+
+
+//SOS
+//void Modelo_Cplex::restricoes_onlyone() {
+//	IloInt m, t, i;
+//	//para cada forma m e periodo de tempo t
+//	for (m = 0; m < M; m++) {
+//		for (t = 0; t < T; t++) {
+//			IloExpr expr(env);
+//			IloNumVarArray teste(env);
+//			teste.add(CPLEX_x[0][m][t]);
+//			for (i = 1; i < P; i++) {
+//				int tipo = PackPatterns[i].tipo;
+//				if ((PackPatterns[i].cap <= FORMAS[m])
+//					&& PackPatterns[i].maximal(FORMAS[m], TipoVigas[tipo].comprimentos)) {
+//					teste.add(CPLEX_x[i][m][t]);
+//				}
+//			}
+//			model.add(IloSOS1(env, teste));
+//			//model.add(expr <= 1).setName("Um Padrao");
+//			//expr.end();
+//		}
+//	}
+//}
 
 void Modelo_Cplex::restricoes_demanda() {
 	IloInt c, k, m, t, i;
@@ -288,6 +302,10 @@ void Modelo_Cplex::restricoes_estoque() {
 		for (auto h: H_menos)
 			expr += CPLEX_y_bi[h][w];
 
+		for (auto mu: SplPatterns)
+			for (int v = 0; v < V; v++)
+				expr += mu.tamanhos[v] * CPLEX_o[mu.id];
+
 		model.add(expr <= e[w]).setName("Estoque 1");
 		expr.end();
 	}
@@ -355,7 +373,7 @@ void Modelo_Cplex::restricoes_integracao() {
 
 	for (IloInt gamma = 0; gamma < Gamma; gamma++)
 	{
-		IloExpr soma1(env), soma2(env), soma3(env), soma4(env);
+		IloExpr soma1(env), soma2(env), soma3(env), expr(env), soma4(env);
 
 		for (IloInt w = 0; w < W; w++) {
 			for (auto h : H_menos)
@@ -375,13 +393,16 @@ void Modelo_Cplex::restricoes_integracao() {
 					soma3 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_bi[h][w];
 		}
 
+		for (int mu = 0; mu < O; mu++)
+			expr += CPLEX_o[mu];
+
 		for (auto m : G[gamma]) {
 			for (int t = 0; t < T; t++)
 				for (int i = 1; i < P; i++)
 					if (PackPatterns[i].cap <= FORMAS[m])
 						soma4 += TipoVigas[PackPatterns[i].tipo].n_barras * CPLEX_x[i][m][t];
 		}
-		model.add(soma1 + soma2 + soma3 == soma4).setName("Integracao");
+		model.add(soma1 + soma2 + soma3 + expr == soma4).setName("Integracao");
 
 		soma1.end();
 		soma2.end();
@@ -412,6 +433,10 @@ void Modelo_Cplex::restricao_limite() {
 	for (IloInt w = W; w < W + V; w++)
 		for (auto h : H_menos)
 			expr -= CPLEX_y_bi[h][w];
+
+	for (auto mu : SplPatterns)
+		for (int v = 0; v < V; v++)
+			expr -= mu.tamanhos[v] * CPLEX_o[mu.id];
 
 	U = 1000;
 	model.add(expr <= U - estoque_leftover).setName("Limite de leftover");
@@ -515,7 +540,7 @@ void Modelo_Cplex::ImprimirGantt() {
 				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos)
 					&& cplex.isExtracted(CPLEX_x[i][m][t])
 					&& cplex.getValue(CPLEX_x[i][m][t]) == 1) {
-					txtsolu << m + 1 << "," << t + 0.01 << "," << t + TipoVigas[PackPatterns[i].tipo].tempo_cura - 0.01 << ",Type " << PackPatterns[i].tipo + 1 << endl;
+					txtsolu << m + 1 << "," << t + 0.1 << "," << t + TipoVigas[PackPatterns[i].tipo].tempo_cura - 0.1 << ",Type " << PackPatterns[i].tipo + 1 << endl;
 					usou = true;
 				}
 		if (!usou)
@@ -582,10 +607,45 @@ void Modelo_Cplex::PlotarBarras() {
 					}
 				}
 			}
-
-			
 		}
 	}
+
+	for (auto mu : SplPatterns)
+	{
+		if (cplex.isExtracted(CPLEX_o[mu.id]) && cplex.getValue(CPLEX_o[mu.id]) > 0) {
+			double aux = 0;
+			contador++;
+			double soma = 0;
+			
+			for (auto i : mu.tamanhos)
+				soma += i* b[W + i];
+
+			//txtsolu << contador << "," << 0
+			//	<< "," << soma - SPL_epsilon<< ",Type 4" << endl;
+
+			txtsolu << contador << "," << soma - SPL_epsilon + 0.1
+				<< "," << soma - SPL_epsilon + mu.folga << ",Type 3" << endl;
+
+			for (auto i : mu.tamanhos) {
+				for (int v = 0; v < i; v++) {
+					if(aux == 0)
+						txtsolu << contador << "," << aux <<
+						"," << aux + b[W + i] - SPL_epsilon / 2 << ",Type 4" << endl;
+					if (aux > 0) {
+						txtsolu << contador << "," << aux << ","
+							<< aux + SPL_epsilon << ",Emenda" << endl;
+						txtsolu << contador << "," << aux + SPL_epsilon <<
+							"," << soma - SPL_epsilon << ",Type 4" << endl;
+
+
+					}
+					aux += b[W + i] - SPL_epsilon / 2;
+				}
+			}
+
+		}
+	}
+
 
 	txtsolu.close();
 

@@ -8,6 +8,7 @@
 #include "Tipo_Viga.h"
 #include "Padrao_Corte.h"
 #include "Padrao_Pack.h"
+#include "Padrao_Traspasse.h"
 
 using namespace std;
 
@@ -26,13 +27,16 @@ protected:
 					de viga*/
 		H,			/*Número de padroes de corte*/
 		P,			/*Número de padroes em empacotamento*/
-		U;			/*Limite de leftovers*/
+		U,			/*Limite de leftovers*/
+		O;			/*Número de padrões de traspasse*/
 	double Maior_Forma, Menor_Forma;
 	double Maior_Barra;
+	double SPL_epsilon;
 	int Maior_Valor_nos_Padroes;
 	vector<Tipo_Viga> TipoVigas;
 	vector<Padrao_Corte> CutPatterns;
 	vector<Padrao_Pack> PackPatterns;
+	vector<Padrao_Traspasse> SplPatterns;
 	
 	vector<double> FORMAS, b, L, l, Menor_tamanho;
 	vector<int> e;

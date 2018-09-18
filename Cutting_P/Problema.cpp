@@ -4,17 +4,20 @@
 
 Problema::Problema(const char* filename) {
 	//Criar nome dos arquivos de padroes com base no nome da instância
-	string padroes_cut, padroes_pack;
+	string padroes_cut, padroes_pack, padroes_spl;
 	nome_instancia = filename;
-	stringstream ss,ss2;
+	stringstream ss,ss2,ss3;
 	ss << filename << ".cutpat";
 	padroes_cut = ss.str();
 	ss2 << filename << ".pat";
 	padroes_pack = ss2.str();
+	ss3 << filename << ".spl";
+	padroes_spl = ss3.str();
 
 	ifstream instancia(filename, ifstream::in);
 	ifstream ler_pat_pack(padroes_pack, ifstream::in);
 	ifstream ler_pat_cut(padroes_cut, ifstream::in);
+	ifstream ler_pat_spl(padroes_spl, ifstream::in);
 
 	//Testar se as instâncias foram encontradas
 	bool fail = false;
@@ -32,6 +35,11 @@ Problema::Problema(const char* filename) {
 		cerr << "     Arquivo \"" << padroes_pack << "\" nao encontrado." << endl;
 		fail = true;
 	}
+	if (ler_pat_spl.fail())
+	{
+		cerr << "     Arquivo \"" << padroes_pack << "\" nao encontrado." << endl;
+		fail = true;
+	}
 	if (fail) {
 		system("pause");
 		exit(0);
@@ -45,7 +53,6 @@ Problema::Problema(const char* filename) {
 	cout << C << " " << M << " " << T << endl;
 	instancia >> W >> V; //Só Usa para padroes de corte
 	cout << W << " " << V << endl;
-
 
 	L.resize(M); //vai ser vetor unique
 	FORMAS.resize(M);
@@ -124,7 +131,24 @@ Problema::Problema(const char* filename) {
 		instancia >> e[i];
 		cout << e[i] << " ";
 	}
+	instancia >> SPL_epsilon;
+	cout << endl << SPL_epsilon;
 	instancia.close();
+
+	/*Leitura dos dados e alocação*/
+	/*Padroes de traspasse*/
+
+	ler_pat_spl >> O;
+	SplPatterns.resize(O);
+	for (int mu = 0; mu < O; mu++){
+		SplPatterns[mu].id = mu;
+		ler_pat_spl >> SplPatterns[mu].barra_gerada >>
+			SplPatterns[mu].folga;
+		SplPatterns[mu].tamanhos.resize(V);
+		for (int v = 0; v < V; v++)
+			ler_pat_spl >> SplPatterns[mu].tamanhos[v];
+	}
+	ler_pat_spl.close();
 
 	/*Leitura dos dados e alocação*/
 	/*Padroes de corte*/
@@ -134,11 +158,13 @@ Problema::Problema(const char* filename) {
 
 		CutPatterns[h].index_pat = h;
 		ler_pat_cut >> CutPatterns[h].index_barra;
+		ler_pat_cut >> CutPatterns[h].cap;
+
 		CutPatterns[h].tamanhos.resize(Gamma + V);
 		for (int i = 0; i < Gamma + V; i++) 
 			ler_pat_cut >> CutPatterns[h].tamanhos[i];
 
-		ler_pat_cut >> CutPatterns[h].cap;
+		
 		
 	}
 	ler_pat_cut.close();
@@ -150,7 +176,7 @@ Problema::Problema(const char* filename) {
 	for (int i = 0; i < P; i++) {
 		PackPatterns[i].id = i;
 		ler_pat_pack >> PackPatterns[i].tipo;
-	
+		ler_pat_pack >> PackPatterns[i].cap;
 		PackPatterns[i].n_comprimentos
 			= TipoVigas[PackPatterns[i].tipo].n_comprimentos;
 
@@ -158,17 +184,13 @@ Problema::Problema(const char* filename) {
 		PackPatterns[i].tamanhos.resize(PackPatterns[i].n_comprimentos);
 
 		int contar_cobertos = 0;
-		double soma = 0;
+
 		for (int k = 0; k < PackPatterns[i].n_comprimentos; k++) {
 			ler_pat_pack >> PackPatterns[i].tamanhos[k];
-			soma += TipoVigas[PackPatterns[i].tipo].comprimentos[k]
-				* PackPatterns[i].tamanhos[k];
-
 			if (PackPatterns[i].tamanhos[k] > 0)
 				contar_cobertos++;
 		}
 		PackPatterns[i].n_cobertos = contar_cobertos;
-		PackPatterns[i].cap = soma;
 
 	}
 	ler_pat_pack.close();

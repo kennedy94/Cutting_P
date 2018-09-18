@@ -154,6 +154,7 @@
     <ClCompile Include="Modelo_Cplex.cpp" />
     <ClCompile Include="Padrao_Corte.cpp" />
     <ClCompile Include="Padrao_Pack.cpp" />
+    <ClCompile Include="Padrao_Traspasse.cpp" />
     <ClCompile Include="Problema.cpp" />
     <ClCompile Include="Tipo_Viga.cpp" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="Modelo_Cplex.h" />
     <ClInclude Include="Padrao_Corte.h" />
     <ClInclude Include="Padrao_Pack.h" />
+    <ClInclude Include="Padrao_Traspasse.h" />
     <ClInclude Include="Problema.h" />
     <ClInclude Include="Tipo_Viga.h" />
   </ItemGroup>
@@ -172,6 +174,7 @@
     <None Include="arquivoteste2.cutpat" />
     <None Include="arquivoteste2.pat" />
     <None Include="generate_inst.m" />
+    <None Include="gerarbarras.py" />
     <None Include="imprimir_gantt.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
