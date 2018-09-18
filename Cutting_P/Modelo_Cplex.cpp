@@ -617,14 +617,14 @@ void Modelo_Cplex::PlotarBarras() {
 			contador++;
 			double soma = 0;
 			
-			for (auto i : mu.tamanhos)
-				soma += i* b[W + i];
+			for (int i = 0; i < V; i++)
+				soma += mu.tamanhos[i]* b[W + i];
 
 			//txtsolu << contador << "," << 0
 			//	<< "," << soma - SPL_epsilon<< ",Type 4" << endl;
 
-			txtsolu << contador << "," << soma - SPL_epsilon + 0.1
-				<< "," << soma - SPL_epsilon + mu.folga << ",Type 3" << endl;
+			txtsolu << contador << "," <<  L[mu.barra_gerada]
+				<< "," << L[mu.barra_gerada] + mu.folga << ",Type 3" << endl;
 
 			for (auto i : mu.tamanhos) {
 				for (int v = 0; v < i; v++) {
@@ -635,7 +635,7 @@ void Modelo_Cplex::PlotarBarras() {
 						txtsolu << contador << "," << aux << ","
 							<< aux + SPL_epsilon << ",Emenda" << endl;
 						txtsolu << contador << "," << aux + SPL_epsilon <<
-							"," << soma - SPL_epsilon << ",Type 4" << endl;
+							"," << L[mu.barra_gerada] << ",Type 4" << endl;
 
 
 					}
