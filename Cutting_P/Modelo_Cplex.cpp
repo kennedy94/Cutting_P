@@ -31,7 +31,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 			cout << endl;
 		}
 
-		if (CutPatterns[h].Gera_LeftOvers(W, V))
+		if (CutPatterns[h].Gera_LeftOvers(Gamma, V))
 			H_mais.push_back(h);
 		else
 			H_menos.push_back(h);
@@ -46,8 +46,8 @@ void Modelo_Cplex::iniciar_variaveis(){
 
 	CPLEX_y_bi = IloArray<IloIntVarArray>(env, H);
 	for (int h = 0; h < H; h++) {
-		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, Maior_Valor_nos_Padroes);
-		for (IloInt w = 0; w < W; w++)
+		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, IloInfinity);
+		for (IloInt w = 0; w < W+V; w++)
 		{
 			sprintf(strnum, "y(%d,%d)", h, w);
 			CPLEX_y_bi[h][w].setName(strnum);
@@ -60,7 +60,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 	for (int h = 0; h < H; h++) {
 		CPLEX_y_tri[h] = IloArray<IloIntVarArray>(env, W);
 		for (IloInt w = 0; w < W; w++) {
-			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, Maior_Valor_nos_Padroes);
+			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, IloInfinity);
 			for (IloInt v = 0; v < V; v++)
 			{
 				sprintf(strnum, "y(%d,%d,%d)", h,w,v);
@@ -294,18 +294,20 @@ void Modelo_Cplex::restricoes_sequenciamento() {
 void Modelo_Cplex::restricoes_estoque() {
 	//estoque de leftovers
 	
-
-
 	//leftovers cortados obedecem restricoes de estoque
 	for (IloInt w = W; w < W + V; w++) {
 		IloExpr expr(env);
-		for (auto h: H_menos)
-			expr += CPLEX_y_bi[h][w];
 
-		for (auto mu: SplPatterns)
-			for (int v = 0; v < V; v++)
+		for (auto h : H_menos) {
+			if(CutPatterns[h].index_barra == w)
+				expr += CPLEX_y_bi[h][w];
+		}
+
+		for (auto mu : SplPatterns) {
+			for (int v = 0; v < V; v++) {
 				expr += mu.tamanhos[v] * CPLEX_o[mu.id];
-
+			}
+		}
 		model.add(expr <= e[w]).setName("Estoque 1");
 		expr.end();
 	}
@@ -313,14 +315,18 @@ void Modelo_Cplex::restricoes_estoque() {
 	//barras novas cortadas obedecem o estoque
 	for (IloInt w = 0; w < W; w++) {
 		IloExpr expr1(env), expr2(env);
-		for (auto h : H_menos) 
-			expr1 += CPLEX_y_bi[h][w];
+		for (auto h : H_menos) {
+			if (CutPatterns[h].index_barra == w)
+				expr1 += CPLEX_y_bi[h][w];
+		}
 
 		
-		for (IloInt v = 0; v < V; v++)
-			for (auto h : H_mais)
-				if(CutPatterns[h].Gera_LeftOver(W,v))
+		for (IloInt v = 0; v < V; v++) {
+			for (auto h : H_mais) {
+				if (CutPatterns[h].Gera_LeftOver(Gamma, v) && (CutPatterns[h].index_barra == w))
 					expr2 += CPLEX_y_tri[h][w][v];
+			}
+		}
 		
 		model.add(expr1 + expr2 <= e[w]).setName("Estoque 2");
 		expr1.end();
@@ -384,7 +390,7 @@ void Modelo_Cplex::restricoes_integracao() {
 		for (IloInt w = 0; w < W; w++) {
 			for (IloInt v = 0; v < V; v++)
 				for (auto h : H_mais)
-					if (CutPatterns[h].index_barra == w && CutPatterns[h].Gera_LeftOver(W, v))
+					if (CutPatterns[h].index_barra == w && CutPatterns[h].Gera_LeftOver(Gamma, v))
 						soma2 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_tri[h][w][v];
 		}
 		for (IloInt w = W; w < W + V; w++) {
@@ -426,7 +432,7 @@ void Modelo_Cplex::restricao_limite() {
 	for (IloInt w = 0; w < W; w++) 
 		for (IloInt v = 0; v < V; v++)
 			for (auto h : H_mais)
-				if (CutPatterns[h].Gera_LeftOver(W, v))
+				if (CutPatterns[h].Gera_LeftOver(Gamma, v))
 					expr += CPLEX_y_tri[h][w][v];
 
 
@@ -466,7 +472,7 @@ void Modelo_Cplex::MontarModelo() {
 
 		restricoes_integracao();
 
-		restricao_limite();
+		//restricao_limite();
 
 		
 		cplex = IloCplex(model);
@@ -516,7 +522,11 @@ void Modelo_Cplex::ImprimirSolucao() {
 					cout << endl;
 				contador++;
 			}
-		
+	
+
+	for (auto h : SplPatterns)
+		if (cplex.isExtracted(CPLEX_o[h.id]) && cplex.getValue(CPLEX_o[h.id]) > 0)
+			cout << "o(" << h.id << ") = " << cplex.getValue(CPLEX_o[h.id]) << endl;
 
 	cout << endl << "Objetivo -> " << cplex.getObjValue() << endl;
 	

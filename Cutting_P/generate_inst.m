@@ -60,15 +60,18 @@ function generate_inst(C, M, arq, misturado, up_d, W, V)
 	
 	%gerar barras
 	
-	Barras_tam = [15 20 25];
-	Sobras_tam = [12 10 8 6];
-	
-	Barras =  datasample(Barras_tam, W, 'Replace',false);
+	%Barras_tam = [12];
+	Sobras_tam = [10 8 6 4];
+	W = 1;
+	Barras =  12;%datasample(Barras_tam, W, 'Replace',false);
 	Sobras =  datasample(Sobras_tam, V, 'Replace',false);
-	UB_estoque = maior * 100;
+    Sobras = sort(Sobras);
+    
+    UB_estoque = t*M*maior;
 	while(true)
-		e = randi([ceil(UB_estoque/3) UB_estoque], 1, W+V);
-		if sum( [Barras Sobras].*e) > soma_barras
+		e = randi([ceil(UB_estoque/10) UB_estoque/5], 1, W+V);
+        e(1) = UB_estoque;
+		if sum( [Barras Sobras].*e) > UB_estoque
 		   break;
 		end
 	end
@@ -108,7 +111,7 @@ function generate_inst(C, M, arq, misturado, up_d, W, V)
 	for i = 1: W +V
 		fprintf(inst2, '%d ', e(i));
 	end
-	
+	fprintf(inst2, '\n%5.2f', 0.3);
 	
 	fclose(inst2);
 end
