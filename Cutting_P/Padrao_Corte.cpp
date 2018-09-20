@@ -2,9 +2,9 @@
 
 
 
-bool Padrao_Corte::Gera_LeftOver(int W, int v)
+bool Padrao_Corte::Gera_LeftOver(int Gamma, int v)
 {
-	return tamanhos[W + v] > 0; //lembra que tá zero based
+	return tamanhos[Gamma + v] > 0; //lembra que tá zero based
 }
 
 bool Padrao_Corte::Gera_LeftOvers(int Gamma, int V)

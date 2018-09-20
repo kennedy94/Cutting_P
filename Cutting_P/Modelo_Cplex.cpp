@@ -14,7 +14,8 @@ void Modelo_Cplex::iniciar_variaveis(){
 		z[t].setName(strnum);
 	}
 
-	CPLEX_o = IloIntVarArray(env, O, 0, INT_MAX);
+
+	CPLEX_o = IloIntVarArray(env, O, 0, 10000000);
 
 	for (int mu = 0; mu < O; mu++) {
 		sprintf(strnum, "o(%d)", mu);
@@ -31,10 +32,13 @@ void Modelo_Cplex::iniciar_variaveis(){
 			cout << endl;
 		}
 
-		if (CutPatterns[h].Gera_LeftOvers(Gamma, V))
+		if (CutPatterns[h].Gera_LeftOvers(Gamma, V)) {
 			H_mais.push_back(h);
-		else
+		}
+		else {
 			H_menos.push_back(h);
+			
+		}
 	}
 
 	G.resize(Gamma);
@@ -46,7 +50,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 
 	CPLEX_y_bi = IloArray<IloIntVarArray>(env, H);
 	for (int h = 0; h < H; h++) {
-		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, IloInfinity);
+		CPLEX_y_bi[h] = IloIntVarArray(env, W + V, 0, 10000000);
 		for (IloInt w = 0; w < W+V; w++)
 		{
 			sprintf(strnum, "y(%d,%d)", h, w);
@@ -60,7 +64,7 @@ void Modelo_Cplex::iniciar_variaveis(){
 	for (int h = 0; h < H; h++) {
 		CPLEX_y_tri[h] = IloArray<IloIntVarArray>(env, W);
 		for (IloInt w = 0; w < W; w++) {
-			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, IloInfinity);
+			CPLEX_y_tri[h][w] = IloIntVarArray(env, V, 0, 10000000);
 			for (IloInt v = 0; v < V; v++)
 			{
 				sprintf(strnum, "y(%d,%d,%d)", h,w,v);
@@ -84,28 +88,11 @@ void Modelo_Cplex::iniciar_variaveis(){
 }
 
 void Modelo_Cplex::resolver_inteira() {
-	//IloModel relax(env);
-	//relax.add(model);
-	//for (IloInt i = 0; i < P; i++) 
-	//	for (IloInt m = 0; m < M; m++) 
-	//		for (IloInt t = 0; t < T; T++) 
-	//			relax.add(IloConversion(env, CPLEX_x[i][m][t], ILOFLOAT));
-
-	//CPLEX_y_bi = IloArray<IloIntVarArray>(env, H_menos.size());
-	//for (auto h : H_menos)
-	//	for (int w = 0; w < W; w++)
-	//		relax.add(IloConversion(env, CPLEX_y_bi[h][w], ILOFLOAT));
-
-	//
-	//for (auto h : H_mais)
-	//	for (int w = 0; w < W; w++)
-	//		for (int v = 0; v < V; v++)
-	//			relax.add(IloConversion(env, CPLEX_y_tri[h][w][v], ILOFLOAT));
-	
 	cplex = IloCplex(model);
 
 	try
 	{
+		//cplex.setParam(IloCplex::PreInd, 0);
 		cplex.setParam(IloCplex::TiLim, 120);
 		cplex.solve();
 	}
@@ -303,11 +290,9 @@ void Modelo_Cplex::restricoes_estoque() {
 				expr += CPLEX_y_bi[h][w];
 		}
 
-		for (auto mu : SplPatterns) {
-			for (int v = 0; v < V; v++) {
-				expr += mu.tamanhos[v] * CPLEX_o[mu.id];
-			}
-		}
+		for (auto mu : SplPatterns) 
+				expr += mu.tamanhos[w - W] * CPLEX_o[mu.id];
+		
 		model.add(expr <= e[w]).setName("Estoque 1");
 		expr.end();
 	}
@@ -320,11 +305,13 @@ void Modelo_Cplex::restricoes_estoque() {
 				expr1 += CPLEX_y_bi[h][w];
 		}
 
+
 		
 		for (IloInt v = 0; v < V; v++) {
 			for (auto h : H_mais) {
-				if (CutPatterns[h].Gera_LeftOver(Gamma, v) && (CutPatterns[h].index_barra == w))
+				if (CutPatterns[h].Gera_LeftOver(Gamma, v) && (CutPatterns[h].index_barra == w)) {
 					expr2 += CPLEX_y_tri[h][w][v];
+				}
 			}
 		}
 		
@@ -399,17 +386,21 @@ void Modelo_Cplex::restricoes_integracao() {
 					soma3 += CutPatterns[h].tamanhos[gamma] * CPLEX_y_bi[h][w];
 		}
 
-		for (int mu = 0; mu < O; mu++)
-			expr += CPLEX_o[mu];
+		for (int mu = 0; mu < O; mu++) {
+			if(SplPatterns[mu].barra_gerada == gamma)
+				expr += CPLEX_o[mu];
+
+		}
 
 		for (auto m : G[gamma]) {
 			for (int t = 0; t < T; t++)
 				for (int i = 1; i < P; i++)
-					if (PackPatterns[i].cap <= FORMAS[m])
+					if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos))
 						soma4 += TipoVigas[PackPatterns[i].tipo].n_barras * CPLEX_x[i][m][t];
 		}
 		model.add(soma1 + soma2 + soma3 + expr == soma4).setName("Integracao");
 
+		expr.end();
 		soma1.end();
 		soma2.end();
 		soma3.end();
