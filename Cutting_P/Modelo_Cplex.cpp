@@ -4,8 +4,8 @@
 bool GreaterThanZero(int i) { return (i > 0); }
 
 void Modelo_Cplex::iniciar_variaveis(){
-	Parameter_alpha_1 = 1;
-	Parameter_alpha_2 = 1;
+	Parameter_alpha_1 = 2;
+	Parameter_alpha_2 = 0;
 	char strnum[30];
 
 	z = IloBoolVarArray(env, T);
@@ -93,7 +93,7 @@ void Modelo_Cplex::resolver_inteira() {
 	try
 	{
 		//cplex.setParam(IloCplex::PreInd, 0);
-		cplex.setParam(IloCplex::TiLim, 120);
+		cplex.setParam(IloCplex::TiLim, 60);
 		cplex.solve();
 	}
 	catch (IloException& e) {
@@ -151,7 +151,7 @@ void Modelo_Cplex::CPLEX_objective_function(){
 			if (b[w] - CutPatterns[h].cap >= 0)
 				soma2 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
 
-	model.add(IloMinimize(env, 10*costSum + soma1 + Parameter_alpha_1*soma2 + 
+	model.add(IloMinimize(env, costSum + soma1 + Parameter_alpha_1*soma2 + 
 		Parameter_alpha_2*(soma3 + expr)));
 
 	soma1.end();
@@ -625,13 +625,13 @@ void Modelo_Cplex::PlotarBarras() {
 			//	<< "," << soma - SPL_epsilon<< ",Type 4" << endl;
 
 			txtsolu << contador << "," <<  L[mu.barra_gerada]
-				<< "," << L[mu.barra_gerada] + mu.folga << ",Type 3" << endl;
+				<< "," << L[mu.barra_gerada] + mu.folga - SPL_epsilon << ",Type 3" << endl;
 
 			for (auto i : mu.tamanhos) {
 				for (int v = 0; v < i; v++) {
 					if(aux == 0)
-						txtsolu << contador << "," << aux <<
-						"," << aux + b[W + i] - SPL_epsilon / 2 << ",Type 4" << endl;
+						txtsolu << contador << "," << 0 <<
+						"," << b[W + v] - SPL_epsilon / 2 << ",Type 4" << endl;
 					if (aux > 0) {
 						txtsolu << contador << "," << aux << ","
 							<< aux + SPL_epsilon << ",Emenda" << endl;
@@ -640,7 +640,7 @@ void Modelo_Cplex::PlotarBarras() {
 
 
 					}
-					aux += b[W + i] - SPL_epsilon / 2;
+					aux += b[W + v] - SPL_epsilon / 2;
 				}
 			}
 

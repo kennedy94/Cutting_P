@@ -2,9 +2,21 @@
 using namespace std;
 
 
-int main() {
-	
-	Modelo_Cplex Modelo("cwp1");
+int main(int argc, char *argv[]) {
+
+	char *inst;
+	if (argc < 2)
+		inst = "problema.txt";
+	else {
+		if (argc < 3)
+			inst = argv[1];
+		else {
+			cout << "Argumentos demais" << endl;
+			exit(0);
+		}
+	}
+
+	Modelo_Cplex Modelo(inst);
 
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();

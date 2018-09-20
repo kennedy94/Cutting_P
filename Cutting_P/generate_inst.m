@@ -6,7 +6,7 @@
 %       Por padrão o tipo de viga i \in C terá tempo de cura i.
 %   limite_cura = tempo de cura maximo quando misturado for usado.
 %   up_d = limite superior de demandas
-function generate_inst(C, M, arq, misturado, up_d, W, V)
+function generate_inst(C, M, arq, misturado, up_d, V)
 	clc;
 	%M = 7;
 	if misturado == 1
@@ -69,7 +69,7 @@ function generate_inst(C, M, arq, misturado, up_d, W, V)
     
     UB_estoque = t*M*maior;
 	while(true)
-		e = randi([ceil(UB_estoque/10) UB_estoque], 1, W+V);
+		e = randi([ceil(UB_estoque/10) UB_estoque/5], 1, W+V);
         e(1) = UB_estoque;
 		if sum( [Barras Sobras].*e) > UB_estoque
 		   break;
