@@ -33,6 +33,7 @@ protected:
 	double Maior_Barra;
 	double SPL_epsilon;
 	int Maior_Valor_nos_Padroes;
+	double Parameter_alpha_1, Parameter_alpha_2;
 	vector<Tipo_Viga> TipoVigas;
 	vector<Padrao_Corte> CutPatterns;
 	vector<Padrao_Pack> PackPatterns;

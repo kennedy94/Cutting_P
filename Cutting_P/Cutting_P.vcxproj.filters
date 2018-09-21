@@ -36,6 +36,9 @@
     <ClCompile Include="Padrao_Traspasse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Heuristica.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modelo_Cplex.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Padrao_Traspasse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Heuristica.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

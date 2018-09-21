@@ -26,7 +26,7 @@ private:
 
 	IloNum Parameter_alpha_1, Parameter_alpha_2;
 
-	void CPLEX_objective_function();
+	inline void CPLEX_objective_function();
 
 	inline void restricoes_onlyone();
 
@@ -38,11 +38,11 @@ private:
 
 	inline void restricoes_estoque();
 
-
-	void restricoes_continuidade();
+	inline void restricoes_continuidade();
 
 	inline void restricoes_integracao();
 
+	void restricao_limite();
 
 	void iniciar_variaveis();
 
@@ -50,14 +50,15 @@ public:
 	/*Usando o construtor do pai*/
 	Modelo_Cplex(const char * filename) : Problema(filename) { };
 
-	void restricao_limite();
-
 	void MontarModelo();
-	void ImprimirSolucao();
-	void ImprimirGantt();
-	void PlotarBarras();
-	void resolver_inteira();
 
+	void ImprimirSolucao();
+
+	void ImprimirGantt();
+
+	void PlotarBarras();
+
+	void resolver_inteira();
 
 	~Modelo_Cplex();
 };

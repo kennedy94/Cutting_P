@@ -4,8 +4,7 @@
 bool GreaterThanZero(int i) { return (i > 0); }
 
 void Modelo_Cplex::iniciar_variaveis(){
-	Parameter_alpha_1 = 2;
-	Parameter_alpha_2 = 0;
+
 	char strnum[30];
 
 	z = IloBoolVarArray(env, T);

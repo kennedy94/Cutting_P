@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Heuristica.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelo_Cplex.cpp" />
     <ClCompile Include="Padrao_Corte.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="Tipo_Viga.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Heuristica.h" />
     <ClInclude Include="Modelo_Cplex.h" />
     <ClInclude Include="Padrao_Corte.h" />
     <ClInclude Include="Padrao_Pack.h" />
