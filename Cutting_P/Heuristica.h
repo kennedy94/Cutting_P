@@ -1,5 +1,13 @@
 #pragma once
 #include "Problema.h"
+#include <numeric>
+
+struct individuo {
+	vector<int> ind;
+	vector<int> n_vezes;
+};
+
+int kMenor(const vector<int> v, int k);
 
 class Heuristica :
 	public Problema
@@ -34,11 +42,8 @@ protected:
 	void corrigir(individuo &solu);
 
 public:
+	void funcaoteste();
 	Heuristica(const char * filename) : Problema(filename) { };
-	~Heuristica();
 };
 
-struct individuo {
-	vector<int> ind;
-	vector<int> n_vezes;
-};
+
