@@ -4,8 +4,8 @@
 
 Problema::Problema(const char* filename) {
 	//Criar nome dos arquivos de padroes com base no nome da instância
-	Parameter_alpha_1 = 2;
-	Parameter_alpha_2 = 0;
+	Parameter_alpha_1 = 1;
+	Parameter_alpha_2 = 1;
 
 	string padroes_cut, padroes_pack, padroes_spl;
 	nome_instancia = filename;

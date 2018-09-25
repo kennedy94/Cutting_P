@@ -41,6 +41,8 @@ protected:
 
 	//corrige uma solução inviável
 	void corrigir(individuo &solu);
+	void ImprimirVetorSolu(individuo solu);
+	individuo GerarSoluAleatoria();
 
 public:
 	void funcaoteste();
