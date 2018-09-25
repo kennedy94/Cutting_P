@@ -1,6 +1,7 @@
 #pragma once
 #include "Problema.h"
 #include <numeric>
+#include <random>
 
 struct individuo {
 	vector<int> ind;

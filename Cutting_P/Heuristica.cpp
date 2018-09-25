@@ -90,6 +90,8 @@ bool Heuristica::viavel(individuo solu)
 		for (auto &demand : elemento.demandas)
 			demand = 0;
 
+	
+
 	for (int i = 0; i < P - 1; i++)
 	{
 		//Contar as demandas que o padrão atual preenche
@@ -98,7 +100,23 @@ bool Heuristica::viavel(individuo solu)
 				+= solu.n_vezes[i] * PackPatterns[solu.ind[i]].tamanhos[tam];
 		}
 
+		if (solu.n_vezes[i] > 0) {
+			cout << "vezes:" << solu.n_vezes[i] << ",tipo:" << PackPatterns[solu.ind[i]].tipo << "-";
+			for (auto tam : PackPatterns[solu.ind[i]].tamanhos) {
+				cout << tam << " ";
+			}
+			cout << endl;
 
+			for (int c = 0; c < C; c++) {
+				if(c == PackPatterns[i].tipo)
+					for (auto &demand : DemandasAuxiliares[c].demandas)
+						cout << demand << " ";
+			}
+		}
+
+
+		
+		cout << endl;
 		for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
 			//forma atual recebe argmin da utilização que acomoda o padrão
 			int k_esimo = 0;
@@ -121,29 +139,13 @@ bool Heuristica::viavel(individuo solu)
 		}
 	}
 
+
 	//Se não obedece a demanda de pelo menos uma viga é inviável por Demanda de Viga
 	for (int c = 0; c < C; c++)
 		for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
 			if (DemandasAuxiliares[c].comprimentos[k] < TipoVigas[c].comprimentos[k])
 				return false;
-
-	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
-	//contar as barras com tamanhos de forma geradas
-	for (int i = P - 1; i < P - 1 + H + O; i++) {
-		for (int gamma = 0; gamma < Gamma; gamma++){
-			if (i < P - 1 + H)
-				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
-			else
-				if (CutPatterns[solu.ind[i]].index_barra == gamma)
-					BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i];
-		}	
-	}
-
-	//Se a quantidade da solu for diferente da que deveria ser é inviável
-	for (int gamma = 0; gamma < Gamma; gamma++)
-		if (BarrasGeradasPelaSolu[gamma] != FormasQueDevemSerGeradas[gamma])
-			return false;
-
+			
 	//Viabilidade por estoque
 
 	vector<int> EstoqueUsado(W + V, 0);
@@ -157,16 +159,183 @@ bool Heuristica::viavel(individuo solu)
 		}
 		if (EstoqueUsado[w] > e[w])
 			return false;
-
 	}
+
+
+	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
+	//contar as barras com tamanhos de forma geradas
+	for (int i = P - 1; i < P - 1 + H + O; i++) {
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if (i < P - 1 + H)
+				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
+			else
+				if (CutPatterns[solu.ind[i]].index_barra == gamma)
+					BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i];
+		}
+	}
+
+	//Se a quantidade da solu for diferente da que deveria ser é inviável
+	for (int gamma = 0; gamma < Gamma; gamma++)
+		if (BarrasGeradasPelaSolu[gamma] != FormasQueDevemSerGeradas[gamma])
+			return false;
 
 	return true;
 }
 
+void Heuristica::corrigir(individuo & solu)
+{
+	vector<int> FormasQueDevemSerGeradas(Gamma, 0);
+	vector<Tipo_Viga> DemandasAuxiliares = TipoVigas;
+
+	//Iniciar as demandas atuais em 0
+	for (auto &elemento : DemandasAuxiliares)
+		for (auto &demand : elemento.demandas)
+			demand = 0;
+
+	for (int i = 0; i < P - 1; i++)
+	{
+		//Contar as demandas que o padrão atual preenche
+		for (int tam = 0; tam < PackPatterns[solu.ind[i]].n_comprimentos; tam++) {
+			DemandasAuxiliares[PackPatterns[solu.ind[i]].tipo].demandas[tam]
+				+= solu.n_vezes[i] * PackPatterns[solu.ind[i]].tamanhos[tam];
+		}
+
+		//Contar o número de formas de tamanho L[gamma] utilizadas
+		for (int gamma = 0; gamma < Gamma; gamma++)
+			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos))
+				FormasQueDevemSerGeradas[gamma] += solu.n_vezes[i];
+	}
+	bool corrigiu = false;
+	//Se não obedece a demanda de pelo menos uma viga é inviável por Demanda de Viga
+	for (int c = 0; c < C; c++)
+		for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
+			if (DemandasAuxiliares[c].comprimentos[k] < TipoVigas[c].comprimentos[k]) {
+				int primeiro_padrao;
+				for (int i = 0; i < P - 1; i++) {
+					if (PackPatterns[solu.ind[i]].tipo == c && PackPatterns[solu.ind[i]].tamanhos[k] > 0) {
+						primeiro_padrao = i;
+					}
+				}
+
+				while (DemandasAuxiliares[c].comprimentos[k] < TipoVigas[c].comprimentos[k]) {
+					solu.n_vezes[primeiro_padrao]++;
+
+					for (int gamma = 0; gamma < Gamma; gamma++)
+						if (PackPatterns[solu.ind[primeiro_padrao]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[primeiro_padrao]].tipo].comprimentos))
+							FormasQueDevemSerGeradas[gamma]++;
+
+					for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
+						DemandasAuxiliares[c].comprimentos[k2] += PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k2];
+				}
+				corrigiu = true;
+			}
+
+	if (corrigiu)
+		cout << "Corrigiu por demanda de viga" << endl;
+
+			
+	//Viabilidade por estoque
+
+	vector<int> EstoqueUsado(W + V, 0);
+
+	for (int w = 0; w < W + V; w++) {
+		for (int i = P - 1; i < P - 1 + H + O; i++) {
+			if (i < P - 1 + H && CutPatterns[solu.ind[i]].index_barra == w)
+				EstoqueUsado[w] += solu.n_vezes[i];
+			else
+				EstoqueUsado[w] += SplPatterns[solu.ind[i]].tamanhos[w];
+		}
+		if (EstoqueUsado[w] > e[w]) {
+			//Vou tratar isso nos operadores, então o ideal é não gerar solução desse tipo
+			cerr << "Erro solução inviável por estoque!" << endl;
+			exit(0);
+		}
+	}
+
+	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
+	//contar as barras com tamanhos de forma geradas
+	for (int i = P - 1; i < P - 1 + H + O; i++) {
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if (i < P - 1 + H)
+				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
+			else
+				if (CutPatterns[solu.ind[i]].index_barra == gamma)
+					BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i];
+		}
+	}
+
+	//Se a quantidade da solu for diferente da que deveria ser é inviável
+	for (int gamma = 0; gamma < Gamma; gamma++)
+		if (BarrasGeradasPelaSolu[gamma] != FormasQueDevemSerGeradas[gamma])//se é inviável
+		{
+			if (BarrasGeradasPelaSolu[gamma] < FormasQueDevemSerGeradas[gamma]) {
+
+
+			}
+		}
+
+	return;
+}
+
 void Heuristica::funcaoteste(){
 
-	vector<int> Teste = { 50, 20, 60 };
+	vector<int>	solu1(P - 1 + H + O),	//índices dos padrões
+				solu2(P - 1 + H + O);	//quantidade dos padrões
+	
+	//Inicializando os índices
+	iota(solu1.begin(), solu1.begin() + P - 1, 1);
+	iota(solu1.begin() + P - 1, solu1.begin() + P - 1 + H, 0);
+	iota(solu1.begin() + P - 1 + H, solu1.end(), 0);
 
-	cout << kMenor(Teste, 1) << endl;
+	//Definição de sementes para a geração das quantidades
+	mt19937 rng_int, rng_real;
+	rng_int.seed(random_device()());
+	rng_real.seed(random_device()());
+
+	int SomaPack = 0,
+		SomaCut = 0,
+		SomaSpl = 0;
+
+	for (auto i = solu2.begin(); i != solu2.begin() + P - 1; i++) {
+		uniform_real_distribution<double> u_real(0.0, 1.0);
+		
+		if (u_real(rng_real) < 0.8) {
+			*i = 0;
+		}
+		else {
+			uniform_int_distribution<int> u_inteira(1, ceil(T/M));
+			*i = u_inteira(rng_int);
+			SomaPack += *i;
+		}		
+	}
+
+	int w = P-1;
+	for (auto i = solu2.begin() + P - 1; i != solu2.begin() + P - 1 + H; i++){
+		uniform_real_distribution<double> u_real(0.0, 1.0);
+
+		if (u_real(rng_real) < 0.5) {
+			*i = 0;
+		}
+		else {
+			uniform_int_distribution<int> u_inteira(0, min(e[CutPatterns[solu1[w]].index_barra], int(SomaPack / H)));
+			*i = u_inteira(rng_int);
+		}
+		w++;
+	}
+	
+	for (auto i = solu2.begin() + P - 1; i != solu2.begin() + P - 1 + H; i++) {
+		uniform_int_distribution<int> u_inteira(0, int(SomaPack / O));
+		*i = u_inteira(rng_int);
+	}
+
+
+	cout << ":)" << endl;
+	individuo solucao;
+	solucao.ind = solu1;
+	solucao.n_vezes = solu2;
+
+	cout << viavel(solucao) << endl;
+	cout << ":)" << endl;
+
 
 }
