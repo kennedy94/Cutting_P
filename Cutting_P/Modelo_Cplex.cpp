@@ -481,6 +481,24 @@ void Modelo_Cplex::MontarModelo() {
 	}
 }
 
+void Modelo_Cplex::ImprimirSolucaoArquivo(){
+	ofstream resultados("resultados.txt", fstream::app);
+
+	resultados << endl << nome_instancia;
+	
+	try
+	{
+		resultados << "," << cplex.getObjValue() << "," <<
+			cplex.getNnodes() << "," << cplex.getMIPRelativeGap() << endl;
+	}
+	catch (const std::exception&)
+	{
+		resultados << "Sem solucao" <<  endl;
+	}
+	
+	resultados.close();
+}
+
 void Modelo_Cplex::ImprimirSolucao() {
 	int contador = 1;
 	for (int t = 0; t < T; t++)

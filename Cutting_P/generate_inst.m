@@ -6,7 +6,7 @@
 %       Por padrão o tipo de viga i \in C terá tempo de cura i.
 %   limite_cura = tempo de cura maximo quando misturado for usado.
 %   up_d = limite superior de demandas
-function generate_inst(C, M, arq, misturado, up_d, V)
+function generate_inst(arq, C, M, up_d, misturado, V)
 	clc;
 	%M = 7;
 	if misturado == 1
@@ -39,7 +39,7 @@ function generate_inst(C, M, arq, misturado, up_d, V)
 		
 		%dados usado para criar conjunto de tamanhos
 		tams = [1.12 1.45 2.35 2.5 2.65 2.95 3.3];
-		tam = unique(datasample(tams, 5));
+		tam = unique(datasample(tams, length(tams)));
 
 		N = length(tam);
 
@@ -54,14 +54,14 @@ function generate_inst(C, M, arq, misturado, up_d, V)
 	end
 	
 	t = ceil(t/ sum(c));
-	%aumento de 10% no T
+	%aumento de 50% no T
 	t = ceil(1.5*t);
 
 	
 	%gerar barras
 	
 	%Barras_tam = [12];
-	Sobras_tam = [10 8 6 4];
+	Sobras_tam = [2 5 6 8];
 	W = 1;
 	Barras =  12;%datasample(Barras_tam, W, 'Replace',false);
 	Sobras =  datasample(Sobras_tam, V, 'Replace',false);
@@ -74,11 +74,11 @@ function generate_inst(C, M, arq, misturado, up_d, V)
 		if sum( [Barras Sobras].*e) > UB_estoque
 		   break;
 		end
-	end
+    end
    
- 
+    arquivo =strcat('Instancia\',arq);
 	%impressão dos dados
-	inst2 = fopen(arq, 'w');
+	inst2 = fopen(arquivo, 'w');
 	fprintf(inst2, '%d %d %d\n \n', C, M, t);
 	
 	fprintf(inst2, '%d %d \n \n', W, V);

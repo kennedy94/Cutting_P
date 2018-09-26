@@ -52,6 +52,8 @@ public:
 
 	void MontarModelo();
 
+	void ImprimirSolucaoArquivo();
+
 	void ImprimirSolucao();
 
 	void ImprimirGantt();
