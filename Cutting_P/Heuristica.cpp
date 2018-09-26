@@ -1,5 +1,22 @@
 #include "Heuristica.h"
 
+// Function to return k'th smallest element in a given array
+inline int kMenor(const vector<int> v, int k) {
+
+	// initialize original index locations
+	vector<int> idx(v.size());
+	iota(idx.begin(), idx.end(), 0);
+
+	// sort indexes based on comparing values in v
+	sort(idx.begin(), idx.end(), [&v](int i1, int i2) {return v[i1] < v[i2]; });
+
+	return idx[k - 1];
+}
+
+
+
+
+
 double Heuristica::fitness(individuo solu)
 {
 	vector<int> UtilizacaoFormas(M, 0);
@@ -56,27 +73,113 @@ double Heuristica::fitness(individuo solu)
 	return Makespan + Sobra1 + Parameter_alpha_1*Sobra2 + Parameter_alpha_2*Sobra3;
 }
 
+
+
+
+
+
+
+
+
 list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 {
 	list<individuo> filhos;
 
+	//filho1
+	individuo filho = pai;
+	for(int i = 0; i < filho.ind.size(); i++)
+		if (i % 2 == 0) {
+			filho.ind[i] = mae.ind[i];
+			filho.n_vezes[i] = mae.n_vezes[i];
+		}
+	//if (!viavel(filho))
+		corrigir(filho);
+	filho.fitness = fitness(filho);
+	filhos.push_back(filho);
+
+
+	//filho2
+	filho = pai;
+	for (int i = 0; i < filho.ind.size(); i++)
+		if (i % 2 != 0 ) {
+			filho.ind[i] = mae.ind[i];
+			filho.n_vezes[i] = mae.n_vezes[i];
+		}
+	//if (!viavel(filho))
+		corrigir(filho);
+	filho.fitness = fitness(filho);
+	filhos.push_back(filho);
+
+
+	//filho3
+	/*filho = pai;
+	for (int i = ceil((P - 1)/2); i < P - 1; i++){
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+	for (int i = ceil((P - 1 + H)/2); i < P - 1 + H; i++) {
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+
+	for (int i = ceil((P - 1 + H + O) / 2); i < P - 1 + H + O; i++) {
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+	if (!viavel(filho))
+		corrigir(filho);
+	filho.fitness = fitness(filho);
+	filhos.push_back(filho);
+
+
+	//filho4
+	filho = pai;
+	for (int i = 0; i < ceil((P - 1) / 2); i++) {
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+	for (int i = P - 1; i < ceil((P - 1 + H) / 2); i++) {
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+
+	for (int i = P - 1 + H; i < ceil((P - 1 + H + O) / 2); i++) {
+		filho.ind[i] = mae.ind[i];
+		filho.n_vezes[i] = mae.n_vezes[i];
+	}
+	if (!viavel(filho))
+		corrigir(filho);
+	filho.fitness = fitness(filho);
+	filhos.push_back(filho);*/
 
 	return filhos;
 }
 
 
-// Function to return k'th smallest element in a given array
-int kMenor(const vector<int> v, int k) {
 
-	// initialize original index locations
-	vector<size_t> idx(v.size());
-	iota(idx.begin(), idx.end(), 0);
 
-	// sort indexes based on comparing values in v
-	sort(idx.begin(), idx.end(),[&v](size_t i1, size_t i2) {return v[i1] < v[i2]; });
 
-	return idx[k-1];
+list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
+{
+	list<individuo> retorno;
+	for (int i = 0; i < Popu.size(); i++) {
+		for (int j = 0; j < Popu.size(); j++) {
+			if (i != j) {
+				list<individuo> aux = cruzar(Popu[i], Popu[j]);
+				retorno.insert(retorno.end(), aux.begin(), aux.end());
+			}
+		}
+	}
+
+	return retorno;
 }
+
+
+
+
+
+
+
 
 bool Heuristica::viavel(individuo solu)
 {
@@ -87,8 +190,6 @@ bool Heuristica::viavel(individuo solu)
 	for (auto &elemento : DemandasAuxiliares)
 		for (auto &demand : elemento.demandas)
 			demand = 0;
-
-	
 
 	for (int i = 0; i < P - 1; i++)
 	{
@@ -145,6 +246,17 @@ bool Heuristica::viavel(individuo solu)
 
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 void Heuristica::corrigir(individuo & solu)
 {
@@ -288,37 +400,16 @@ void Heuristica::corrigir(individuo & solu)
 	}
 }
 
-void Heuristica::funcaoteste(){
-	double MenorFo = double(INT_MAX);
 
 
-	for (int i = 0; i < 1000; i++)
-	{
-		individuo solucao = GerarSoluAleatoria();
 
-		//ImprimirVetorSolu(solucao)
 
-		if (viavel(solucao))
-			cout << "\n\nFeasible! - FO = " << fitness(solucao) << "\n\n";
-		else {
-			cout << "\n\nUnfeasible\n\n";
-			corrigir(solucao);
-			//ImprimirVetorSolu(solucao)
-			if (viavel(solucao)) {
-				cout << "\n\nFeasible! - FO = " << fitness(solucao) << "\n\n";
-				if (MenorFo > fitness(solucao))
-					MenorFo = fitness(solucao);
-			}
-			else {
-				cerr << "\n\nUnfeasible, solution fix error\n\n";
-				exit(0);
-			}
-		}
-	}
 
-	cout << "FO = " << MenorFo << endl;
 
-}
+
+
+
+
 void Heuristica::ImprimirVetorSolu(individuo solu)
 {
 	for (int i = 0; i < P - 1 + H + O; i++) {
@@ -333,11 +424,20 @@ void Heuristica::ImprimirVetorSolu(individuo solu)
 	}
 }
 
+
+
+
+
+
+
+
+
+
 individuo Heuristica::GerarSoluAleatoria()
 {
 
 	vector<int>	solu1(P - 1 + H + O),	//índices dos padrões
-		solu2(P - 1 + H + O);	//quantidade dos padrões
+				solu2(P - 1 + H + O);	//quantidade dos padrões
 
 								//Inicializando os índices
 	iota(solu1.begin(), solu1.begin() + P - 1, 1);
@@ -386,10 +486,101 @@ individuo Heuristica::GerarSoluAleatoria()
 	}
 
 
-	cout << ":)" << endl;
+	//cout << ":)" << endl;
 	individuo solucao;
 	solucao.ind = solu1;
 	solucao.n_vezes = solu2;
 
 	return solucao;
+}
+
+
+
+void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por elitismo
+{
+	//Ordenando população por fitness
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+
+	TamanhoDaPopulacao = 10;
+	//Auxiliar para guardar a populacao atual
+	vector<individuo> Auxiliar = Popu;
+	Popu.clear();
+	//Populacao atual recebe só os TamanhoDaPopulacao melhores elementos
+	for (int i = 0; i < TamanhoDaPopulacao; i++)
+		Popu.push_back(Auxiliar[i]);
+}
+
+
+
+
+
+
+
+
+
+
+void Heuristica::funcaoteste() {
+	double MenorFo = double(INT_MAX);
+
+	vector<individuo> Populacao;
+
+
+	cout << "Gerando populacao inicial\n";
+
+	auto start = chrono::system_clock::now();
+
+	for (int i = 0; i < 200; i++)
+	{
+		individuo solucao = GerarSoluAleatoria();
+
+		//ImprimirVetorSolu(solucao)
+
+		if (false) {
+			solucao.fitness = fitness(solucao);
+			//cout << "\n\nFeasible! - FO = " << fitness(solucao) << "\n\n";
+		}
+		else {
+			//cout << "\n\nUnfeasible\n\n";
+			corrigir(solucao);
+			//ImprimirVetorSolu(solucao)
+			solucao.fitness = fitness(solucao);
+			//cout << "\n\nFeasible! - FO = " << solucao.fitness << "\n\n";
+			if (MenorFo > solucao.fitness)
+				MenorFo = solucao.fitness;
+			//Estou assumindo que sempre vou conseguir corrigir corretamente
+			/*if (viavel(solucao)) {
+			solucao.fitness = fitness(solucao);
+			//cout << "\n\nFeasible! - FO = " << solucao.fitness << "\n\n";
+			if (MenorFo > solucao.fitness)
+			MenorFo = solucao.fitness;
+			}
+			else {
+			cerr << "\n\nUnfeasible, solution fix error\n\n";
+			exit(0);
+			}*/
+		}
+
+		Populacao.push_back(solucao);
+		if (i % 100 == 0) {
+			auto end = chrono::system_clock::now();
+			chrono::duration<double> elapsed_seconds = end - start;
+			cout << "\t" << elapsed_seconds.count() << "s" << endl;
+		}
+	}
+	selecao(Populacao);
+
+	list<individuo> Offspring = cruzamento(Populacao);
+	Populacao.insert(Populacao.end(), Offspring.begin(), Offspring.end());
+
+
+
+	auto end = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds = end - start;
+	cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
+	
+	selecao(Populacao);
+
+	cout << endl << "Populacao inicial gerada com sucesso" << endl;
+
+	cout << "FO = " << MenorFo << endl;
 }

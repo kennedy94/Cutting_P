@@ -2,20 +2,23 @@
 #include "Problema.h"
 #include <numeric>
 #include <random>
+#include <chrono>
+#include <ctime>
 
 struct individuo {
 	vector<int> ind;
 	vector<int> n_vezes;
+	double fitness;
 };
 
-int kMenor(const vector<int> v, int k);
+inline int kMenor(const vector<int> v, int k);
 
 class Heuristica :
 	public Problema
 {
 private:
 	list<individuo> Populacao;
-
+	int TamanhoDaPopulacao;
 protected:
 	
 	//aqui o bicho pega
@@ -26,12 +29,12 @@ protected:
 	list<individuo> cruzar(individuo pai, individuo mae);
 
 	//cruza vários indivíduos e retorna todos os gerados
-	list<individuo> cruzamento();
+	list<individuo> cruzamento(vector<individuo> Popu);
 
 	/*junta os indivíduos obtidos por cruzamento à população atual e
 	seleciona só um número predefinido deles
 	*/
-	void selecao();//
+	void selecao(vector<individuo> &Popu);//
 
 	//altera um elemento do vetor
 	void mutar(individuo &solu);
