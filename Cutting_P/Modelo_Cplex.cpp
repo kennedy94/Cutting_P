@@ -92,8 +92,12 @@ void Modelo_Cplex::resolver_inteira() {
 	try
 	{
 		//cplex.setParam(IloCplex::PreInd, 0);
-		cplex.setParam(IloCplex::TiLim, 60);
+		cplex.setParam(IloCplex::TiLim, 3600);
+		auto start = chrono::system_clock::now();
 		cplex.solve();
+		auto end = chrono::system_clock::now();
+		chrono::duration<double> elapsed_seconds = end - start;
+		tempo_solucao = elapsed_seconds.count();
 	}
 	catch (IloException& e) {
 		cerr << endl << e.getMessage() << endl;
@@ -479,21 +483,24 @@ void Modelo_Cplex::MontarModelo() {
 		getchar();
 		return;
 	}
+	catch (...) {
+		return;
+	}
 }
 
 void Modelo_Cplex::ImprimirSolucaoArquivo(){
 	ofstream resultados("resultados.txt", fstream::app);
 
 	resultados << endl << nome_instancia;
-	
+	//resultados << "," << P << "," << H << "," << O << endl;
 	try
 	{
 		resultados << "," << cplex.getObjValue() << "," <<
-			cplex.getNnodes() << "," << cplex.getMIPRelativeGap() << endl;
+			cplex.getNnodes() << "," << cplex.getMIPRelativeGap() << "," << tempo_solucao << endl;
 	}
-	catch (const std::exception&)
+	catch (...)
 	{
-		resultados << "Sem solucao" <<  endl;
+		resultados << ",No solution," << tempo_solucao <<  endl;
 	}
 	
 	resultados.close();

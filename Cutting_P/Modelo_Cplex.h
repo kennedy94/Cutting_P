@@ -1,7 +1,8 @@
 #pragma once
 #include <ilcplex/ilocplex.h>
 #include "Problema.h"
-
+#include <chrono>
+#include <ctime>
 
 class Modelo_Cplex :
 	public Problema
@@ -20,6 +21,7 @@ private:
 						 de tamanho gamma*/
 		
 	IloEnv env;
+	double tempo_solucao;
 	IloModel model;
 	IloCplex cplex;
 	IloBoolVarArray z;
