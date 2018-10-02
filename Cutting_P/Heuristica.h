@@ -13,6 +13,8 @@ struct individuo {
 
 inline int kMenor(const vector<int> v, int k);
 
+inline int kMaior(const vector<int> v, int k);
+
 class Heuristica :
 	public Problema
 {
@@ -44,7 +46,9 @@ protected:
 
 	//corrige uma solução inviável
 	void corrigir(individuo &solu);
+	bool estoque_ok(vector<int> EstoqueUsado, list<int> usados);
 	void ImprimirVetorSolu(individuo solu);
+	individuo GerarSoluGRASP();
 	individuo GerarSoluAleatoria();
 
 public:

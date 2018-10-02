@@ -19,18 +19,18 @@ int main(int argc, char *argv[]) {
 
 	Modelo_Cplex Modelo(inst);
 
-	Modelo.MontarModelo();
+	/*Modelo.MontarModelo();
 	Modelo.resolver_inteira();
-	Modelo.ImprimirSolucaoArquivo();
+	Modelo.ImprimirSolucaoArquivo();*/
 	//Modelo.ImprimirSolucao();
 
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
 
-	/*Heuristica GA(inst);
-	GA.funcaoteste();*/
+	Heuristica GA(inst);
+	GA.funcaoteste();
 
-	//getchar();
+	getchar();
 	return 0;
 }
 
