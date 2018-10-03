@@ -4,7 +4,7 @@
 #include <random>
 #include <chrono>
 #include <ctime>
-
+#include <algorithm>
 struct individuo {
 	vector<int> ind;
 	vector<int> n_vezes;
@@ -46,10 +46,10 @@ protected:
 
 	//corrige uma solução inviável
 	void corrigir(individuo &solu);
+	int qtde_adicionavel(Padrao_Traspasse Padrao, vector<int> EstoqueUsado, list<int> usados);
 	bool estoque_ok(vector<int> EstoqueUsado, list<int> usados);
 	void ImprimirVetorSolu(individuo solu);
 	individuo GerarSoluGRASP();
-	individuo GerarSoluAleatoria();
 
 public:
 	void funcaoteste();
