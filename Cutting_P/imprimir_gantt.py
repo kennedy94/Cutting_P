@@ -53,7 +53,5 @@ if nome.endswith('.solu'):
 if nome.endswith('.barras'):
 	nome = nome[:-7]
 	nome = nome + '_barras.png'
-	
-
 
 plt.savefig(nome, bbox_inches='tight')

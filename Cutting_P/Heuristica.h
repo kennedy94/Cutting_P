@@ -5,6 +5,7 @@
 #include <chrono>
 #include <ctime>
 #include <algorithm>
+#include <iomanip>
 struct individuo {
 	vector<int> ind;
 	vector<int> n_vezes;
@@ -23,7 +24,6 @@ private:
 	int TamanhoDaPopulacao;
 protected:
 	
-	//aqui o bicho pega
 	double fitness(individuo solu);
 
 	//retorna vários indivíduos obtidos por cruzando entre outros

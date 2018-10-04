@@ -29,8 +29,6 @@ int main(int argc, char *argv[]) {
 
 	Heuristica GA(inst);
 	GA.funcaoteste();
-
-	getchar();
 	return 0;
 }
 
