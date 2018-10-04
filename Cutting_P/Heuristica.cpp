@@ -284,10 +284,20 @@ void Heuristica::corrigir(individuo &solu)
 			}
 		}
 	}
+	//Contar qtd necessária de barras
+	vector<int> FormasQueDevemSerGeradas(Gamma, 0);
+	for (int i = 0; i < P - 1; i++)
+	{
+		int tipo_do_padrao = PackPatterns[solu.ind[i]].tipo;
+		for (int gamma = 0; gamma < Gamma; gamma++)
+		{
+			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[tipo_do_padrao].comprimentos))
+				FormasQueDevemSerGeradas[gamma] += TipoVigas[tipo_do_padrao].n_barras * solu.n_vezes[i];
+		}
+	}
+
 
 	//Corrigir por estoque de barras
-	vector<int> FormasQueDevemSerGeradas(Gamma, 0);
-
 
 
 
