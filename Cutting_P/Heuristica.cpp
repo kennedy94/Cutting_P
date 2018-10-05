@@ -298,6 +298,7 @@ void Heuristica::corrigir(individuo &solu)
 
 	vector<int> EstoqueUsado(W+V, 0);
 	//Corrigir por estoque de barras
+	//Até aqui OK
 	for (int i = P - 1; i < P - 1 + H + O; i++) {
 		if (i < P - 1 + H)
 			EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += solu.n_vezes[i];
@@ -308,21 +309,37 @@ void Heuristica::corrigir(individuo &solu)
 	}
 
 	for (int w = 0; w < W + V; w++) {
+		//se desobedece o estoque
 		if (EstoqueUsado[w] > e[w]) {
+			//Calcular qtde que deve ser retirada
 			int retirar = EstoqueUsado[w] - e[w];
+			//Para todo padrão na ordem que está na solução
 			for (int i = P - 1; i < P - 1 + H; i++) {
+				//se o padrão corta a barra w e ele está na solução
 				if (CutPatterns[solu.ind[i]].index_barra == w && solu.n_vezes[i] > 0) {
-					solu.n_vezes[i] -= min(solu.n_vezes[i], retirar);
-					EstoqueUsado[w] -= min(solu.n_vezes[i], retirar);
-					retirar -= min(solu.n_vezes[i], retirar);
-					
+					/*qtde que vai ser removidade do padrão da solução é o menor valor entre o que
+					tem que ser removido e o número de vezes que o padrão é usado
+					*/
+					int remover = min(solu.n_vezes[i], retirar);
+					//atualiza o número de vezes que o padrão tá na solução
+					solu.n_vezes[i] -= remover;
+					//atualiza o estoque usado da barra w
+					EstoqueUsado[w] -= remover;
+					//atualiza a qtde que ainda falta ser retirada
+					retirar -= remover;
+					//se já removeu o que tinha q remover para de percorrer os padrões
 					if (retirar <= 0)
 						break;
 				}
 			}
+			//Se mesmo depois de percorrer os padrões ainda houver barras a serem removidas, percorra os padrões de traspasse
 			if (retirar > 0) {
 				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+					//Se o padrão de traspasse está na solução
 					if (solu.n_vezes[i] > 0) {
+						/*qtde a ser removida é o minimo entre o número de vezes que ele está na solução e o piso
+						do número que preciso retirar sobre a qtde de barras w que o padrão usa
+						*/
 						int remover = min(solu.n_vezes[i],
 							int(floor(retirar / SplPatterns[solu.ind[i]].tamanhos[w - W])));
 						solu.n_vezes[i] -= remover;
@@ -336,7 +353,6 @@ void Heuristica::corrigir(individuo &solu)
 					}
 				}
 			}
-			cout << retirar ;
 		}
 	}
 
@@ -369,17 +385,6 @@ int Heuristica::qtde_adicionavel(Padrao_Traspasse Padrao, vector<int> EstoqueUsa
 
 	return *min_element(qtdes.begin(), qtdes.end());
 }
-
-
-
-bool Heuristica::estoque_ok(vector<int> EstoqueUsado, list<int> usados) {
-	for (auto w: usados){
-		if (EstoqueUsado[w] >= e[w])
-			return false;
-	}
-	return true;
-}
-
 
 
 
