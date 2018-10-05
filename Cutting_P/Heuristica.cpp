@@ -296,9 +296,49 @@ void Heuristica::corrigir(individuo &solu)
 		}
 	}
 
-
+	vector<int> EstoqueUsado(W+V, 0);
 	//Corrigir por estoque de barras
+	for (int i = P - 1; i < P - 1 + H + O; i++) {
+		if (i < P - 1 + H)
+			EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += solu.n_vezes[i];
+		else {
+			for (int v = 0; v < V; v++)
+				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[solu.ind[i]].tamanhos[v];
+		}
+	}
 
+	for (int w = 0; w < W + V; w++) {
+		if (EstoqueUsado[w] > e[w]) {
+			int retirar = EstoqueUsado[w] - e[w];
+			for (int i = P - 1; i < P - 1 + H; i++) {
+				if (CutPatterns[solu.ind[i]].index_barra == w && solu.n_vezes[i] > 0) {
+					solu.n_vezes[i] -= min(solu.n_vezes[i], retirar);
+					EstoqueUsado[w] -= min(solu.n_vezes[i], retirar);
+					retirar -= min(solu.n_vezes[i], retirar);
+					
+					if (retirar <= 0)
+						break;
+				}
+			}
+			if (retirar > 0) {
+				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+					if (solu.n_vezes[i] > 0) {
+						int remover = min(solu.n_vezes[i],
+							int(floor(retirar / SplPatterns[solu.ind[i]].tamanhos[w - W])));
+						solu.n_vezes[i] -= remover;
+
+						for (int v = 0; v < V; v++)
+							EstoqueUsado[w] -= SplPatterns[solu.ind[i]].tamanhos[v - W] * remover;
+
+						retirar -= remover;
+						if (retirar <= 0)
+							break;
+					}
+				}
+			}
+			cout << retirar ;
+		}
+	}
 
 
 	//Corrigir por necessidade de barras
