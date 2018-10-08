@@ -106,6 +106,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 	if (!viavel(filho))
 		corrigir(filho);
+	
 	filho.fitness = fitness(filho);
 	filhos.push_back(filho);
 
@@ -119,8 +120,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 	if (!viavel(filho))
 		corrigir(filho);
-	if (!viavel(filho))
-		cout << "socorro" << endl;
+
 
 	filho.fitness = fitness(filho);
 	filhos.push_back(filho);
@@ -213,8 +213,8 @@ bool Heuristica::viavel(individuo solu)
 
 	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
 	//contar as barras com tamanhos de forma geradas
-	for (int i = P - 1; i < P - 1 + H + O; i++) {
-		for (int gamma = 0; gamma < Gamma; gamma++) {
+	for (int gamma = 0; gamma < Gamma; gamma++) {
+		for (int i = P - 1; i < P - 1 + H + O; i++) {
 			if (i < P - 1 + H)
 				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
 			else
@@ -266,7 +266,7 @@ void Heuristica::corrigir(individuo &solu)
 			//Se a demanda do tipo c tamanho k não é atendida
 			if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k]) {
 				//Pegar o primeiro padrão que cobre ela
-				int primeiro_padrao;
+				int primeiro_padrao = - 1;
 				for (int i = 0; i < P - 1; i++) {
 					if (PackPatterns[solu.ind[i]].tipo == c && PackPatterns[solu.ind[i]].tamanhos[k] > 0) {
 						primeiro_padrao = i;
@@ -274,13 +274,11 @@ void Heuristica::corrigir(individuo &solu)
 					}
 				}
 
-				int adicionar = 
-					ceil((TipoVigas[c].demandas[k] - DemandasAuxiliares[c].demandas[k])/ PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k]);
-
-				solu.n_vezes[primeiro_padrao] += adicionar;
-
-				for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
-					DemandasAuxiliares[c].demandas[k2] += adicionar * PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k2];
+				while (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k]) {
+					solu.n_vezes[primeiro_padrao]++;
+					for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
+						DemandasAuxiliares[c].demandas[k2] += PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k2];
+				}
 			}
 		}
 	}
@@ -298,7 +296,7 @@ void Heuristica::corrigir(individuo &solu)
 
 	vector<int> EstoqueUsado(W+V, 0);
 	//Corrigir por estoque de barras
-	//Até aqui OK
+
 	for (int i = P - 1; i < P - 1 + H + O; i++) {
 		if (i < P - 1 + H)
 			EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += solu.n_vezes[i];
@@ -307,6 +305,7 @@ void Heuristica::corrigir(individuo &solu)
 				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[solu.ind[i]].tamanhos[v];
 		}
 	}
+
 
 	for (int w = 0; w < W + V; w++) {
 		//se desobedece o estoque
@@ -355,21 +354,167 @@ void Heuristica::corrigir(individuo &solu)
 			}
 		}
 	}
+	//Tudo OK até aqui
+	
+	vector<int> BarrasGeradas(Gamma, 0);
+	//Contar barras que estão sendo geradas
+	for (int gamma = 0; gamma < Gamma; gamma++) {
+		for (int i = P - 1; i < P - 1 + H + O; i++) {
+			if (i < P - 1 + H)
+				BarrasGeradas[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
+			else {
+				if(SplPatterns[solu.ind[i]].barra_gerada == gamma)
+					BarrasGeradas[gamma] += solu.n_vezes[i];
+			}
+		}
+	}
+
+	for (int gamma = 0; gamma < Gamma; gamma++) {
+
+		if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+
+			//Se tem em excesso, remover dos padrões que só tem o tipo gamma
+			for (int i = P - 1; i < P - 1 + H; i++) {
+				//só gera formas do tipo gamma?
+				bool gera_gamma = true;
+				for (int tam = 0; tam < Gamma; tam++) {
+					if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
+						gera_gamma = false;
+						break;
+					}
+				}
+				if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma] == 0)
+					gera_gamma = false;
+
+
+				if (gera_gamma) {
+					while (solu.n_vezes[i] > 0 && BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+						solu.n_vezes[i]--;
+						//Como estou assumindo que o padrão selecionado só gera barra gamma então só basta atualizar o valor de gamma
+						BarrasGeradas[gamma] -= CutPatterns[solu.ind[i]].tamanhos[gamma];
+						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]--;
+					}
+					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+						break;
+				}
+			}
+
+
+			//Se continuar, remova dos traspasses
+			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+					if (SplPatterns[solu.ind[i]].barra_gerada == gamma) {
+						while (solu.n_vezes[i] > 0 && BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+							solu.n_vezes[i]--;
+							BarrasGeradas[gamma]--;
+
+							for (int v = 0; v < V; v++)
+								EstoqueUsado[W + v] -= SplPatterns[solu.ind[i]].tamanhos[v];
+
+						}
+						if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+							break;
+					}
+				}
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+		if (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+
+			//Se ta em falta, adiciona
+			for (int i = P - 1; i < P - 1 + H; i++) {
+				//Se gera só gamma
+				bool gera_gamma = true;
+				for (int tam = 0; tam < Gamma; tam++) {
+					if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
+						gera_gamma = false;
+						break;
+					}
+				}
+				if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma] == 0)
+					gera_gamma = false;
+
+
+				//se o padrão cobre uma barra de tamanho gamma
+				if (gera_gamma) {
+					//enquanto ainda é menor e o padrão não interfere no estoque da barra
+					while (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma] 
+						&& EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] < e[CutPatterns[solu.ind[i]].index_barra]) {
+						
+						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]++;
+						solu.n_vezes[i]++;
+
+						BarrasGeradas[gamma] += CutPatterns[solu.ind[i]].tamanhos[gamma];
+					}
+					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+						break;
+				}
+			}
+
+			//Se ainda não supriu adiciona splicing feito doido
+			if (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+					if (SplPatterns[solu.ind[i]].barra_gerada == gamma) {
+						bool pode_ser_adicionado = true;
+						while (pode_ser_adicionado  && BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+
+							for (int v = 0; v < V; v++) {
+								if (EstoqueUsado[W + v] + SplPatterns[solu.ind[i]].tamanhos[v] > e[W + v]) {
+									pode_ser_adicionado = false;
+									break;
+								}
+							}
+							if (pode_ser_adicionado) {
+								solu.n_vezes[i]++;
+								BarrasGeradas[gamma]++;
+								for (int v = 0; v < V; v++)
+									EstoqueUsado[W + v] += SplPatterns[solu.ind[i]].tamanhos[v];
+							}
+						}
+						if (BarrasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
+							break;
+					}
+				}
+			}
+
+
+		}
+	}
+
+
+	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
+	//contar as barras com tamanhos de forma geradas
+	for (int gamma = 0; gamma < Gamma; gamma++) {
+		for (int i = P - 1; i < P - 1 + H + O; i++) {
+			if (i < P - 1 + H)
+				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
+			else
+				if (SplPatterns[solu.ind[i]].barra_gerada == gamma)
+					BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i];
+		}
+	}
+	
+	for (int gamma = 0; gamma < Gamma; gamma++)
+		if (BarrasGeradasPelaSolu[gamma] != FormasQueDevemSerGeradas[gamma])
+			cout << "CUIDADOOO" << endl;
 
 
 	//Corrigir por necessidade de barras
-
-
-
-
 	if (!viavel(solu)) {
-		cout << "help";
+		cout << "help" << endl;
 		viavel(solu);
 	}
 	else
-	{
-		cout << "corrigiu!" << endl;
-	}
+		cout << "Corrigiu!" << endl;
 }
 
 
