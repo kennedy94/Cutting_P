@@ -44,6 +44,8 @@ protected:
 	//testa se é uma solução viávels
 	bool viavel(individuo solu);
 
+	void ImprimirSolucaoEstiloCPLEX(individuo solu);
+
 	//corrige uma solução inviável
 	void corrigir(individuo &solu);
 	int qtde_adicionavel(Padrao_Traspasse Padrao, vector<int> EstoqueUsado, list<int> usados);
