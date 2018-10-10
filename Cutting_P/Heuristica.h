@@ -48,8 +48,11 @@ protected:
 
 	//corrige uma solução inviável
 	void corrigir(individuo &solu);
+
 	int qtde_adicionavel(Padrao_Traspasse Padrao, vector<int> EstoqueUsado, list<int> usados);
+	
 	void ImprimirVetorSolu(individuo solu);
+
 	individuo GerarSoluGRASP();
 
 public:

@@ -97,7 +97,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 {
 	list<individuo> filhos;
 
-	//filho1
+	//----------------------GERAÇÃO DO FILHO1
 	individuo filho = pai;
 
 	for (int i = 0; i < P - 1 + H + O; i++) {
@@ -114,7 +114,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	vector<int> nao_escolhidos;
 	for (int i = floor((P - 1) / 2); i < P - 1; i++)
 		nao_escolhidos.push_back(pai.ind[i]);
-
 
 	for (int i = floor((P - 1) / 2); i < P - 1; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), mae.ind[i]) != nao_escolhidos.end()) {
@@ -189,11 +188,196 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 	}
 
-	ImprimirVetorSolu(filho);
+	//CALCULAR NOVAS QUANTIDADES PELAS MÉDIAS
+	for (int i = 0; i < P - 1; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = 0; j < P - 1; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
+
+	for (int i = P - 1; i < P - 1 + H; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = P - 1; j < P - 1 + H; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
+
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = P - 1 + H; j < P - 1 + H + O; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
+
+
+	if (!viavel(filho))
+		corrigir(filho);
+
+	if (viavel(filho)) {
+		filho.fitness = fitness(filho);
+		filhos.push_back(filho);
+	}
 
 
 
+
+	//GERAÇÃO DO FILHO 2
+	filho = mae;
 	
+	for (int i = 0; i < P - 1 + H + O; i++) {
+		filho.ind[i] = -1;
+		filho.n_vezes[i] = -1;
+	}
+
+
+	//CROSSOVER INDICES DE PADRÕES DE EMPACOTAMENTO
+	for (int i = 0; i < floor((P - 1) / 2); i++)
+		filho.ind[i] = mae.ind[i];
+
+	nao_escolhidos.clear();
+	nao_escolhidos.resize(0);
+
+
+	for (int i = floor((P - 1) / 2); i < P - 1; i++)
+		nao_escolhidos.push_back(mae.ind[i]);
+
+	for (int i = floor((P - 1) / 2); i < P - 1; i++) {
+		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
+			filho.ind[i] = pai.ind[i];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+		else {
+			default_random_engine generator;
+			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
+
+			int escolhido = distribution(generator);
+
+			filho.ind[i] = nao_escolhidos[escolhido];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+	}
+
+	//CROSSOVER INDICES DE PADRÕES DE CORTE
+	for (int i = P - 1; i < P - 1 + floor(H / 2); i++) {
+		filho.ind[i] = mae.ind[i];
+	}
+
+
+	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++)
+		nao_escolhidos.push_back(mae.ind[i]);
+
+	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++) {
+		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
+			filho.ind[i] = pai.ind[i];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+		else {
+			default_random_engine generator;
+			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
+
+			int escolhido = distribution(generator);
+
+			filho.ind[i] = nao_escolhidos[escolhido];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+	}
+
+	//CROSSOVER INDICES DE PADRÕES DE TRASPASSE
+	for (int i = P - 1 + H; i <P - 1 + H + floor(O / 2); i++) {
+		filho.ind[i] = mae.ind[i];
+	}
+	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++)
+		nao_escolhidos.push_back(mae.ind[i]);
+
+	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++) {
+		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
+			filho.ind[i] = pai.ind[i];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+		else {
+			default_random_engine generator;
+			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
+
+			int escolhido = distribution(generator);
+
+			filho.ind[i] = nao_escolhidos[escolhido];
+			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
+			nao_escolhidos.resize(nao_escolhidos.size() - 1);
+		}
+	}
+
+	//CALCULAR NOVAS QUANTIDADES PELAS MÉDIAS
+	for (int i = 0; i < P - 1; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = 0; j < P - 1; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
+
+	for (int i = P - 1; i < P - 1 + H; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = P - 1; j < P - 1 + H; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
+
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+		int	valor1 = -1,
+			valor2 = -1;
+		for (int j = P - 1 + H; j < P - 1 + H + O; j++) {
+			if (pai.ind[j] == filho.ind[i])
+				valor1 = pai.n_vezes[j];
+			if (mae.ind[j] == filho.ind[i])
+				valor2 = mae.n_vezes[j];
+			if (valor1 != -1 && valor2 != -1)
+				break;
+		}
+		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+	}
 
 	if (!viavel(filho))
 		corrigir(filho);
@@ -550,13 +734,6 @@ void Heuristica::corrigir(individuo &solu)
 
 
 
-
-
-
-
-
-
-
 		if (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
 
 			//Se ta em falta, adiciona
@@ -615,18 +792,67 @@ void Heuristica::corrigir(individuo &solu)
 				}
 			}
 
+			//Se adicionou uma que não deveria, 
+			//remova um padrão de corte que tem 2 gammas e remova um dos dos traspasses
+			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+
+
+				for (int i = P - 1; i < P - 1 + H; i++) {
+					//Se gera qtde par de gamma
+					bool gera_gamma = true;
+					for (int tam = 0; tam < Gamma; tam++) {
+						if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
+							gera_gamma = false;
+							break;
+						}
+					}
+					if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma]%2 != 0)
+						gera_gamma = false;
+					if (solu.n_vezes[i] == 0)
+						gera_gamma = false;
+
+
+					//se o padrão cobre uma barra de tamanho gamma
+					if (gera_gamma) {
+						//enquanto ainda é menor e o padrão não interfere no estoque da barra
+						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]--;
+						solu.n_vezes[i]--;
+
+						BarrasGeradas[gamma] -= CutPatterns[solu.ind[i]].tamanhos[gamma];
+						break;
+					}
+				}
+
+
+				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+					if (SplPatterns[solu.ind[i]].barra_gerada == gamma) {
+						bool pode_ser_adicionado = true;
+
+						for (int v = 0; v < V; v++) {
+							if (EstoqueUsado[W + v] + SplPatterns[solu.ind[i]].tamanhos[v] > e[W + v]) {
+								pode_ser_adicionado = false;
+								break;
+							}
+						}
+
+						if (pode_ser_adicionado) {
+							solu.n_vezes[i]++;
+							BarrasGeradas[gamma]++;
+							for (int v = 0; v < V; v++)
+								EstoqueUsado[W + v] += SplPatterns[solu.ind[i]].tamanhos[v];
+							break;
+						}				
+					}
+				}
+			}
 
 		}
 	}
 
+	if (!viavel(solu)) {
+		cout << "Filho que nao conseguiu corrigir detectado!" << endl;
+	}
 
-	//Corrigir por necessidade de barras
-	//if (!viavel(solu)) {
-	//	cout << "Corrigiu NAO!" << endl;
-	//	//viavel(solu);
-	//}
-	//else
-	//	cout << "Corrigiu!" << endl;
 }
 
 
@@ -651,13 +877,13 @@ void Heuristica::ImprimirVetorSolu(individuo solu)
 {
 
 	for (int i = 0; i < P - 1; i++)
-		cout << PackPatterns[solu.ind[i]].id << "-";
+		cout << PackPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
 	cout << "//" << endl;
 	for (int i = P - 1; i < P - 1 + H; i++)
-		cout << CutPatterns[solu.ind[i]].index_pat << "-";
+		cout << CutPatterns[solu.ind[i]].index_pat << "," << solu.n_vezes[i] << " ";
 	cout << "//" << endl;
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++)
-		cout << SplPatterns[solu.ind[i]].id << "-";
+		cout << SplPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
 
 	return;
 
@@ -873,7 +1099,7 @@ void Heuristica::funcaoteste() {
 	for (auto solucao : Populacao)
 		cout << "FO = " << solucao.fitness << endl;
 
-	int NGeracoes = 1;
+	int NGeracoes = 20;
 
 	
 	for(int i = 0; i < NGeracoes; ++i){
@@ -895,6 +1121,7 @@ void Heuristica::funcaoteste() {
 
 	cout << endl << "Populacao inicial gerada com sucesso" << endl;
 	cout << viavel(Populacao[0]) << endl;
+	ImprimirVetorSolu(Populacao[0]);
 	for(auto solucao: Populacao)
 		cout << "FO = " << solucao.fitness << endl;
 }
