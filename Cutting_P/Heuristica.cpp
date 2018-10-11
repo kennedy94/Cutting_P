@@ -123,7 +123,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size()-1);
 
 			int escolhido = distribution(generator);
@@ -151,7 +151,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -177,7 +177,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -200,7 +200,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
 	for (int i = P - 1; i < P - 1 + H; i++) {
@@ -214,7 +214,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
@@ -228,12 +228,22 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
+	default_random_engine generator;
+	generator.seed(time(NULL));
+	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 	if (!viavel(filho))
 		corrigir(filho);
+
+	double prob_mutacao = 0.25;
+	if (distribution(generator) < prob_mutacao) {
+		mutar(filho);
+		if (!viavel(filho))
+			corrigir(filho);
+	}
 
 	if (viavel(filho)) {
 		filho.fitness = fitness(filho);
@@ -271,7 +281,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -299,7 +309,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -325,7 +335,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		}
 		else {
 			default_random_engine generator;
-			generator.seed(chrono::system_clock::now().time_since_epoch().count());
+			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -348,7 +358,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
 	for (int i = P - 1; i < P - 1 + H; i++) {
@@ -362,7 +372,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
@@ -376,11 +386,19 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			if (valor1 != -1 && valor2 != -1)
 				break;
 		}
-		filho.n_vezes[i] = ceil((valor1 + valor2) / 2);
+		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
+
 
 	if (!viavel(filho))
 		corrigir(filho);
+
+	if (distribution(generator) < prob_mutacao) {
+		mutar(filho);
+		if (!viavel(filho))
+			corrigir(filho);
+	}
+
 
 	if (viavel(filho)) {
 		filho.fitness = fitness(filho);
@@ -398,15 +416,16 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 {
 	default_random_engine generator;
+	generator.seed(time(NULL));
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 
-
 	double prop_cruzamento = 0.5;
+
 	list<individuo> retorno;
 	for (int i = 0; i < Popu.size(); i++) {
 		for (int j = 0; j < Popu.size(); j++) {
-			if (i != j && distribution(generator) < 0.5) {
+			if (i != j && distribution(generator) < prop_cruzamento) {
 				list<individuo> aux = cruzar(Popu[i], Popu[j]);
 				retorno.insert(retorno.end(), aux.begin(), aux.end());
 			}
@@ -564,14 +583,29 @@ void Heuristica::corrigir(individuo &solu)
 		for (auto &demand : elemento.demandas)
 			demand = 0;
 
+
+	bool ja_encheu = false;
+
 	for (int i = 0; i < P - 1; i++)
 	{
-		//Contar as demandas que o padrão atual preenche
-		for (int tam = 0; tam < PackPatterns[solu.ind[i]].n_comprimentos; tam++) {
-			DemandasAuxiliares[PackPatterns[solu.ind[i]].tipo].demandas[tam]
-				+= solu.n_vezes[i] * PackPatterns[solu.ind[i]].tamanhos[tam];
+		if (ja_encheu && solu.n_vezes[i] > 0)
+			solu.n_vezes[i] = 0;
+		else {
+			//Contar as demandas que o padrão atual preenche
+			for (int tam = 0; tam < PackPatterns[solu.ind[i]].n_comprimentos; tam++) {
+				DemandasAuxiliares[PackPatterns[solu.ind[i]].tipo].demandas[tam]
+					+= solu.n_vezes[i] * PackPatterns[solu.ind[i]].tamanhos[tam];
+			}
+			bool entrou = false;
+			for (int c = 0; c < C; c++)
+				for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
+					if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k])
+						entrou = true;
+			if (!entrou)
+				ja_encheu = true;
 		}
 	}
+
 
 	//Se não obedece a demanda de pelo menos uma viga é inviável por Demanda de Viga
 	for (int c = 0; c < C; c++) {
@@ -586,12 +620,13 @@ void Heuristica::corrigir(individuo &solu)
 						break;
 					}
 				}
-
-				while (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k]) {
-					solu.n_vezes[primeiro_padrao]++;
-					for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
-						DemandasAuxiliares[c].demandas[k2] += PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k2];
-				}
+				int n_add = ceil((double) (TipoVigas[c].demandas[k] - DemandasAuxiliares[c].demandas[k])
+					/PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k]);
+				
+				solu.n_vezes[primeiro_padrao] += n_add;
+				for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
+					DemandasAuxiliares[c].demandas[k2] += PackPatterns[solu.ind[primeiro_padrao]].tamanhos[k2];
+				
 			}
 		}
 	}
@@ -653,7 +688,7 @@ void Heuristica::corrigir(individuo &solu)
 						do número que preciso retirar sobre a qtde de barras w que o padrão usa
 						*/
 						int remover = min(solu.n_vezes[i],
-							int(floor(retirar / SplPatterns[solu.ind[i]].tamanhos[w - W])));
+							int(floor((double) retirar / SplPatterns[solu.ind[i]].tamanhos[w - W])));
 						solu.n_vezes[i] -= remover;
 
 						for (int v = 0; v < V; v++)
@@ -688,46 +723,51 @@ void Heuristica::corrigir(individuo &solu)
 
 			//Se tem em excesso, remover dos padrões que só tem o tipo gamma
 			for (int i = P - 1; i < P - 1 + H; i++) {
-				//só gera formas do tipo gamma?
-				bool gera_gamma = true;
-				for (int tam = 0; tam < Gamma; tam++) {
-					if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
-						gera_gamma = false;
-						break;
+				if (solu.n_vezes[i] > 0) {
+					//só gera formas do tipo gamma?
+					bool gera_gamma = true;
+					for (int tam = 0; tam < Gamma; tam++) {
+						if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
+							gera_gamma = false;
+							break;
+						}
 					}
-				}
-				if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma] == 0)
-					gera_gamma = false;
+					if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma] == 0)
+						gera_gamma = false;
 
 
-				if (gera_gamma) {
-					while (solu.n_vezes[i] > 0 && BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
-						solu.n_vezes[i]--;
-						//Como estou assumindo que o padrão selecionado só gera barra gamma então só basta atualizar o valor de gamma
-						BarrasGeradas[gamma] -= CutPatterns[solu.ind[i]].tamanhos[gamma];
-						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]--;
+					if (gera_gamma) {
+
+						int remover = min(solu.n_vezes[i], (int)ceil((double)(BarrasGeradas[gamma] - FormasQueDevemSerGeradas[gamma])
+							/ CutPatterns[solu.ind[i]].tamanhos[gamma]));
+
+						solu.n_vezes[i] -= remover;
+						BarrasGeradas[gamma] -= remover * CutPatterns[solu.ind[i]].tamanhos[gamma];
+						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] -= remover;
+
+						
 					}
 					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
 						break;
 				}
-			}
 
+			}
+		
 
 			//Se continuar, remova dos traspasses
 			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
 				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
-					if (SplPatterns[solu.ind[i]].barra_gerada == gamma) {
-						while (solu.n_vezes[i] > 0 && BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
-							solu.n_vezes[i]--;
-							BarrasGeradas[gamma]--;
 
-							for (int v = 0; v < V; v++)
-								EstoqueUsado[W + v] -= SplPatterns[solu.ind[i]].tamanhos[v];
+					if (SplPatterns[solu.ind[i]].barra_gerada == gamma && solu.n_vezes[i] > 0) {
+						int remover = min(solu.n_vezes[i], BarrasGeradas[gamma] - FormasQueDevemSerGeradas[gamma]);
+						solu.n_vezes[i] -= remover;
+						BarrasGeradas[gamma] -= remover;
 
-						}
-						if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
-							break;
+						for (int v = 0; v < V; v++)
+							EstoqueUsado[W + v] -= remover * SplPatterns[solu.ind[i]].tamanhos[v];	
 					}
+					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+						break;
 				}
 			}
 		}
@@ -753,15 +793,15 @@ void Heuristica::corrigir(individuo &solu)
 				//se o padrão cobre uma barra de tamanho gamma
 				if (gera_gamma) {
 					//enquanto ainda é menor e o padrão não interfere no estoque da barra
-					while (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma] 
-						&& EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] < e[CutPatterns[solu.ind[i]].index_barra]) {
-						
-						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]++;
-						solu.n_vezes[i]++;
+					int adicionar = min((int)(floor((double)(FormasQueDevemSerGeradas[gamma] - BarrasGeradas[gamma]) / CutPatterns[solu.ind[i]].tamanhos[gamma])),
+						e[CutPatterns[solu.ind[i]].index_barra] - EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]);
 
-						BarrasGeradas[gamma] += CutPatterns[solu.ind[i]].tamanhos[gamma];
-					}
-					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+					EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += adicionar;
+					solu.n_vezes[i] += adicionar;
+
+					BarrasGeradas[gamma] += adicionar * CutPatterns[solu.ind[i]].tamanhos[gamma];
+
+					if (BarrasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
 						break;
 				}
 			}
@@ -788,60 +828,6 @@ void Heuristica::corrigir(individuo &solu)
 						}
 						if (BarrasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
 							break;
-					}
-				}
-			}
-
-			//Se adicionou uma que não deveria, 
-			//remova um padrão de corte que tem 2 gammas e remova um dos dos traspasses
-			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
-
-
-				for (int i = P - 1; i < P - 1 + H; i++) {
-					//Se gera qtde par de gamma
-					bool gera_gamma = true;
-					for (int tam = 0; tam < Gamma; tam++) {
-						if (tam != gamma && CutPatterns[solu.ind[i]].tamanhos[tam] > 0) {
-							gera_gamma = false;
-							break;
-						}
-					}
-					if (gera_gamma && CutPatterns[solu.ind[i]].tamanhos[gamma]%2 != 0)
-						gera_gamma = false;
-					if (solu.n_vezes[i] == 0)
-						gera_gamma = false;
-
-
-					//se o padrão cobre uma barra de tamanho gamma
-					if (gera_gamma) {
-						//enquanto ainda é menor e o padrão não interfere no estoque da barra
-						EstoqueUsado[CutPatterns[solu.ind[i]].index_barra]--;
-						solu.n_vezes[i]--;
-
-						BarrasGeradas[gamma] -= CutPatterns[solu.ind[i]].tamanhos[gamma];
-						break;
-					}
-				}
-
-
-				for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
-					if (SplPatterns[solu.ind[i]].barra_gerada == gamma) {
-						bool pode_ser_adicionado = true;
-
-						for (int v = 0; v < V; v++) {
-							if (EstoqueUsado[W + v] + SplPatterns[solu.ind[i]].tamanhos[v] > e[W + v]) {
-								pode_ser_adicionado = false;
-								break;
-							}
-						}
-
-						if (pode_ser_adicionado) {
-							solu.n_vezes[i]++;
-							BarrasGeradas[gamma]++;
-							for (int v = 0; v < V; v++)
-								EstoqueUsado[W + v] += SplPatterns[solu.ind[i]].tamanhos[v];
-							break;
-						}				
 					}
 				}
 			}
@@ -956,7 +942,7 @@ individuo Heuristica::GerarSoluGRASP() {
 			//pega o tamanho mais necessário que o padrão cobre
 
 			for (auto k_aux : SemDemanda_PadraoCobre) {
-				int n_vezes_uso_padrao_atual = ceil(qtde_necessaria[k_aux] / PackPatterns[solu1[i]].tamanhos[k_aux]);
+				int n_vezes_uso_padrao_atual = ceil((double)(qtde_necessaria[k_aux] / PackPatterns[solu1[i]].tamanhos[k_aux]));
 
 				solu2[i] += n_vezes_uso_padrao_atual;
 
@@ -1047,18 +1033,108 @@ individuo Heuristica::GerarSoluGRASP() {
 
 
 
-void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por elitismo
+void Heuristica::selecao(vector<individuo> &Popu)	//Selecao metade por elitismo e metade por roleta viciada
 {
-	//Ordenando população por fitness
-	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
 
-	TamanhoDaPopulacao = 20;
-	//Auxiliar para guardar a populacao atual
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
 	vector<individuo> Auxiliar = Popu;
 	Popu.clear();
-	//Populacao atual recebe só os TamanhoDaPopulacao melhores elementos
-	for (int i = 0; i < TamanhoDaPopulacao; i++)
+	TamanhoDaPopulacao = 20;
+	for (int i = 0; i < 20; i++)
 		Popu.push_back(Auxiliar[i]);
+	return;
+
+	for (int i = 0; i < ceil((double)TamanhoDaPopulacao / 2); i++)
+		Popu.push_back(Auxiliar[i]);
+
+
+
+	
+	vector<double> PESOS(Auxiliar.size());
+	double soma_peso = 0;
+
+	for (int i = ceil((double)TamanhoDaPopulacao / 2); i < Auxiliar.size(); i++){
+		PESOS[i] = 1 / Auxiliar[i].fitness;
+		soma_peso += PESOS[i];
+	}
+
+	default_random_engine generator;
+	generator.seed(time(NULL));
+	uniform_real_distribution<double> distribution(0.0, soma_peso);
+
+	int contador = ceil((double)TamanhoDaPopulacao / 2);
+	list<int> selecionados;
+	
+
+
+
+	while (contador < TamanhoDaPopulacao) {
+		double sorteio = distribution(generator);
+		int i = ceil((double)TamanhoDaPopulacao / 2) - 1;
+		double total_partial = 0;
+		do {
+			i++;
+			total_partial += PESOS[i];
+		} while (total_partial < sorteio);
+
+		if (find(selecionados.begin(), selecionados.end(), i) == selecionados.end()) {
+			Popu.push_back(Auxiliar[i]);
+			selecionados.push_back(i);
+			contador++;
+		}
+	}
+}
+
+
+
+
+
+
+void Heuristica::mutar(individuo & solu){
+	//return;
+	default_random_engine generator;
+	generator.seed(time(NULL));
+	uniform_int_distribution<int> bloco1(0, P - 2);
+	//indices que serao trocados
+	int id_pack1, id_pack2;
+
+	vector<int> diferentes_de_zero;
+	for (int i = 0; i < P - 1; i++)
+		if (solu.n_vezes[i] > 0)
+			diferentes_de_zero.push_back(i);
+
+	uniform_int_distribution<int> bloco1_n0(0, diferentes_de_zero.size() - 1);
+	int aux_id = bloco1_n0(generator);
+	id_pack1 = diferentes_de_zero[aux_id];
+	do {
+		id_pack2 = bloco1(generator);
+	} while (id_pack2 == id_pack1 || PackPatterns[solu.ind[id_pack1]].tipo != PackPatterns[solu.ind[id_pack2]].tipo);
+
+	int aux = solu.ind[id_pack1];
+	solu.ind[id_pack1] = solu.ind[id_pack2];
+	solu.ind[id_pack2] = aux;
+
+
+
+
+	int id_cut1, id_cut2;
+	diferentes_de_zero.clear();
+	for (int i = P - 1; i < P - 1 + H; i++)
+		if (solu.n_vezes[i] > 0)
+			diferentes_de_zero.push_back(i);
+
+	uniform_int_distribution<int> bloco2_n0(0, diferentes_de_zero.size() - 1);
+	uniform_int_distribution<int> bloco2(P - 1, P - 2 + H);
+	aux_id = bloco2_n0(generator);
+	id_cut1 = diferentes_de_zero[aux_id];
+	do {
+		id_cut2 = bloco2(generator);
+	} while (id_pack2 == id_pack1);
+
+	aux = solu.ind[id_cut1];
+	solu.ind[id_cut1] = solu.ind[id_cut2];
+	solu.ind[id_cut2] = aux;
+
 }
 
 
@@ -1068,17 +1144,13 @@ void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por elitismo
 void Heuristica::funcaoteste() {
 	srand(time(NULL));
 
-	double MenorFo = double(INT_MAX);
-	
-
 	vector<individuo> Populacao;
-
 
 	cout << "Gerando populacao inicial\n";
 
 	auto start = chrono::system_clock::now();
 	
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < P + H + O; i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 
@@ -1099,7 +1171,7 @@ void Heuristica::funcaoteste() {
 	for (auto solucao : Populacao)
 		cout << "FO = " << solucao.fitness << endl;
 
-	int NGeracoes = 20;
+	int NGeracoes = 10;
 
 	
 	for(int i = 0; i < NGeracoes; ++i){
@@ -1107,21 +1179,17 @@ void Heuristica::funcaoteste() {
 		Populacao.insert(Populacao.end(), Offspring.begin(), Offspring.end());
 		selecao(Populacao);
 
-		if ((i + 1) % 2 == 0) {
-			auto end = chrono::system_clock::now();
-			chrono::duration<double> elapsed_seconds = end - start;
-			cout << "\t" << setprecision(2) << elapsed_seconds.count() << "s" << endl;
-		}
+		cout << "\n\n Geracao" << i << endl;
+		for (auto solucao : Populacao)
+			cout << "FO = " << solucao.fitness << endl;
 	}
 	
 
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds = end - start;
-	cout << "\t Tempo Total " << setprecision(2) << elapsed_seconds.count() << "s" << endl;
+	cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
 
 	cout << endl << "Populacao inicial gerada com sucesso" << endl;
-	cout << viavel(Populacao[0]) << endl;
+
 	ImprimirVetorSolu(Populacao[0]);
-	for(auto solucao: Populacao)
-		cout << "FO = " << solucao.fitness << endl;
 }
