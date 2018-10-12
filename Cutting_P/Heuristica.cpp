@@ -118,7 +118,7 @@ double Heuristica::fitness(individuo solu)
 	}
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++)
 		Sobra3 += solu.n_vezes[i] * (SplPatterns[solu.ind[i]].folga);
-
+	//Makespan +
 	return Makespan + Sobra1 + Parameter_alpha_1*Sobra2 + Parameter_alpha_2*Sobra3;
 }
 

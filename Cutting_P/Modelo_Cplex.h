@@ -62,6 +62,8 @@ public:
 
 	void PlotarBarras();
 
+	void transformar_em_vetor();
+
 	void resolver_inteira();
 
 	~Modelo_Cplex();

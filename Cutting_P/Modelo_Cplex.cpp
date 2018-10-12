@@ -92,12 +92,13 @@ void Modelo_Cplex::resolver_inteira() {
 	try
 	{
 		//cplex.setParam(IloCplex::PreInd, 0);
-		cplex.setParam(IloCplex::TiLim, 3600);
+		cplex.setParam(IloCplex::TiLim, 20);
 		auto start = chrono::system_clock::now();
 		cplex.solve();
 		auto end = chrono::system_clock::now();
 		chrono::duration<double> elapsed_seconds = end - start;
 		tempo_solucao = elapsed_seconds.count();
+		
 	}
 	catch (IloException& e) {
 		cerr << endl << e.getMessage() << endl;
@@ -132,24 +133,31 @@ void Modelo_Cplex::CPLEX_objective_function(){
 		costSum += z[t];
 
 
-	for (auto h : H_menos)
-		if (CutPatterns[h].index_barra < W)
-				soma1 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
-
-	for (auto mu : SplPatterns)
+	for (auto h : H_menos) {
+		if (CutPatterns[h].index_barra < W) {
+			soma1 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
+		}
+	}
+	for (auto mu : SplPatterns) {
 		expr += mu.folga * CPLEX_o[mu.id];
-	
+	}
 
-	for (auto h: H_mais)
-		if (CutPatterns[h].index_barra < W)
-			for (IloInt v = 0; v < V; v++)
-				if(CutPatterns[h].tamanhos[Gamma + v] > 0)
+	for (auto h : H_mais) {
+		if (CutPatterns[h].index_barra < W) {
+			for (IloInt v = 0; v < V; v++) {
+				if (CutPatterns[h].Gera_LeftOver(Gamma, v)) {
 					soma2 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_tri[h][CutPatterns[h].index_barra][v];
+				}
+			}
+		}
+	}
 
-	for (auto h: H_menos)
-		if (CutPatterns[h].index_barra >= W)
-				soma3 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
-
+	for (auto h : H_menos) {
+		if (CutPatterns[h].index_barra >= W) {
+			soma3 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
+		}
+	}
+	//costSum +
 	model.add(IloMinimize(env, costSum + soma1 + Parameter_alpha_1*soma2 + Parameter_alpha_2*(soma3 + expr)));
 
 	soma1.end();
@@ -678,4 +686,3 @@ void Modelo_Cplex::PlotarBarras() {
 	cout << "Barras Gerado! :)" << endl;
 
 }
-
