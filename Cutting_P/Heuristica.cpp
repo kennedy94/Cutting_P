@@ -29,6 +29,22 @@ inline int kMaior(const vector<int> v, int k) {
 
 
 
+
+
+
+
+
+struct Utilizacao {
+	int idx, util;
+	bool operator<(const Utilizacao& rhs) const {
+		return util < rhs.util;
+	}
+};
+
+
+
+
+
 double Heuristica::fitness(individuo solu)
 {
 	vector<int> UtilizacaoFormas(M, 0);
@@ -39,35 +55,56 @@ double Heuristica::fitness(individuo solu)
 		Sobra1 = 0.0,
 		Sobra2 = 0.0,
 		Sobra3 = 0.0;
+	
+
+	
+	vector<Utilizacao> UtilFormas(M);
+	for (int m = 0; m < M; m++) {
+		UtilFormas[m].idx = m;
+		UtilFormas[m].util = 0;
+	}
 
 	/*for (int m = 0; m < M; m++) 
 		PadroesAssociados[m].resize(T);*/
 	
 	//Passa nos genes dependendes dos padroes de empacotamento
 	//é -1 porque não tem indíce 0 na heuristica
+
+	vector<list<int>> lista_formas_gamma(Gamma);
+	for (int gamma = 0; gamma < Gamma; gamma++) 
+		for (int m = 0; m < M; m++) 
+			if (L[gamma] == FORMAS[m])
+				lista_formas_gamma[gamma].push_back(m);
+
 	for (int i = 0; i < P-1; i++)
 	{
-		for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
+		if (solu.n_vezes[i] == 0)
+			continue;
+		int tipo_da_forma;
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos)) {
+				tipo_da_forma = gamma;
+				break;
+			}
+		}
 
+		for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
+			sort(UtilFormas.begin(), UtilFormas.end());
 			//forma atual recebe argmin da utilização que acomoda o padrão
 			int k_esimo = 0;
-			int FormaAtual;
+			int FormaAtual = 0;
 			do
-			{
+			{	
+				FormaAtual = UtilFormas[k_esimo].idx;
 				k_esimo++;
-				FormaAtual = kMenor(UtilizacaoFormas, k_esimo);
-			} while (!PackPatterns[solu.ind[i]].maximal(FORMAS[FormaAtual],TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos));
-			
-			//tempo atual é o valor mínimo da utilização
-			int TempoAtual = UtilizacaoFormas[kMenor(UtilizacaoFormas, k_esimo)];
-
-			//PadroesAssociados[FormaAtual][TempoAtual] = solu.ind[i];
-
-			UtilizacaoFormas[FormaAtual] += TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura;
+			} while (FORMAS[FormaAtual] != L[tipo_da_forma]);
+			for (int m = 0; m < M; m++)
+				if(UtilFormas[m].idx == FormaAtual)
+					UtilFormas[k_esimo].util += TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura;
 		}
 	}
-
-	Makespan = *max_element(UtilizacaoFormas.begin(), UtilizacaoFormas.end());
+	Utilizacao valor = *max_element(UtilFormas.begin(), UtilFormas.end());
+	Makespan = valor.util;
 
 	for (int i = P - 1; i < P - 1 + H; i++){
 		if (CutPatterns[solu.ind[i]].index_barra < W & !CutPatterns[solu.ind[i]].Gera_LeftOvers(Gamma, V))
@@ -238,7 +275,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	if (!viavel(filho))
 		corrigir(filho);
 
-	double prob_mutacao = 0.25;
+	double prob_mutacao = 0.90;
 	if (distribution(generator) < prob_mutacao) {
 		mutar(filho);
 		if (!viavel(filho))
@@ -419,12 +456,12 @@ list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 
-	double prop_cruzamento = 0.40;
+	double prob_cruzamento = 0.35;
 
 	list<individuo> retorno;
 	for (int i = 0; i < Popu.size(); i++) {
 		for (int j = 0; j < Popu.size(); j++) {
-			if (i != j && distribution(generator) < prop_cruzamento) {
+			if (i != j && distribution(generator) < prob_cruzamento) {
 				list<individuo> aux = cruzar(Popu[i], Popu[j]);
 				retorno.insert(retorno.end(), aux.begin(), aux.end());
 			}
@@ -590,18 +627,25 @@ void Heuristica::corrigir(individuo &solu)
 		if (ja_encheu && solu.n_vezes[i] > 0)
 			solu.n_vezes[i] = 0;
 		else {
-			//Contar as demandas que o padrão atual preenche
-			for (int tam = 0; tam < PackPatterns[solu.ind[i]].n_comprimentos; tam++) {
-				DemandasAuxiliares[PackPatterns[solu.ind[i]].tipo].demandas[tam]
-					+= solu.n_vezes[i] * PackPatterns[solu.ind[i]].tamanhos[tam];
+
+			for (int nvezes = 0; nvezes < solu.n_vezes[i]; nvezes++) {
+
+				//Contar as demandas que o padrão atual preenche
+				for (int tam = 0; tam < PackPatterns[solu.ind[i]].n_comprimentos; tam++) {
+					DemandasAuxiliares[PackPatterns[solu.ind[i]].tipo].demandas[tam]
+						+= PackPatterns[solu.ind[i]].tamanhos[tam];
+				}
+				bool entrou = false;
+				for (int c = 0; c < C; c++)
+					for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
+						if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k])
+							entrou = true;
+				if (!entrou) {
+					ja_encheu = true;
+					solu.n_vezes[i] = nvezes + 1;
+					break;
+				}
 			}
-			bool entrou = false;
-			for (int c = 0; c < C; c++)
-				for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
-					if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k])
-						entrou = true;
-			if (!entrou)
-				ja_encheu = true;
 		}
 	}
 
@@ -862,17 +906,17 @@ void Heuristica::ImprimirVetorSolu(individuo solu)
 {
 
 	for (int i = 0; i < P - 1; i++) {
-		if(solu.n_vezes[i] > 0)
+		if(solu.n_vezes[i] != 0)
 		cout << PackPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
 	}
 	cout << "//" << endl;
 	for (int i = P - 1; i < P - 1 + H; i++) {
-		if (solu.n_vezes[i] > 0)
+		if (solu.n_vezes[i] != 0)
 			cout << CutPatterns[solu.ind[i]].index_pat << "," << solu.n_vezes[i] << " ";
 	}
 	cout << "//" << endl;
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
-		if (solu.n_vezes[i] > 0)
+		if (solu.n_vezes[i] != 0)
 			cout << SplPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
 	}
 
@@ -1074,52 +1118,46 @@ void Heuristica::selecao(vector<individuo> &Popu)	//Selecao metade por elitismo 
 	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
 	vector<individuo> Auxiliar = Popu;
 	Popu.clear();
-	TamanhoDaPopulacao = 20;
-	/*for (int i = 0; i < 20; i++)
+	TamanhoDaPopulacao = 25;
+	for (int i = 0; i < TamanhoDaPopulacao; i++)
 		Popu.push_back(Auxiliar[i]);
-	return;*/
+	return;
 
 
-	//meio elitismo meio roleta viciada
-	for (int i = 0; i < ceil((double)TamanhoDaPopulacao / 2); i++)
-		Popu.push_back(Auxiliar[i]);
+	vector<int> nao_selecionados;
+	for (int i = 0; i < Auxiliar.size();i++)
+		nao_selecionados.push_back(i);
 
-
-
-	
-	vector<double> PESOS(Auxiliar.size());
-	double soma_peso = 0;
-
-	for (int i = ceil((double)TamanhoDaPopulacao / 2); i < Auxiliar.size(); i++){
-		PESOS[i] = 1 / Auxiliar[i].fitness;
-		soma_peso += PESOS[i];
-	}
 
 	default_random_engine generator;
 	generator.seed(time(NULL));
-	uniform_real_distribution<double> distribution(0.0, soma_peso);
+	for (int i = 0; i < TamanhoDaPopulacao; i++) {
+		uniform_int_distribution<int> distribution(0, nao_selecionados.size());
 
-	int contador = ceil((double)TamanhoDaPopulacao / 2);
-	list<int> selecionados;
-	
+		int sel1 = nao_selecionados[distribution(generator)];
+		
+		int sel2;
+		do
+		{
+			sel2 = nao_selecionados[distribution(generator)];
+		} while (sel1 == sel2);
+		
+		int selecionado;
+		if (Auxiliar[sel1].fitness < Auxiliar[sel2].fitness)
+			selecionado = sel1;
+		else
+			selecionado = sel2;
 
+		remove(nao_selecionados.begin(), nao_selecionados.end(), selecionado);
+		nao_selecionados.resize(nao_selecionados.size() - 1);
 
-
-	while (contador < TamanhoDaPopulacao) {
-		double sorteio = distribution(generator);
-		int i = ceil((double)TamanhoDaPopulacao / 2) - 1;
-		double total_partial = 0;
-		do {
-			i++;
-			total_partial += PESOS[i];
-		} while (total_partial < sorteio);
-
-		if (find(selecionados.begin(), selecionados.end(), i) == selecionados.end()) {
-			Popu.push_back(Auxiliar[i]);
-			selecionados.push_back(i);
-			contador++;
-		}
+		Popu.push_back(Auxiliar[selecionado]);
 	}
+
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+
+
+
 }
 
 
@@ -1164,9 +1202,11 @@ void Heuristica::mutar(individuo & solu){
 	uniform_int_distribution<int> bloco2(P - 1, P - 2 + H);
 	aux_id = bloco2_n0(generator);
 	id_cut1 = diferentes_de_zero[aux_id];
+	solu.n_vezes[id_cut1] = 0;
+
 	do {
 		id_cut2 = bloco2(generator);
-	} while (id_pack2 == id_pack1);
+	} while (id_cut1 == id_cut2);
 
 	aux = solu.ind[id_cut1];
 	solu.ind[id_cut1] = solu.ind[id_cut2];
@@ -1200,6 +1240,8 @@ void Heuristica::funcaoteste() {
 
 		Populacao.push_back(solucao);
 	}
+	
+
 
 	selecao(Populacao);
 	ImprimirVetorSolu(Populacao[0]);
@@ -1208,7 +1250,7 @@ void Heuristica::funcaoteste() {
 	for (auto solucao : Populacao)
 		cout << "FO = " << solucao.fitness << endl;
 
-	int NGeracoes = 10;
+	int NGeracoes = 20;
 
 	
 	for(int i = 0; i < NGeracoes; ++i){
@@ -1219,14 +1261,14 @@ void Heuristica::funcaoteste() {
 		cout << "\n\n Geracao" << i << endl;
 		for (auto solucao : Populacao)
 			cout << "FO = " << solucao.fitness << endl;
+		ImprimirVetorSolu(Populacao[0]);
+		cout << viavel(Populacao[0]);
 	}
 	
 
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds = end - start;
 	cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
-
-	cout << endl << "Populacao inicial gerada com sucesso" << endl;
 
 	ImprimirVetorSolu(Populacao[0]);
 }

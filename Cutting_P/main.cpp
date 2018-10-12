@@ -16,19 +16,19 @@ int main(int argc, char *argv[]) {
 			exit(0);
 		}
 	}
+	
+	Modelo_Cplex Modelo(inst);
 
-	//Modelo_Cplex Modelo(inst);
-
-	//Modelo.MontarModelo();
-	//Modelo.resolver_inteira();
-	//Modelo.ImprimirSolucaoArquivo();
-	//Modelo.ImprimirSolucao();
+	Modelo.MontarModelo();
+	Modelo.resolver_inteira();
+	Modelo.ImprimirSolucaoArquivo();
+	Modelo.ImprimirSolucao();
 
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
-
-	Heuristica GA(inst);
-	GA.funcaoteste();
+	
+	/*Heuristica GA(inst);
+	GA.funcaoteste();*/
 	return 0;
 }
 

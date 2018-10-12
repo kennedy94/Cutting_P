@@ -132,30 +132,25 @@ void Modelo_Cplex::CPLEX_objective_function(){
 		costSum += z[t];
 
 
-	for (auto h: H_menos)
-		for (IloInt w = 0; w < W; w++) 
-			if(b[w] - CutPatterns[h].cap >= 0)
-				soma1 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
+	for (auto h : H_menos)
+		if (CutPatterns[h].index_barra < W)
+				soma1 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
 
 	for (auto mu : SplPatterns)
 		expr += mu.folga * CPLEX_o[mu.id];
 	
 
 	for (auto h: H_mais)
-		for (IloInt w = 0; w < W; w++)
+		if (CutPatterns[h].index_barra < W)
 			for (IloInt v = 0; v < V; v++)
-				if (b[w] - CutPatterns[h].cap >= 0)
-					soma2 += (b[w] - CutPatterns[h].cap)
-							* CPLEX_y_tri[h][w][v];
-
+				if(CutPatterns[h].tamanhos[Gamma + v] > 0)
+					soma2 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_tri[h][CutPatterns[h].index_barra][v];
 
 	for (auto h: H_menos)
-		for (IloInt w = W; w < W + V; w++)
-			if (b[w] - CutPatterns[h].cap >= 0)
-				soma2 += (b[w] - CutPatterns[h].cap) * CPLEX_y_bi[h][w];
+		if (CutPatterns[h].index_barra >= W)
+				soma3 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
 
-	model.add(IloMinimize(env, costSum + soma1 + Parameter_alpha_1*soma2 + 
-		Parameter_alpha_2*(soma3 + expr)));
+	model.add(IloMinimize(env, costSum + soma1 + Parameter_alpha_1*soma2 + Parameter_alpha_2*(soma3 + expr)));
 
 	soma1.end();
 	soma2.end();
