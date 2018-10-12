@@ -26,7 +26,7 @@ private:
 	IloCplex cplex;
 	IloBoolVarArray z;
 
-	IloNum Parameter_alpha_1, Parameter_alpha_2;
+	//IloNum Parameter_alpha_1, Parameter_alpha_2;
 
 	inline void CPLEX_objective_function();
 

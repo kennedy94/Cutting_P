@@ -107,15 +107,15 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 
 
 	//CROSSOVER INDICES DE PADRÕES DE EMPACOTAMENTO
-	for (int i = 0; i < floor((P - 1)/2); i++) {
+	for (int i = 0; i < floor((double)(P - 1)/2); i++) {
 		filho.ind[i] = pai.ind[i];
 	}
 
 	vector<int> nao_escolhidos;
-	for (int i = floor((P - 1) / 2); i < P - 1; i++)
+	for (int i = floor((double)(P - 1) / 2); i < P - 1; i++)
 		nao_escolhidos.push_back(pai.ind[i]);
 
-	for (int i = floor((P - 1) / 2); i < P - 1; i++) {
+	for (int i = floor((double)(P - 1) / 2); i < P - 1; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), mae.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = mae.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -135,15 +135,15 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	}
 
 	//CROSSOVER INDICES DE PADRÕES DE CORTE
-	for (int i = P - 1; i < P - 1 + floor(H/2); i++) {
+	for (int i = P - 1; i < P - 1 + floor((double)H/2); i++) {
 		filho.ind[i] = pai.ind[i];
 	}
 
 
-	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++)
+	for (int i = P - 1 + floor((double)H / 2); i < P - 1 + H; i++)
 		nao_escolhidos.push_back(pai.ind[i]);
 
-	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++) {
+	for (int i = P - 1 + floor((double)H / 2); i < P - 1 + H; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), mae.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = mae.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -163,13 +163,13 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	}
 
 	//CROSSOVER INDICES DE PADRÕES DE TRASPASSE
-	for (int i = P - 1 + H; i <P - 1 + H + floor(O/2); i++) {
+	for (int i = P - 1 + H; i <P - 1 + H + floor((double)O/2); i++) {
 		filho.ind[i] = pai.ind[i];
 	}
-	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++)
+	for (int i = P - 1 + H + floor((double)O / 2); i < P - 1 + H + O; i++)
 		nao_escolhidos.push_back(pai.ind[i]);
 
-	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++) {
+	for (int i = P - 1 + H + floor((double)O / 2); i < P - 1 + H + O; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), mae.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = mae.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -252,7 +252,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 
 
 
-
 	//GERAÇÃO DO FILHO 2
 	filho = mae;
 	
@@ -263,17 +262,17 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 
 
 	//CROSSOVER INDICES DE PADRÕES DE EMPACOTAMENTO
-	for (int i = 0; i < floor((P - 1) / 2); i++)
+	for (int i = 0; i < floor((double)(P - 1) / 2); i++)
 		filho.ind[i] = mae.ind[i];
 
 	nao_escolhidos.clear();
 	nao_escolhidos.resize(0);
 
 
-	for (int i = floor((P - 1) / 2); i < P - 1; i++)
+	for (int i = floor((double)(P - 1) / 2); i < P - 1; i++)
 		nao_escolhidos.push_back(mae.ind[i]);
 
-	for (int i = floor((P - 1) / 2); i < P - 1; i++) {
+	for (int i = floor((double)(P - 1) / 2); i < P - 1; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = pai.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -293,15 +292,15 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	}
 
 	//CROSSOVER INDICES DE PADRÕES DE CORTE
-	for (int i = P - 1; i < P - 1 + floor(H / 2); i++) {
+	for (int i = P - 1; i < P - 1 + floor((double)H / 2); i++) {
 		filho.ind[i] = mae.ind[i];
 	}
 
 
-	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++)
+	for (int i = P - 1 + floor((double)H / 2); i < P - 1 + H; i++)
 		nao_escolhidos.push_back(mae.ind[i]);
 
-	for (int i = P - 1 + floor(H / 2); i < P - 1 + H; i++) {
+	for (int i = P - 1 + floor((double)H / 2); i < P - 1 + H; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = pai.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -321,13 +320,13 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	}
 
 	//CROSSOVER INDICES DE PADRÕES DE TRASPASSE
-	for (int i = P - 1 + H; i <P - 1 + H + floor(O / 2); i++) {
+	for (int i = P - 1 + H; i <P - 1 + H + floor((double)O / 2); i++) {
 		filho.ind[i] = mae.ind[i];
 	}
-	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++)
+	for (int i = P - 1 + H + floor((double)O / 2); i < P - 1 + H + O; i++)
 		nao_escolhidos.push_back(mae.ind[i]);
 
-	for (int i = P - 1 + H + floor(O / 2); i < P - 1 + H + O; i++) {
+	for (int i = P - 1 + H + floor((double)O / 2); i < P - 1 + H + O; i++) {
 		if (find(nao_escolhidos.begin(), nao_escolhidos.end(), pai.ind[i]) != nao_escolhidos.end()) {
 			filho.ind[i] = pai.ind[i];
 			remove(nao_escolhidos.begin(), nao_escolhidos.end(), filho.ind[i]);
@@ -420,7 +419,7 @@ list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 
-	double prop_cruzamento = 0.5;
+	double prop_cruzamento = 0.40;
 
 	list<individuo> retorno;
 	for (int i = 0; i < Popu.size(); i++) {
@@ -716,7 +715,7 @@ void Heuristica::corrigir(individuo &solu)
 			}
 		}
 	}
-
+	
 	for (int gamma = 0; gamma < Gamma; gamma++) {
 
 		if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
@@ -862,14 +861,20 @@ int Heuristica::qtde_adicionavel(Padrao_Traspasse Padrao, vector<int> EstoqueUsa
 void Heuristica::ImprimirVetorSolu(individuo solu)
 {
 
-	for (int i = 0; i < P - 1; i++)
+	for (int i = 0; i < P - 1; i++) {
+		if(solu.n_vezes[i] > 0)
 		cout << PackPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
+	}
 	cout << "//" << endl;
-	for (int i = P - 1; i < P - 1 + H; i++)
-		cout << CutPatterns[solu.ind[i]].index_pat << "," << solu.n_vezes[i] << " ";
+	for (int i = P - 1; i < P - 1 + H; i++) {
+		if (solu.n_vezes[i] > 0)
+			cout << CutPatterns[solu.ind[i]].index_pat << "," << solu.n_vezes[i] << " ";
+	}
 	cout << "//" << endl;
-	for (int i = P - 1 + H; i < P - 1 + H + O; i++)
-		cout << SplPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+		if (solu.n_vezes[i] > 0)
+			cout << SplPatterns[solu.ind[i]].id << "," << solu.n_vezes[i] << " ";
+	}
 
 	return;
 
@@ -970,17 +975,15 @@ individuo Heuristica::GerarSoluGRASP() {
 
 
 	vector<int> FormasGeradas(Gamma, 0);
-
 	vector<int> EstoqueDisponivel = e;
+
 	//cout << "\n\n\n";
 	for (int gamma = 0; gamma < Gamma; gamma++) {
 		int necessario = FormasQueDevemSerGeradas[gamma];
 
 		for (int i = P - 1; i < P - 1 + H; i++) {
 			if (CutPatterns[solu1[i]].tamanhos[gamma] > 0 && necessario > 0) {
-				//cout << endl << "gamma:" << gamma << " - " <<
-				//	EstoqueDisponivel[CutPatterns[solu1[i]].index_barra] << " , " << necessario << endl << endl;
-				
+
 				int adicionado = floor(min(EstoqueDisponivel[CutPatterns[solu1[i]].index_barra], necessario) / CutPatterns[solu1[i]].tamanhos[gamma]);
 				FormasGeradas[gamma] += CutPatterns[solu1[i]].tamanhos[gamma] * adicionado;
 				solu2[i] += adicionado;
@@ -988,7 +991,39 @@ individuo Heuristica::GerarSoluGRASP() {
 				necessario -= CutPatterns[solu1[i]].tamanhos[gamma] * adicionado;
 			}
 		}
-		//cout << "nec:" << necessario << endl;
+		//se já conseguiu preencher com padrãoes de corte não precisa tentar com os traspasses
+		if (necessario == 0)
+			continue;
+
+
+		for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+			if (SplPatterns[solu1[i]].barra_gerada == gamma) {
+				bool pode_ser_adicionado = true;
+				while (pode_ser_adicionado  && necessario > 0) {
+
+					for (int v = 0; v < V; v++) {
+						if (EstoqueDisponivel[W + v] - SplPatterns[solu1[i]].tamanhos[v] < 0) {
+							pode_ser_adicionado = false;
+							break;
+						}
+					}
+					if (pode_ser_adicionado) {
+						solu2[i]++;
+						FormasGeradas[gamma]++;
+						necessario--;
+						for (int v = 0; v < V; v++) {
+							EstoqueDisponivel[W + v] -= SplPatterns[solu1[i]].tamanhos[v];
+						}
+					}
+				}
+				if (FormasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
+					break;
+			}
+		}
+
+
+
+		
 	}
 
 	//Se com os padrões de corte não supriu o necessário de barras adicione splicing até suprir
@@ -1007,8 +1042,8 @@ individuo Heuristica::GerarSoluGRASP() {
 				for (int v = 0; v < V; v++) {
 					EstoqueDisponivel_Aux[W + v] -= SplPatterns[solu1[i]].tamanhos[v] * adicionado;
 					if (EstoqueDisponivel_Aux[W + v] < 0) {
-						if(adicionado > floor(EstoqueDisponivel[W + v] / SplPatterns[solu1[i]].tamanhos[v]))
-							adicionado = floor(EstoqueDisponivel[W + v] / SplPatterns[solu1[i]].tamanhos[v]);
+						if(adicionado > floor((double)EstoqueDisponivel[W + v] / SplPatterns[solu1[i]].tamanhos[v]))
+							adicionado = floor((double)EstoqueDisponivel[W + v] / SplPatterns[solu1[i]].tamanhos[v]);
 					}
 				}
 				
@@ -1040,10 +1075,12 @@ void Heuristica::selecao(vector<individuo> &Popu)	//Selecao metade por elitismo 
 	vector<individuo> Auxiliar = Popu;
 	Popu.clear();
 	TamanhoDaPopulacao = 20;
-	for (int i = 0; i < 20; i++)
+	/*for (int i = 0; i < 20; i++)
 		Popu.push_back(Auxiliar[i]);
-	return;
+	return;*/
 
+
+	//meio elitismo meio roleta viciada
 	for (int i = 0; i < ceil((double)TamanhoDaPopulacao / 2); i++)
 		Popu.push_back(Auxiliar[i]);
 
@@ -1134,7 +1171,6 @@ void Heuristica::mutar(individuo & solu){
 	aux = solu.ind[id_cut1];
 	solu.ind[id_cut1] = solu.ind[id_cut2];
 	solu.ind[id_cut2] = aux;
-
 }
 
 
@@ -1166,6 +1202,7 @@ void Heuristica::funcaoteste() {
 	}
 
 	selecao(Populacao);
+	ImprimirVetorSolu(Populacao[0]);
 	cout << "Populacao inicial gerada e elitizada\n";
 
 	for (auto solucao : Populacao)
