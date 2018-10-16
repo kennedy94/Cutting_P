@@ -235,7 +235,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 	if (!viavel(filho))
 		corrigir(filho);
 
-	double prob_mutacao = 0.90;
+	double prob_mutacao = 1.0;
 	if (distribution(generator) < prob_mutacao) {
 		mutar(filho);
 		if (!viavel(filho))
@@ -416,7 +416,7 @@ list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 
-	double prob_cruzamento = 0.35;
+	double prob_cruzamento = 0.3;
 
 	list<individuo> retorno;
 	for (int i = 0; i < Popu.size(); i++) {
