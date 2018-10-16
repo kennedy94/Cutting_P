@@ -1,37 +1,5 @@
 #include "Heuristica.h"
 
-// Function to return k'th smallest element in a given array
-inline int kMenor(const vector<int> v, int k) {
-
-	// initialize original index locations
-	vector<int> idx(v.size());
-	iota(idx.begin(), idx.end(), 0);
-
-	// sort indexes based on comparing values in v
-	sort(idx.begin(), idx.end(), [&v](int i1, int i2) {return v[i1] < v[i2]; });
-
-	return idx[k - 1];
-}
-
-
-inline int kMaior(const vector<int> v, int k) {
-
-	// initialize original index locations
-	vector<int> idx(v.size());
-	iota(idx.begin(), idx.end(), 0);
-
-	// sort indexes based on comparing values in v
-	sort(idx.begin(), idx.end(), [&v](int i1, int i2) {return v[i1] > v[i2]; });
-
-	return idx[k - 1];
-}
-
-
-
-
-
-
-
 
 
 struct Utilizacao {
@@ -64,23 +32,13 @@ double Heuristica::fitness(individuo solu)
 		UtilFormas[m].util = 0;
 	}
 
-	/*for (int m = 0; m < M; m++) 
-		PadroesAssociados[m].resize(T);*/
-	
-	//Passa nos genes dependendes dos padroes de empacotamento
-	//é -1 porque não tem indíce 0 na heuristica
-
-	vector<list<int>> lista_formas_gamma(Gamma);
-	for (int gamma = 0; gamma < Gamma; gamma++) 
-		for (int m = 0; m < M; m++) 
-			if (L[gamma] == FORMAS[m])
-				lista_formas_gamma[gamma].push_back(m);
 
 	for (int i = 0; i < P-1; i++)
 	{
 		if (solu.n_vezes[i] == 0)
 			continue;
-		int tipo_da_forma;
+
+		int tipo_da_forma = -1;
 		for (int gamma = 0; gamma < Gamma; gamma++) {
 			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos)) {
 				tipo_da_forma = gamma;
@@ -92,15 +50,17 @@ double Heuristica::fitness(individuo solu)
 			sort(UtilFormas.begin(), UtilFormas.end());
 			//forma atual recebe argmin da utilização que acomoda o padrão
 			int k_esimo = 0;
-			int FormaAtual = 0;
+			int FormaAtual, k_escolhido;
 			do
 			{	
 				FormaAtual = UtilFormas[k_esimo].idx;
+				k_escolhido = k_esimo;
 				k_esimo++;
 			} while (FORMAS[FormaAtual] != L[tipo_da_forma]);
-			for (int m = 0; m < M; m++)
-				if(UtilFormas[m].idx == FormaAtual)
-					UtilFormas[k_esimo].util += TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura;
+
+			for (int m = 0; m < M; m++) 
+				if (UtilFormas[m].idx == FormaAtual) 
+					UtilFormas[k_escolhido].util += TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura;
 		}
 	}
 	Utilizacao valor = *max_element(UtilFormas.begin(), UtilFormas.end());
@@ -118,7 +78,7 @@ double Heuristica::fitness(individuo solu)
 	}
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++)
 		Sobra3 += solu.n_vezes[i] * (SplPatterns[solu.ind[i]].folga);
-	//Makespan +
+	
 	return Makespan + Sobra1 + Parameter_alpha_1*Sobra2 + Parameter_alpha_2*Sobra3;
 }
 
@@ -483,6 +443,29 @@ bool Heuristica::viavel(individuo solu)
 	vector<int> FormasQueDevemSerGeradas(Gamma, 0);
 	vector<Tipo_Viga> DemandasAuxiliares = TipoVigas;
 
+	//Inviabilidade por permutação
+	/*vector<int> p1(P - 1), p2(H), p3(O),
+				s1(P - 1), s2(H), s3(O);
+
+	for (int i = 0; i < P - 1; i++)
+		s1[i] = solu.ind[i];
+	for (int i = P - 1; i < P - 1 + H; i++)
+		s2[i - (P - 1)] = solu.ind[i];
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++)
+		s3[i - (P - 1 + H)] = solu.ind[i];
+
+	iota(p1.begin(), p1.end(), 1);
+	iota(p2.begin(), p2.end(), 0);
+	iota(p3.begin(), p3.end(), 0);
+
+	if (!is_permutation(p1.begin(), p1.end(), s1.begin()))
+		return false;
+	if (!is_permutation(p2.begin(), p2.end(), s2.begin()))
+		return false;
+	if (!is_permutation(p3.begin(), p3.end(), s3.begin()))
+		return false;*/
+
+
 	//Iniciar as demandas atuais em 0
 	for (auto &elemento : DemandasAuxiliares)
 		for (auto &demand : elemento.demandas)
@@ -503,19 +486,24 @@ bool Heuristica::viavel(individuo solu)
 		for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
 			if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k])
 				return false;
-			
+	
 	for (int i = 0; i < P - 1; i++)
 	{
+		if (solu.n_vezes[i] == 0)
+			continue;
+
 		for (int gamma = 0; gamma < Gamma; gamma++)
 			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos))
-				FormasQueDevemSerGeradas[gamma] += TipoVigas[PackPatterns[solu.ind[i]].tipo].n_barras*solu.n_vezes[i];
+				FormasQueDevemSerGeradas[gamma] += TipoVigas[PackPatterns[solu.ind[i]].tipo].n_barras * solu.n_vezes[i];
 	}
 
 	
 	//Viabilidade por estoque
 
 	vector<int> EstoqueUsado(W + V, 0);
-	
+
+
+
 	for (int i = P - 1; i < P - 1 + H + O; i++) {
 		if (i < P - 1 + H)
 			EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += solu.n_vezes[i];
@@ -527,25 +515,31 @@ bool Heuristica::viavel(individuo solu)
 
 	for (int w = 0; w < W + V; w++) {
 		if (EstoqueUsado[w] > e[w]) {
-			//cout << endl << endl;
-			//ImprimirVetorSolu(solu);
 			return false;
 		}
 	}
 
 
-
-	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
 	//contar as barras com tamanhos de forma geradas
-	for (int gamma = 0; gamma < Gamma; gamma++) {
-		for (int i = P - 1; i < P - 1 + H + O; i++) {
-			if (i < P - 1 + H)
+	vector<int> BarrasGeradasPelaSolu(Gamma, 0);
+	for (int gamma = 0; gamma < Gamma; gamma++)
+		BarrasGeradasPelaSolu[gamma] = 0;
+
+
+	for (int i = P - 1; i < P - 1 + H; i++) {
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if(CutPatterns[solu.ind[i]].tamanhos[gamma] != 0)
 				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
-			else
-				if (SplPatterns[solu.ind[i]].barra_gerada == gamma)
-					BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i];
 		}
 	}
+
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if (SplPatterns[solu.ind[i]].barra_gerada == gamma)
+				BarrasGeradasPelaSolu[gamma] += solu.n_vezes[i] * CutPatterns[solu.ind[i]].tamanhos[gamma];
+		}
+	}
+
 
 	//Se a quantidade da solu for diferente da que deveria ser é inviável
 	for (int gamma = 0; gamma < Gamma; gamma++)
@@ -563,48 +557,7 @@ bool Heuristica::viavel(individuo solu)
 
 void Heuristica::ImprimirSolucaoEstiloCPLEX(individuo solu) {
 
-
-	vector<vector<vector<bool>>> X;
-
-
-	X = vector<vector<vector<bool>>>(P);
-	for (int i = 0; i < P; i++){
-		X[i] = vector<vector<bool>>(H);
-		for (int h = 0; h < H; h++) 
-			X[i][h] = vector<bool>(O);
-	}
-
-
-
-	vector<int> UtilizacaoFormas(M, 0);
-
-
-	for (int i = 0; i < P - 1; i++)
-	{
-		for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
-
-			//forma atual recebe argmin da utilização que acomoda o padrão
-			int k_esimo = 0;
-			int FormaAtual;
-			do
-			{
-				k_esimo++;
-				FormaAtual = kMenor(UtilizacaoFormas, k_esimo);
-			} while (!PackPatterns[solu.ind[i]].maximal(FORMAS[FormaAtual], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos));
-
-			//tempo atual é o valor mínimo da utilização
-			int TempoAtual = UtilizacaoFormas[kMenor(UtilizacaoFormas, k_esimo)];
-
-			//PadroesAssociados[FormaAtual][TempoAtual] = solu.ind[i];
-			X[solu.ind[i]][FormaAtual][UtilizacaoFormas[FormaAtual]] = 1;
-
-			for(int m_ = 1; m_ < TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura; m_ ++)
-				X[0][FormaAtual][UtilizacaoFormas[FormaAtual] + m_] = 1;
-
-			UtilizacaoFormas[FormaAtual] += TipoVigas[PackPatterns[solu.ind[i]].tipo].tempo_cura;
-			
-		}
-	}
+	return;
 }
 
 

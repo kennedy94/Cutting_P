@@ -40,7 +40,7 @@ bool Padrao_Pack::maximal(double capacidade, vector<double> comprimentos){
 		return false;
 
 	double menor = 10000;
-	for (int aux = 0; aux < n_comprimentos; aux++)
+	for (int aux = 0; aux < this->n_comprimentos; aux++)
 		if (comprimentos[aux] < menor) menor = comprimentos[aux];
 
 	return (capacidade - cap) < menor;

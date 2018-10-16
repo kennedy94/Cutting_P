@@ -12,10 +12,6 @@ struct individuo {
 	double fitness;
 };
 
-inline int kMenor(const vector<int> v, int k);
-
-inline int kMaior(const vector<int> v, int k);
-
 class Heuristica :
 	public Problema
 {
