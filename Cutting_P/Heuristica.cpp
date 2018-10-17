@@ -896,6 +896,15 @@ void Heuristica::ImprimirVetorSolu(individuo solu)
 	}
 }
 
+void Heuristica::ImprimirArquivo(individuo solu, double time)
+{
+	ofstream resultados("resultados.txt", fstream::app);
+
+	resultados << endl << solu.fitness << "," << time << endl;
+
+	resultados.close();
+}
+
 
 
 
@@ -1263,7 +1272,7 @@ void Heuristica::funcaoteste() {
 
 		if (fit_atual == fit_antigo) {
 			contador_fit++;
-			if (contador_fit > 10) {
+			if (contador_fit > 5) {
 				contador_fit = 0;
 				//restart_populacao(Populacao);
 				//prob_mutacao = 0.05;
@@ -1279,6 +1288,8 @@ void Heuristica::funcaoteste() {
 	auto end = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds = end - start;
 	cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
+
+	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
 	ImprimirVetorSolu(Populacao[0]);
 }

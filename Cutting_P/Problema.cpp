@@ -111,8 +111,10 @@ Problema::Problema(const char* filename) {
 		}
 
 		//Demandas dos comprimentos
-		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++) {
 			instancia >> TipoVigas[i].demandas[k];
+			cout << TipoVigas[i].demandas[k] << " ";
+		}
 
 	}
 

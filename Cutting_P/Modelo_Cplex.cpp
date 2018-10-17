@@ -93,7 +93,7 @@ void Modelo_Cplex::resolver_inteira() {
 	{
 		//cplex.setParam(IloCplex::PreInd, 0);
 		cplex.setParam(IloCplex::NumericalEmphasis, 1);
-		cplex.setParam(IloCplex::TiLim, 20);
+		cplex.setParam(IloCplex::TiLim, 3600);
 		auto start = chrono::system_clock::now();
 		cplex.solve();
 		auto end = chrono::system_clock::now();

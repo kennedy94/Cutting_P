@@ -18,12 +18,11 @@ int main(int argc, char *argv[]) {
 	}
 	
 	Modelo_Cplex Modelo(inst);
-
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
 	Modelo.ImprimirSolucaoArquivo();
-	//Modelo.ImprimirSolucao();
 
+	//Modelo.ImprimirSolucao();
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
 	

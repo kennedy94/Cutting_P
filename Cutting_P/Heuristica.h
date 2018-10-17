@@ -78,6 +78,8 @@ protected:
 	
 	void ImprimirVetorSolu(individuo solu);
 
+	void ImprimirArquivo(individuo solu, double time);
+
 	individuo GerarSoluGRASP();
 
 public:
