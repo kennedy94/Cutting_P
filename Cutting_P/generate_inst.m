@@ -67,16 +67,14 @@ function generate_inst(arq, C, M, up_d, misturado, V)
 	Sobras =  datasample(Sobras_tam, V, 'Replace',false);
     Sobras = sort(Sobras);
     
-    UB_estoque = t*M*maior;
-	while(true)
-		e = randi([ceil(UB_estoque/10) UB_estoque/5], 1, W+V);
-        e(1) = UB_estoque;
-		if sum( [Barras Sobras].*e) > UB_estoque
-		   break;
-		end
-    end
-   
-    arquivo =strcat('Instancia\',arq);
+    UB_estoque = 2*t*M*maior;
+    
+    e = randi([ceil(UB_estoque/5) UB_estoque], 1, W+V);
+    e(1) = UB_estoque;
+
+    
+    mkdir Instancia_novas
+    arquivo =strcat('Instancia_novas\',arq);
 	%impressão dos dados
 	inst2 = fopen(arquivo, 'w');
 	fprintf(inst2, '%d %d %d\n \n', C, M, t);

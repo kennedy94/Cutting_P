@@ -6,20 +6,47 @@
 #include <ctime>
 #include <algorithm>
 #include <iomanip>
+
 struct individuo {
 	vector<int> ind;
 	vector<int> n_vezes;
 	double fitness;
+	double comparacao(individuo indie) {
+		int contador = 0;
+
+		for (int i = 0; i < this->ind.size(); i++)
+			if (this->ind[i] == indie.ind[i] && this->n_vezes[i] == indie.n_vezes[i])
+				contador++;
+
+		return (double)contador / this->ind.size();
+	}
+	bool operator<(const individuo& rhs) const {
+		return fitness < rhs.fitness;
+	}
 };
 
 class Heuristica :
 	public Problema
 {
 private:
-	list<individuo> Populacao;
-	int TamanhoDaPopulacao;
+	int	TamanhoDaPopulacao,
+		NGeracoes;
+	double	prob_mutacao,
+			prob_cruzamento;
+	double taxa_aumento_mut;
+	vector<individuo> list_tabu;
+			
 protected:
 	
+	void definir_parametros() {
+		TamanhoDaPopulacao = 30;
+		prob_mutacao = 0.05;
+		prob_cruzamento = 0.05;
+		NGeracoes = 30;
+		taxa_aumento_mut = 0.30;
+	}
+
+
 	double fitness(individuo solu);
 
 	//retorna vários indivíduos obtidos por cruzando entre outros
@@ -36,6 +63,8 @@ protected:
 
 	//altera um elemento do vetor
 	void mutar(individuo &solu);
+
+	void restart_populacao(vector<individuo>& Populacao);
 
 	//testa se é uma solução viávels
 	bool viavel(individuo solu);
