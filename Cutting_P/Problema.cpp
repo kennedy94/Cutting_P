@@ -109,7 +109,7 @@ Problema::Problema(const char* filename) {
 			if (TipoVigas[i].comprimentos[k] < Menor_tamanho[i])
 				Menor_tamanho[i] = TipoVigas[i].comprimentos[k];
 		}
-
+		cout << endl;
 		//Demandas dos comprimentos
 		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++) {
 			instancia >> TipoVigas[i].demandas[k];

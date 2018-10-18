@@ -838,6 +838,7 @@ void Heuristica::corrigir(individuo &solu)
 
 	if (!viavel(solu)) {
 		cout << "Filho que nao conseguiu corrigir detectado!" << endl;
+		viavel(solu);
 	}
 
 }
@@ -898,9 +899,9 @@ void Heuristica::ImprimirVetorSolu(individuo solu)
 
 void Heuristica::ImprimirArquivo(individuo solu, double time)
 {
-	ofstream resultados("resultados.txt", fstream::app);
+	ofstream resultados("resultados_h.txt", fstream::app);
 
-	resultados << endl << solu.fitness << "," << time << endl;
+	resultados << endl << nome_instancia << "," << solu.fitness << "," << time << endl;
 
 	resultados.close();
 }
@@ -916,14 +917,26 @@ individuo Heuristica::GerarSoluGRASP() {
 	//Inicializando os índices
 
 	iota(solu1.begin(), solu1.begin() + P - 1, 1);
-	iota(solu1.begin() + P - 1, solu1.begin() + P - 1 + H, 0);
-	iota(solu1.begin() + P - 1 + H, solu1.end(), 0);
+	//iota(solu1.begin() + P - 1, solu1.begin() + P - 1 + H, 0);
+	//iota(solu1.begin() + P - 1 + H, solu1.end(), 0);
 	
 
 	//Fazendo permutações aleatórias dos índices
 	random_shuffle(solu1.begin(), solu1.begin() + P - 1);
-	random_shuffle(solu1.begin() + P - 1, solu1.begin() + P - 1 + H);
-	random_shuffle(solu1.begin() + P - 1 + H, solu1.end());
+	//Vetor dos padrões de cortes são ordenados por capacidade
+	vector<Padrao_Corte> OrdenadoPorCusto = CutPatterns;
+	sort(OrdenadoPorCusto.begin(), OrdenadoPorCusto.end());
+	for (int i = P - 1; i < P - 1 + H; i++) {
+		solu1[i] = OrdenadoPorCusto[(P - 1 + H) - i - 1].index_pat;
+	}
+	vector<Padrao_Traspasse> OrdenadoPorCusto_SPL = SplPatterns;
+	sort(OrdenadoPorCusto_SPL.begin(), OrdenadoPorCusto_SPL.end());
+	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
+		solu1[i] = OrdenadoPorCusto_SPL[i - (P - 1 + H)].id;
+	}
+
+	//random_shuffle(solu1.begin() + P - 1, solu1.begin() + P - 1 + H);
+	//random_shuffle(solu1.begin() + P - 1 + H, solu1.end());
 	
 
 	//prenchendo os padrões de empacotamento até a demanda ser atendida
@@ -1079,6 +1092,8 @@ individuo Heuristica::GerarSoluGRASP() {
 
 
 
+
+
 void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por ranking
 {
 
@@ -1090,9 +1105,9 @@ void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por ranking
 	for(int j = 0; j < 1; j++)
 		list_tabu.push_back(Auxiliar[j]);
 
-	if (list_tabu.size() > 20) {
-		for (int j = 0; j < 20 - list_tabu.size(); j++)
-			list_tabu.pop_back();
+	if (list_tabu.size() > 10) {
+		for (int j = 0; j < 10 - list_tabu.size(); j++)
+			list_tabu.pop_front();
 	}
 	
 	
@@ -1104,9 +1119,8 @@ void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por ranking
 		contador = 1;
 	while (contador < TamanhoDaPopulacao) {
 		bool tabu = false;
-
 		for (auto tabuzinho : list_tabu) {
-			if (Auxiliar[i].comparacao(tabuzinho) > 0.75) {
+			if (Auxiliar[i].comparacao(tabuzinho) > 0.9) {
 				tabu = true;
 				break;
 			}
@@ -1175,32 +1189,12 @@ void Heuristica::mutar(individuo & solu){
 
 
 
-
-
-void Heuristica::restart_populacao(vector<individuo> &Populacao) {
-	individuo Elite = Populacao[0];
-	Populacao.clear();
-	Populacao.resize(0);
-	Populacao.push_back(Elite);
-	list_tabu.clear();
-
-	for (int i = 0; i < P + H + O; i++)
-	{
-		individuo solucao = GerarSoluGRASP();
-
-		//corrigir(solucao);
-
-		if (!viavel(solucao)) {
-			cout << "Erro! Solucao gulosa gerada inviavel!" << endl;
-			//system("pause");
-			//exit(0);
-		}
-		else {
-			solucao.fitness = fitness(solucao);
-			Populacao.push_back(solucao);
-		}
-	}
+void Heuristica::perturbar(individuo & solu) {
+	individuo aux = solu;
+	for (int i = 0; i < P - 1; i++)
+		solu.ind[i] = aux.ind[P - 1 - i - 1];
 }
+
 
 
 
@@ -1216,10 +1210,10 @@ void Heuristica::funcaoteste() {
 
 	auto start = chrono::system_clock::now();
 	
-	for (int i = 0; i < P + H + O; i++)
+	for (int i = 0; i < 2*(P + H + O); i++)
 	{
 		individuo solucao = GerarSoluGRASP();
-
+		
 		//corrigir(solucao);
 		
 		if (!viavel(solucao)) {
@@ -1235,53 +1229,40 @@ void Heuristica::funcaoteste() {
 	
 
 	selecao(Populacao);
+	for (auto elemento : Populacao)
+		cout << "FO = " << elemento.fitness << endl;
+
 	ImprimirVetorSolu(Populacao[0]);
+
 	cout << "Populacao inicial gerada e elitizada\n";
 
-	for (auto solucao : Populacao)
-		cout << "FO = " << solucao.fitness << endl;
+
+	
 
 
-	double	fit_atual,
-			fit_antigo;
-	int contador_fit = 0;
+
 
 
 	for(int i = 0; i < NGeracoes; ++i){
-		fit_antigo = Populacao[0].fitness;
+		cout << "\n\n Geracao" << i << endl;
+		Populacao[0] = vizinho_melhor(Populacao[0]);
 
 		list<individuo> Offspring = cruzamento(Populacao);
 		Populacao.insert(Populacao.end(), Offspring.begin(), Offspring.end());
 		selecao(Populacao);
 
-		fit_atual = Populacao[0].fitness;
-
-
-
-		cout << "\n\n Geracao" << i << endl;
+		/*
 		for (auto solucao : Populacao)
 			cout << "FO = " << solucao.fitness << endl;
 		ImprimirVetorSolu(Populacao[0]);
 
 		if(viavel(Populacao[0]))
-			cout << "Viavel!!";
+			cout << "Viavel!!";*/
 
 		
-		if(i%2 != 0)
-			prob_mutacao += taxa_aumento_mut*prob_mutacao;
 
-		if (fit_atual == fit_antigo) {
-			contador_fit++;
-			if (contador_fit > 5) {
-				contador_fit = 0;
-				//restart_populacao(Populacao);
-				//prob_mutacao = 0.05;
-				break;
-			}
-		}
-		else {
-			contador_fit = 0;
-		}
+		prob_mutacao += taxa_aumento_mut*prob_mutacao;
+
 	}
 	
 
@@ -1292,4 +1273,165 @@ void Heuristica::funcaoteste() {
 	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
 	ImprimirVetorSolu(Populacao[0]);
+	cout << endl << Populacao[0].fitness << endl << endl;
+
+
+
+	individuo melhor = vizinho_melhor(Populacao[0]);
+	ImprimirVetorSolu(melhor);
+	cout << endl << melhor.fitness << endl;
+
+}
+
+
+
+
+
+
+individuo Heuristica::vizinho_melhor(individuo solu)
+{
+	individuo melhor, aux;
+	melhor = solu;
+
+	vector<int> diferentes_0;
+
+	for (int i = 0; i < P - 1; i++) {
+		if (solu.n_vezes[i] > 0) {
+			diferentes_0.push_back(i);
+			break;
+		}
+	}
+
+
+	/*if (diferentes_0.size() == 1) {
+		aux = solu;
+		aux.n_vezes[diferentes_0[0]]--;
+
+		if (!viavel(aux))
+			corrigir(aux);
+		aux.fitness = fitness(aux);
+
+
+		if (aux.fitness < melhor.fitness)
+			melhor = aux;
+
+		return melhor;
+	}
+		
+
+	for (auto j : diferentes_0) {
+		for (auto i : diferentes_0) {
+			if (i == j)
+				continue;
+			aux = solu;
+			aux.n_vezes[i] --;
+			aux.n_vezes[j] ++;
+			if (!viavel(aux))
+				corrigir(aux);
+			aux.fitness = fitness(aux);
+
+
+			if (aux.fitness < melhor.fitness)
+				melhor = aux;
+		}
+	}*/
+
+
+	for (auto j: diferentes_0) {
+		for (auto i : diferentes_0) {
+			if (i == j)
+				continue;
+			aux = insert(solu, j, i);
+			if (aux.fitness < melhor.fitness)
+				melhor = aux;
+		}
+	}
+
+	return melhor;
+}
+
+
+inline individuo Heuristica::insert(individuo solu, int a, int b) {
+
+	individuo vizinho = solu;
+		
+	vizinho.ind[b] = solu.ind[a];
+	vizinho.n_vezes[b] = ceil((double)solu.n_vezes[a] / 2);
+
+	for (int c = a; c < b; c++) {
+		vizinho.ind[c] = solu.ind[c + 1];
+		vizinho.n_vezes[c] = solu.n_vezes[c + 1];
+	}
+
+	for (int c = 0; c < a; c++) {
+		vizinho.ind[c] = solu.ind[c];
+		vizinho.n_vezes[c] = solu.n_vezes[c];
+	}
+	for (int c = b + 1; c < solu.ind.size(); c++) {
+		vizinho.ind[c] = solu.ind[c];
+		vizinho.n_vezes[c] = solu.n_vezes[c];
+	}
+
+	if (!viavel(vizinho))
+		corrigir(vizinho);
+
+	vizinho.fitness = fitness(vizinho);
+
+	return vizinho;
+}
+
+
+
+
+
+void Heuristica::torneio_suico(vector<individuo> &Popu)	//Selecao por ranking
+{
+	return;
+	
+	
+}
+
+
+void Heuristica::ILS()//Tá horrível!!!!!!!!! Vizinhança muito fraca!
+{
+	individuo solucao_inicial = GerarSoluGRASP();
+	solucao_inicial.fitness = fitness(solucao_inicial);
+	vector<individuo> Populacao;
+
+	for (int i = 0; i < 2 * (P + H + O); i++)
+	{
+		individuo solucao = GerarSoluGRASP();
+
+		if (!viavel(solucao)) {
+			cout << "Erro! Solucao gulosa gerada inviavel!" << endl;
+		}
+		else {
+			solucao.fitness = fitness(solucao);
+			Populacao.push_back(solucao);
+		}
+	}
+
+	sort(Populacao.begin(), Populacao.end());
+
+	solucao_inicial = Populacao[0];
+
+	individuo solucao_atual, melhor = solucao_inicial;
+
+	for (int it = 0; it < 100; it++) {
+
+		solucao_atual = vizinho_melhor(solucao_inicial);
+
+		if (solucao_atual.fitness < melhor.fitness)
+			melhor = solucao_atual;
+
+		solucao_inicial = melhor;
+		perturbar(solucao_inicial);
+		mutar(solucao_inicial);
+		if (!viavel(solucao_inicial))
+			corrigir(solucao_inicial);
+		solucao_atual.fitness = fitness(solucao_inicial);
+	}
+
+	cout << endl << melhor.fitness << endl;
+	cout << endl;
 }

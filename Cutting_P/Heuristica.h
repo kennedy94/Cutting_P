@@ -11,6 +11,7 @@ struct individuo {
 	vector<int> ind;
 	vector<int> n_vezes;
 	double fitness;
+
 	double comparacao(individuo indie) {
 		int contador = 0;
 
@@ -34,16 +35,16 @@ private:
 	double	prob_mutacao,
 			prob_cruzamento;
 	double taxa_aumento_mut;
-	vector<individuo> list_tabu;
+	list<individuo> list_tabu;
 			
 protected:
 	
 	void definir_parametros() {
-		TamanhoDaPopulacao = 30;
-		prob_mutacao = 0.05;
-		prob_cruzamento = 0.05;
-		NGeracoes = 30;
-		taxa_aumento_mut = 0.30;
+		TamanhoDaPopulacao = ceil((double)P/5);
+		prob_mutacao = 0.1;
+		prob_cruzamento = 0.20;
+		NGeracoes = 20;
+		taxa_aumento_mut = 0.15;
 	}
 
 
@@ -64,7 +65,9 @@ protected:
 	//altera um elemento do vetor
 	void mutar(individuo &solu);
 
-	void restart_populacao(vector<individuo>& Populacao);
+	void perturbar(individuo & solu);
+
+
 
 	//testa se é uma solução viávels
 	bool viavel(individuo solu);
@@ -82,7 +85,16 @@ protected:
 
 	individuo GerarSoluGRASP();
 
+	individuo vizinho_melhor(individuo solu);
+
+	individuo insert(individuo solu, int a, int b);
+
+	void torneio_suico(vector<individuo>& Popu);
+
+	
+
 public:
+	void ILS();
 	void funcaoteste();
 	Heuristica(const char * filename) : Problema(filename) { };
 };

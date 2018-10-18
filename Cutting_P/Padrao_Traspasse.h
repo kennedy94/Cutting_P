@@ -11,6 +11,10 @@ public:
 		barra_gerada;
 	double folga;
 	vector<int> tamanhos;
+	bool operator<(const Padrao_Traspasse& rhs) const {
+		return folga < rhs.folga;
+	}
+
 
 	Padrao_Traspasse();
 	~Padrao_Traspasse();

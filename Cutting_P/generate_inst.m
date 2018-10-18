@@ -39,7 +39,7 @@ function generate_inst(arq, C, M, up_d, misturado, V)
 		
 		%dados usado para criar conjunto de tamanhos
 		tams = [1.12 1.45 2.35 2.5 2.65 2.95 3.3];
-		tam = unique(datasample(tams, length(tams)));
+		tam = datasample(tams,4,'Replace',false);
 
 		N = length(tam);
 

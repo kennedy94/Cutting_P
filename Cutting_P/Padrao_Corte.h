@@ -13,5 +13,9 @@ public:
 	bool Gera_LeftOvers(int Gamma, int V);
 	Padrao_Corte();
 	~Padrao_Corte();
+	bool operator<(const Padrao_Corte& rhs) const {
+		return cap < rhs.cap;
+	}
+
 };
 
