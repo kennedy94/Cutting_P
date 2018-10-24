@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	//Modelo.ImprimirSolucao();
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		Heuristica GA(inst);
 		GA.funcaoteste();
