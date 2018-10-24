@@ -52,3 +52,7 @@ cwp001,6,794,0,1.16207
 Instancia_novas\\cwp011,14.7,1208,0.0216678,20.0731
 
 80.05,20.2312
+
+Instancia_novas\\numerica,2.3,0,0,0.358021
+
+Instancia_novas\\cwp001,5,0,0,0.251014

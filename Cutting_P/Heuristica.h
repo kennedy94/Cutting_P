@@ -40,11 +40,11 @@ private:
 protected:
 	
 	void definir_parametros() {
-		TamanhoDaPopulacao = ceil((double)P/5);
+		TamanhoDaPopulacao = 50;
 		prob_mutacao = 0.1;
-		prob_cruzamento = 0.20;
-		NGeracoes = 20;
-		taxa_aumento_mut = 0.15;
+		prob_cruzamento = 0.35;
+		NGeracoes = 50;
+		taxa_aumento_mut = 0.02;
 	}
 
 
@@ -85,7 +85,7 @@ protected:
 
 	individuo GerarSoluGRASP();
 
-	individuo vizinho_melhor(individuo solu);
+
 
 	individuo insert(individuo solu, int a, int b);
 
@@ -94,7 +94,6 @@ protected:
 	
 
 public:
-	void ILS();
 	void funcaoteste();
 	Heuristica(const char * filename) : Problema(filename) { };
 };
