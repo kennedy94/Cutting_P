@@ -33,17 +33,17 @@ private:
 	int	TamanhoDaPopulacao,
 		NGeracoes;
 	double	prob_mutacao,
-			prob_cruzamento;
-	double taxa_aumento_mut;
-	list<individuo> list_tabu;
+			prob_cruzamento,
+			taxa_aumento_mut;
 			
 protected:
 	
 	void definir_parametros() {
 		TamanhoDaPopulacao = P;
 		prob_mutacao = 0.05;
+		taxa_aumento_mut = 0.01;
 		prob_cruzamento = 0.35;
-		NGeracoes = 50;
+		NGeracoes = 150;
 	}
 
 
@@ -89,6 +89,8 @@ protected:
 	individuo insert(individuo solu, int a, int b);
 
 	void torneio_suico(vector<individuo>& Popu);
+
+	void Restart(vector<individuo>& Popu);
 
 	
 

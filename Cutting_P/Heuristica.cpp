@@ -117,7 +117,7 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		filho.ind[i] = pai.ind[i];
 	}
 
-	vector<int> nao_escolhidos;
+	vector<int> nao_escolhidos(0, 0);
 	for (int i = floor((double)(P - 1) / 2); i < P - 1; i++)
 		nao_escolhidos.push_back(pai.ind[i]);
 
@@ -426,7 +426,7 @@ list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 
 	list<individuo> retorno;
 	for (int i = 0; i < Popu.size(); i++) {
-		for (int j = 0; j < Popu.size(); j++) {
+		for (int j = i; j < Popu.size(); j++) {
 			if (i != j && distribution(generator) < prob_cruzamento) {
 				list<individuo> aux = cruzar(Popu[i], Popu[j]);
 				retorno.insert(retorno.end(), aux.begin(), aux.end());
@@ -837,7 +837,6 @@ void Heuristica::corrigir(individuo &solu)
 
 	if (!viavel(solu)) {
 		cout << "Filho que nao conseguiu corrigir detectado!" << endl;
-		viavel(solu);
 	}
 
 }
@@ -1076,57 +1075,6 @@ individuo Heuristica::GerarSoluGRASP() {
 
 
 
-void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por ranking
-{
-
-	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
-	vector<individuo> Auxiliar = Popu;
-	Popu.clear();
-	Popu.resize(0);
-
-
-	//Elistimo
-
-	Popu.push_back(Auxiliar[0]);
-	for (int i = 1; i < TamanhoDaPopulacao; i++) {
-		//perturbar(Auxiliar[i]);
-		Popu.push_back(Auxiliar[i]);
-	}
-	return;
-
-
-	list_tabu.push_back(Auxiliar[0]);
-	list_tabu.push_back(Auxiliar[Auxiliar.size() - 1]);
-	if (list_tabu.size() > 10)
-		list_tabu.pop_front();
-	
-
-	//ranking
-	int i = 1,
-		contador = 1;
-	while (contador < TamanhoDaPopulacao) {
-		bool tabu = false;
-		for (auto tabuzinho : list_tabu) {
-			if (Auxiliar[i].comparacao(tabuzinho) > 0.9) {
-				tabu = true;
-				break;
-			}
-		}
-		if (!tabu) {
-			Popu.push_back(Auxiliar[i]);
-			contador++;
-		}
-
-		i++;
-		/*cout << i << "," << Auxiliar.size() << endl;*/
-		if (i == Auxiliar.size())
-			cout << "\nLista Tabu impedindo de adicionar mais elementos na popu...\n";
-	}
-
-
-	
-	
-}
 
 
 
@@ -1141,7 +1089,7 @@ void Heuristica::mutar(individuo & solu){
 	//indices que serao trocados
 	int id_pack1, id_pack2;
 
-	vector<int> diferentes_de_zero;
+	vector<int> diferentes_de_zero(0, 0);
 	for (int i = 0; i < P - 1; i++)
 		if (solu.n_vezes[i] > 0)
 			diferentes_de_zero.push_back(i);
@@ -1157,7 +1105,7 @@ void Heuristica::mutar(individuo & solu){
 	solu.ind[id_pack1] = solu.ind[id_pack2];
 	solu.ind[id_pack2] = aux;
 
-	aux = solu.n_vezes[id_pack1] - 1;
+	aux = solu.n_vezes[id_pack1] --;
 	solu.n_vezes[id_pack1] = solu.n_vezes[id_pack2] + 1;
 	solu.n_vezes[id_pack2] = aux;
 
@@ -1198,13 +1146,13 @@ void Heuristica::perturbar(individuo & solu) {
 void Heuristica::funcaoteste() {
 	srand(time(NULL));
 	definir_parametros();
-	vector<individuo> Populacao;
+	vector<individuo> Populacao(0);
 
 	cout << "Gerando populacao inicial\n";
 
 	auto start = chrono::system_clock::now();
 	
-	for (int i = 0; i < 2*(P + H + O); i++)
+	for (int i = 0; i < 1000*(P + H + O); i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 		
@@ -1239,18 +1187,24 @@ void Heuristica::funcaoteste() {
 
 		list<individuo> Offspring = cruzamento(Populacao);
 		Populacao.insert(Populacao.end(), Offspring.begin(), Offspring.end());
+		/*if ( (i + 1) % 500 == 0) {
+			torneio_suico(Populacao);
+		}
+		else*/
 		selecao(Populacao);
 
-		/*
-		for (auto solucao : Populacao)
-			cout << "FO = " << solucao.fitness << endl;
-		ImprimirVetorSolu(Populacao[0]);
-
-		if(viavel(Populacao[0]))
+		
+		/*for (auto solucao : Populacao)
+			cout << "FO = " << solucao.fitness << endl;*/
+		cout << "FO = " << Populacao[0].fitness << endl;
+		
+		/*if(viavel(Populacao[0]))
 			cout << "Viavel!!";*/
 
 	
-		//prob_mutacao += taxa_aumento_mut;
+	/*	prob_mutacao += taxa_aumento_mut;
+		if (prob_mutacao == 0.5)
+			prob_mutacao == 0;*/
 	}
 	
 
@@ -1300,10 +1254,97 @@ inline individuo Heuristica::insert(individuo solu, int a, int b) {
 }
 
 
+void Heuristica::selecao(vector<individuo> &Popu)	//Selecao por ranking
+{
+
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+	vector<individuo> Auxiliar = Popu;
+	Popu.clear();
+	Popu.resize(0);
+
+	//Elistimo
+
+	Popu.push_back(Auxiliar[0]);
+	for (int i = 1; i < TamanhoDaPopulacao; i++) {
+		//perturbar(Auxiliar[i]);
+		Popu.push_back(Auxiliar[i]);
+	}
+	return;
+}
 
 
 
 void Heuristica::torneio_suico(vector<individuo> &Popu)	//Selecao por ranking
 {
-	return;
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+	vector<int> nao_escolhido(0, 0);
+	vector<individuo> Auxiliar = Popu;
+	Popu.clear();
+	Popu.resize(0);
+
+	for (int i = 0; i < 1; i++) {
+		Popu.push_back(Auxiliar[0]);
+	}
+	
+
+	for (int i = 1; i < Auxiliar.size(); i++) {
+		nao_escolhido.push_back(i);
+	}
+
+
+	default_random_engine generator;
+	generator.seed(time(NULL));
+	
+
+	for (int i2 = 1; i2 < TamanhoDaPopulacao; i2++){
+		uniform_int_distribution<int> bloco1(0, nao_escolhido.size() - 1);
+		int escolhido1, escolhido2;
+		do
+		{
+			escolhido1 = bloco1(generator);
+			escolhido2 = bloco1(generator);
+		} while (escolhido1 == escolhido2);
+
+		if (Auxiliar[nao_escolhido[escolhido1]].fitness <
+			Auxiliar[nao_escolhido[escolhido2]].fitness) {
+			Popu.push_back(Auxiliar[nao_escolhido[escolhido1]]);
+			nao_escolhido.erase(nao_escolhido.begin() + escolhido1);
+		}
+		else
+		{
+			Popu.push_back(Auxiliar[nao_escolhido[escolhido2]]);
+			nao_escolhido.erase(nao_escolhido.begin() + escolhido2);
+		}
+		
+	}
+
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });	
+}
+
+
+
+void Heuristica::Restart(vector<individuo> &Popu) {
+	sort(Popu.begin(), Popu.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+	vector<individuo> Auxiliar = Popu;
+	Popu.clear();
+	Popu.resize(0);
+
+	for (int i = 0; i < ceil((double)TamanhoDaPopulacao/2); i++) {
+		Popu.push_back(Auxiliar[i]);
+	}
+
+	for (int i2 = ceil((double)TamanhoDaPopulacao / 2); i2 < TamanhoDaPopulacao; i2++) {
+		
+		individuo solucao = GerarSoluGRASP();
+		if (!viavel(solucao)) {
+			cout << "Erro! Solucao gulosa gerada inviavel!" << endl;
+			system("pause");
+			exit(0);
+		}
+		else {
+			solucao.fitness = fitness(solucao);
+			Popu.push_back(solucao);
+		}
+
+	}
 }

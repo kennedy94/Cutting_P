@@ -82,3 +82,7 @@ Instancia_novas\\cwp001,2.4,3,2.4,0,0,0.577033
 Instancia_novas\\cwp001,5,2,3,0,0,0.278016
 
 Instancia_novas\\cwp001,2.55,3,2.4,0,0,0.315018
+
+Instancia_novas\\cwp001,5,2,3,0,0,0.599034
+
+Instancia_novas\\cwp001,5,2,3,0,0,0.272016

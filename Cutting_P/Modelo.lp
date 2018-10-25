@@ -2,7 +2,7 @@
 \Problem name: IloCplex
 
 Minimize
- obj: 0.25 x4 + 0.75 x27
+ obj: x4 + x27
 Subject To
  c1#0:           z(0) + z(1) + z(2) - x4  = 0
  c2#1:           - 6.05 y(0,0) - 0.0999999999999996 y(8,0)

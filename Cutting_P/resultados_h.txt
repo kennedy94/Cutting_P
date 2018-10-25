@@ -1,32 +1,60 @@
 
-Instancia_novas\\cwp002,8.95,3.4682
+Instancia_novas\\cwp001,5.6,0.283016
+Instancia_novas\\cwp001,5.7,0.208012
+Instancia_novas\\cwp001,6.4,0.209012
+Instancia_novas\\cwp001,6.4,0.205012
+Instancia_novas\\cwp001,6.4,0.208012
+Instancia_novas\\cwp001,6.4,0.211012
+Instancia_novas\\cwp001,5.8,0.17201
+Instancia_novas\\cwp001,5.8,0.17301
+Instancia_novas\\cwp001,5.8,0.17501
+Instancia_novas\\cwp001,5.8,0.17201
 
-Instancia_novas\\cwp002,9,4.74227
+Instancia_novas\\cwp001,6.3,0.321018
+Instancia_novas\\cwp001,6.3,0.229013
+Instancia_novas\\cwp001,6.2,0.246014
+Instancia_novas\\cwp001,6.2,0.247014
+Instancia_novas\\cwp001,6.2,0.247014
+Instancia_novas\\cwp001,6.2,0.243014
+Instancia_novas\\cwp001,6,0.17201
+Instancia_novas\\cwp001,6,0.17601
+Instancia_novas\\cwp001,6,0.17201
+Instancia_novas\\cwp001,6,0.17301
+Instancia_novas\\cwp001,5.7,0.34702
+Instancia_novas\\cwp001,6.2,0.332019
+Instancia_novas\\cwp001,6.2,0.321018
+Instancia_novas\\cwp001,6.2,0.315018
+Instancia_novas\\cwp001,5.9,0.339019
+Instancia_novas\\cwp001,5.9,0.340019
+Instancia_novas\\cwp001,5.9,0.331019
+Instancia_novas\\cwp001,5.7,0.218012
+Instancia_novas\\cwp001,5.7,0.216012
+Instancia_novas\\cwp001,5.7,0.216012
 
-Instancia_novas\\cwp002,8.95,2.73416
+Instancia_novas\\cwp001,5.5,12.9537
 
-Instancia_novas\\cwp002,9,5.64832
+Instancia_novas\\cwp001,6,5.53132
 
-Instancia_novas\\cwp002,8.95,3.93523
+Instancia_novas\\cwp001,5.8,10.1396
 
-Instancia_novas\\cwp002,8.95,4.37825
+Instancia_novas\\numerica,2.3,0.496028
 
-Instancia_novas\\cwp002,9.1,5.74833
+Instancia_novas\\numerica,2.3,0.404023
 
-Instancia_novas\\cwp002,9.1,5.37031
+Instancia_novas\\cwp011,19.6,27.4176
 
-Instancia_novas\\cwp002,8.95,4.86128
+Instancia_novas\\cwp011,19,101.902
 
-Instancia_novas\\cwp002,9.1,6.07635
+Instancia_novas\\cwp011,17.45,81.4037
 
-Instancia_novas\\cwp001,5.5,9.57255
+Instancia_novas\\cwp011,17.75,102.895
 
-Instancia_novas\\cwp001,5.5,19.9746
+Instancia_novas\\cwp011,17.85,74.4493
 
-Instancia_novas\\cwp011,17.4,8.40004
+Instancia_novas\\cwp011,16.5,80.9736
 
-Instancia_novas\\numerica,2.3,0.104006
+Instancia_novas\\cwp001,5.5,56.1042
 
-Instancia_novas\\cwp011,17.8,10.994
+Instancia_novas\\cwp003,5.4,7.46343
 
-Instancia_novas\\cwp011,17.05,14.0058
+Instancia_novas\\cwp006,5.6,13.2598
