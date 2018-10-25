@@ -12,6 +12,9 @@ private:
 	IloArray<IloIntVarArray> CPLEX_y_bi;
 	IloArray<IloArray<IloIntVarArray>> CPLEX_y_tri;
 	IloArray<IloArray<IloBoolVarArray>> CPLEX_x;
+	IloNumVar Makespan, Custo;
+
+
 	list<int> 
 		H_mais,	//Guarda os indices dos padroes de
 						//corte que geram leftover

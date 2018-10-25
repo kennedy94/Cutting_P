@@ -40,11 +40,10 @@ private:
 protected:
 	
 	void definir_parametros() {
-		TamanhoDaPopulacao = 50;
-		prob_mutacao = 0.1;
+		TamanhoDaPopulacao = P;
+		prob_mutacao = 0.05;
 		prob_cruzamento = 0.35;
 		NGeracoes = 50;
-		taxa_aumento_mut = 0.02;
 	}
 
 

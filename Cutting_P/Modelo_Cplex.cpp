@@ -159,7 +159,12 @@ void Modelo_Cplex::CPLEX_objective_function(){
 		}
 	}
 	//costSum +
-	model.add(IloMinimize(env, costSum + soma1 + Parameter_alpha_1*soma2 + Parameter_alpha_2*(soma3 + expr)));
+	Makespan = IloNumVar(env, 0, T);
+	Custo = IloNumVar(env, 0, 99999999);
+
+	model.add(costSum == Makespan);
+	model.add(Custo == soma1 + Parameter_alpha_1*soma2 + Parameter_alpha_2*(soma3 + expr));
+	model.add(IloMinimize(env, Makespan + Custo));
 
 	soma1.end();
 	soma2.end();
@@ -496,10 +501,11 @@ void Modelo_Cplex::ImprimirSolucaoArquivo(){
 	ofstream resultados("resultados.txt", fstream::app);
 
 	resultados << endl << nome_instancia;
-	//resultados << "," << P << "," << H << "," << O << endl;
+	/*resultados << "," << C << "," << M << "," << T << 
+		"," << P << "," << H << "," << O << endl;*/
 	try
 	{
-		resultados << "," << cplex.getObjValue() << "," <<
+		resultados << "," << cplex.getObjValue() << "," << cplex.getValue(Makespan) << "," << cplex.getValue(Custo) << "," <<
 			cplex.getNnodes() << "," << cplex.getMIPRelativeGap() << "," << tempo_solucao << endl;
 	}
 	catch (...)

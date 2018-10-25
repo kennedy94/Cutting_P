@@ -39,7 +39,11 @@ function generate_inst(arq, C, M, up_d, misturado, V)
 		
 		%dados usado para criar conjunto de tamanhos
 		tams = [1.12 1.45 2.35 2.5 2.65 2.95 3.3];
-		tam = datasample(tams,4,'Replace',false);
+        
+        pegue_um_n = [4, 5];
+        peguei_um_n = datasample(pegue_um_n,1);
+        
+		tam = sort(datasample(tams,peguei_um_n,'Replace',false));
 
 		N = length(tam);
 
@@ -57,7 +61,6 @@ function generate_inst(arq, C, M, up_d, misturado, V)
 	%aumento de 50% no T
 	t = ceil(1.5*t);
 
-	
 	%gerar barras
 	
 	%Barras_tam = [12];
@@ -74,7 +77,7 @@ function generate_inst(arq, C, M, up_d, misturado, V)
 
     
     mkdir Instancia_novas
-    arquivo =strcat('Instancia_novas\',arq);
+    arquivo =strcat('Instancias\',arq);
 	%impressão dos dados
 	inst2 = fopen(arquivo, 'w');
 	fprintf(inst2, '%d %d %d\n \n', C, M, t);

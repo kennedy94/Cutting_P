@@ -899,14 +899,14 @@ individuo Heuristica::GerarSoluGRASP() {
 	//Inicializando os índices
 
 	iota(solu1.begin(), solu1.begin() + P - 1, 1);
-	//iota(solu1.begin() + P - 1, solu1.begin() + P - 1 + H, 0);
-	//iota(solu1.begin() + P - 1 + H, solu1.end(), 0);
+	iota(solu1.begin() + P - 1, solu1.begin() + P - 1 + H, 0);
+	iota(solu1.begin() + P - 1 + H, solu1.end(), 0);
 	
 
 	//Fazendo permutações aleatórias dos índices
 	random_shuffle(solu1.begin(), solu1.begin() + P - 1);
 	//Vetor dos padrões de cortes são ordenados por capacidade
-	vector<Padrao_Corte> OrdenadoPorCusto = CutPatterns;
+	/*vector<Padrao_Corte> OrdenadoPorCusto = CutPatterns;
 	sort(OrdenadoPorCusto.begin(), OrdenadoPorCusto.end());
 	for (int i = P - 1; i < P - 1 + H; i++) {
 		solu1[i] = OrdenadoPorCusto[(P - 1 + H) - i - 1].index_pat;
@@ -915,10 +915,10 @@ individuo Heuristica::GerarSoluGRASP() {
 	sort(OrdenadoPorCusto_SPL.begin(), OrdenadoPorCusto_SPL.end());
 	for (int i = P - 1 + H; i < P - 1 + H + O; i++) {
 		solu1[i] = OrdenadoPorCusto_SPL[i - (P - 1 + H)].id;
-	}
+	}*/
 
-	//random_shuffle(solu1.begin() + P - 1, solu1.begin() + P - 1 + H);
-	//random_shuffle(solu1.begin() + P - 1 + H, solu1.end());
+	random_shuffle(solu1.begin() + P - 1, solu1.begin() + P - 1 + H);
+	random_shuffle(solu1.begin() + P - 1 + H, solu1.end());
 	
 
 	//prenchendo os padrões de empacotamento até a demanda ser atendida
@@ -1229,10 +1229,6 @@ void Heuristica::funcaoteste() {
 	ImprimirVetorSolu(Populacao[0]);
 
 	cout << "Populacao inicial gerada e elitizada\n";
-
-
-	
-
 
 
 
