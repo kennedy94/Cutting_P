@@ -33,17 +33,17 @@ private:
 	int	TamanhoDaPopulacao,
 		NGeracoes;
 	double	prob_mutacao,
-			prob_cruzamento,
-			taxa_aumento_mut;
+		prob_cruzamento;
+			//taxa_aumento_mut;
 			
 protected:
 	
 	void definir_parametros() {
 		TamanhoDaPopulacao = P;
 		prob_mutacao = 0.05;
-		taxa_aumento_mut = 0.01;
+		//taxa_aumento_mut = 0.01;
 		prob_cruzamento = 0.35;
-		NGeracoes = 150;
+		NGeracoes = 1000;
 	}
 
 
@@ -64,11 +64,7 @@ protected:
 	//altera um elemento do vetor
 	void mutar(individuo &solu);
 
-	void perturbar(individuo & solu);
-
-
-
-	//testa se é uma solução viávels
+	//testa se é uma solução viável
 	bool viavel(individuo solu);
 
 	void ImprimirSolucaoEstiloCPLEX(individuo solu);
@@ -84,11 +80,11 @@ protected:
 
 	individuo GerarSoluGRASP();
 
-
+	individuo melhor_vizinho(individuo solu);
 
 	individuo insert(individuo solu, int a, int b);
 
-	void torneio_suico(vector<individuo>& Popu);
+	void torneio(vector<individuo>& Popu);
 
 	void Restart(vector<individuo>& Popu);
 

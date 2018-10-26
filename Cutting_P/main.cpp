@@ -17,20 +17,19 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-	/*Modelo_Cplex Modelo(inst);
+	Modelo_Cplex Modelo(inst);
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
 	Modelo.ImprimirSolucaoArquivo();
-
-	Modelo.ImprimirSolucao();*/
+	//Modelo.ImprimirSolucao();
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
-	for (int i = 0; i < 1; i++)
-	{
-		Heuristica GA(inst);
-		GA.funcaoteste();
-		//GA.ILS();
-	}
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	Heuristica GA(inst);
+	//	GA.funcaoteste();
+	//	//GA.ILS();
+	//}
 	
 	return 0;
 }
