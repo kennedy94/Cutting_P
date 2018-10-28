@@ -1,6 +1,15 @@
 
-Instancia_novas\\cwp001,5.5,19.2841
 
-Instancia_novas\\cwp001,5.5,8.34748
+Instancia_novas\\cwp011,16.25,113.524
 
-Instancia_novas\\cwp001,5.5,101.627
+Instancia_novas\\cwp011,16.6,111.117
+
+Instancia_novas\\numerica,2.35,13.9768
+
+Instancia_novas\\numerica,2.3,1.23807
+
+Instancia_novas\\numerica,2.3,1.12806
+
+Instancia_novas\\cwp012,15,137.961
+
+Instancia_novas\\cwp012,15,390.456

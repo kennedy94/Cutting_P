@@ -86,3 +86,9 @@ Instancia_novas\\cwp001,2.55,3,2.4,0,0,0.315018
 Instancia_novas\\cwp001,5,2,3,0,0,0.599034
 
 Instancia_novas\\cwp001,5,2,3,0,0,0.272016
+
+Instancia_novas\\numerica,2.3,2,0.3,0,0,1.7651
+
+Instancia_novas\\cwp003,5,2,3,0,0,0.893051
+
+Instancia_novas\\cwp003,5,2,3,0,0,0.298017

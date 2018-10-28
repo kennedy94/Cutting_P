@@ -12,15 +12,64 @@ struct individuo {
 	vector<int> n_vezes;
 	double fitness;
 
-	double comparacao(individuo indie) {
-		int contador = 0;
+	double distancia(individuo indie, int P, int H, int O) {
+		int distancia = 0;
+		vector<int>
+			auxP(P - 1, 0),
+			auxH(H, 0),
+			auxO(O, 0);
 
-		for (int i = 0; i < this->ind.size(); i++)
-			if (this->ind[i] == indie.ind[i] && this->n_vezes[i] == indie.n_vezes[i])
-				contador++;
+		for (int i = 1; i < P; i++) {
+			int valor_desse, valor_daquele;
+			for (int j = 0; j < P - 1; j++)
+				if (this->ind[j] == i) {
+					valor_desse = this->n_vezes[j];
+					break;
+				}
+			for (int j = 0; j < P - 1; j++)
+				if (indie.ind[j] == i) {
+					valor_daquele = indie.n_vezes[j];
+					break;
+				}
+			distancia += abs(valor_desse - valor_daquele);
+		}
 
-		return (double)contador / this->ind.size();
+		for (int i = 0; i < H; i++) {
+			int valor_desse, valor_daquele;
+			for (int j = P - 1; j < P - 1 + H; j++)
+				if (this->ind[j] == i) {
+					valor_desse = this->n_vezes[j];
+					break;
+				}
+			for (int j = P - 1; j < P - 1 + H; j++)
+				if (indie.ind[j] == i) {
+					valor_daquele = indie.n_vezes[j];
+					break;
+				}
+			distancia += abs(valor_desse - valor_daquele);
+		}
+
+
+
+		for (int i = 0; i < O; i++) {
+			int valor_desse, valor_daquele;
+			for (int j = P - 1 + H; j < P - 1 + H + O; j++)
+				if (this->ind[j] == i) {
+					valor_desse = this->n_vezes[j];
+					break;
+				}
+			for (int j = P - 1 + H; j < P - 1 + H + O; j++)
+				if (indie.ind[j] == i) {
+					valor_daquele = indie.n_vezes[j];
+					break;
+				}
+			
+			distancia += abs(valor_desse - valor_daquele);
+		}
+
+		return distancia;
 	}
+
 	bool operator<(const individuo& rhs) const {
 		return fitness < rhs.fitness;
 	}
@@ -39,14 +88,13 @@ private:
 protected:
 	
 	void definir_parametros() {
-		TamanhoDaPopulacao = P;
+		TamanhoDaPopulacao = 50;
 		prob_mutacao = 0.05;
-		//taxa_aumento_mut = 0.01;
-		prob_cruzamento = 0.35;
-		NGeracoes = 1000;
+		prob_cruzamento = 0.25;
+		NGeracoes = 5000;
 	}
 
-
+	double distancia_total_popu(vector<individuo> Popu);
 	double fitness(individuo solu);
 
 	//retorna vários indivíduos obtidos por cruzando entre outros
@@ -55,6 +103,8 @@ protected:
 
 	//cruza vários indivíduos e retorna todos os gerados
 	list<individuo> cruzamento(vector<individuo> Popu);
+
+	list<individuo> cruzamento_diferenciado(vector<individuo> Popu);
 
 	/*junta os indivíduos obtidos por cruzamento à população atual e
 	seleciona só um número predefinido deles
