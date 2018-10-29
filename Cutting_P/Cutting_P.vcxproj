@@ -217,6 +217,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GA_Novo.cpp" />
     <ClCompile Include="Heuristica.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelo_Cplex.cpp" />
@@ -227,6 +228,7 @@
     <ClCompile Include="Tipo_Viga.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GA_Novo.h" />
     <ClInclude Include="Heuristica.h" />
     <ClInclude Include="Modelo_Cplex.h" />
     <ClInclude Include="Padrao_Corte.h" />

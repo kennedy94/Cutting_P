@@ -2,13 +2,6 @@
 
 
 
-struct Utilizacao {
-	int idx, util;
-	bool operator<(const Utilizacao& rhs) const {
-		return util < rhs.util;
-	}
-};
-
 
 
 
@@ -52,13 +45,7 @@ double Heuristica::fitness(individuo solu)
 		if (solu.n_vezes[i] == 0)
 			continue;
 
-		int tipo_da_forma = -1;
-		for (int gamma = 0; gamma < Gamma; gamma++) {
-			if (PackPatterns[solu.ind[i]].maximal(L[gamma], TipoVigas[PackPatterns[solu.ind[i]].tipo].comprimentos)) {
-				tipo_da_forma = gamma;
-				break;
-			}
-		}
+		int tipo_da_forma = Gamma_Associado[solu.ind[i]];
 
 		for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
 			std::sort(UtilFormas.begin(), UtilFormas.end());
@@ -81,10 +68,10 @@ double Heuristica::fitness(individuo solu)
 	Makespan = valor.util;
 
 	for (int i = P - 1; i < P - 1 + H; i++){
-		if (CutPatterns[solu.ind[i]].index_barra < W & !CutPatterns[solu.ind[i]].Gera_LeftOvers(Gamma, V))
+		if (CutPatterns[solu.ind[i]].index_barra < W && !CutPatterns[solu.ind[i]].Gera_LeftOvers(Gamma, V))
 			Sobra1 += solu.n_vezes[i] * (b[CutPatterns[solu.ind[i]].index_barra] - CutPatterns[solu.ind[i]].cap);
 
-		if (CutPatterns[solu.ind[i]].index_barra < W & CutPatterns[solu.ind[i]].Gera_LeftOvers(Gamma, V))
+		if (CutPatterns[solu.ind[i]].index_barra < W && CutPatterns[solu.ind[i]].Gera_LeftOvers(Gamma, V))
 			Sobra2 += solu.n_vezes[i] * (b[CutPatterns[solu.ind[i]].index_barra] - CutPatterns[solu.ind[i]].cap);
 
 		if(CutPatterns[solu.ind[i]].index_barra >= W)
@@ -104,18 +91,9 @@ double Heuristica::fitness(individuo solu)
 
 
 
-list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
+list<Heuristica::individuo> Heuristica::cruzar(individuo pai, individuo mae)
 {
 	list<individuo> filhos;
-
-	/*default_random_engine generator;
-	generator.seed(time(NULL));
-	uniform_int_distribution<int> bloco1(0, P - 2);
-	uniform_int_distribution<int> bloco2(P - 1, P - 2 + H);
-
-	int escollhidoPack = bloco1(generator),
-		escollhidoCut = bloco2(generator);*/
-
 
 	//----------------------GERAÇÃO DO FILHO1
 	individuo filho = pai;
@@ -142,8 +120,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size()-1);
 
 			int escolhido = distribution(generator);
@@ -170,8 +146,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -196,8 +170,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -251,8 +223,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 		filho.n_vezes[i] = ceil((double)(valor1 + valor2) / 2);
 	}
 
-	default_random_engine generator;
-	generator.seed(time(NULL));
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 	if (!viavel(filho))
@@ -299,8 +269,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -327,8 +295,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -353,8 +319,6 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 			nao_escolhidos.resize(nao_escolhidos.size() - 1);
 		}
 		else {
-			default_random_engine generator;
-			generator.seed(time(NULL));
 			uniform_int_distribution<int> distribution(0, nao_escolhidos.size() - 1);
 
 			int escolhido = distribution(generator);
@@ -432,10 +396,8 @@ list<individuo> Heuristica::cruzar(individuo pai, individuo mae)
 
 
 
-list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
+list<Heuristica::individuo> Heuristica::cruzamento(vector<individuo> Popu)
 {
-	default_random_engine generator;
-	generator.seed(time(NULL));
 	uniform_real_distribution<double> distribution(0.0, 1.0);
 
 	list<individuo> retorno;
@@ -451,10 +413,8 @@ list<individuo> Heuristica::cruzamento(vector<individuo> Popu)
 	return retorno;
 }
 
-list<individuo> Heuristica::cruzamento_diferenciado(vector<individuo> Popu)
+list<Heuristica::individuo> Heuristica::cruzamento_diferenciado(vector<individuo> Popu)
 {
-	default_random_engine generator;
-	generator.seed(time(NULL));
 	uniform_int_distribution<int> distribution(0, Popu.size() - 1);
 	int i = distribution(generator),
 		j;
@@ -643,8 +603,6 @@ void Heuristica::corrigir(individuo &solu)
 			if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k]) {
 				//Pegar o primeiro padrão que cobre ela
 				int primeiro_padrao = - 1;
-				default_random_engine generator;
-				generator.seed(time(NULL));
 				uniform_real_distribution<double> distribution(0.0, 1.0);
 				
 				for (int i = 0; i < P - 1; i++) {
@@ -738,6 +696,9 @@ void Heuristica::corrigir(individuo &solu)
 	}
 	//Tudo OK até aqui
 	
+
+
+
 	vector<int> BarrasGeradas(Gamma, 0);
 	//Contar barras que estão sendo geradas
 	for (int gamma = 0; gamma < Gamma; gamma++) {
@@ -924,7 +885,7 @@ void Heuristica::ImprimirArquivo(individuo solu, double time)
 
 
 
-individuo Heuristica::GerarSoluGRASP() {
+Heuristica::individuo Heuristica::GerarSoluGRASP() {
 	vector<int>	solu1(P - 1 + H + O),	//índices dos padrões
 				solu2(P - 1 + H + O, 0);	//quantidade dos padrões
 
@@ -1105,8 +1066,6 @@ individuo Heuristica::GerarSoluGRASP() {
 
 void Heuristica::mutar(individuo & solu){
 	//return;
-	default_random_engine generator;
-	generator.seed(time(NULL));
 	uniform_int_distribution<int> bloco1(0, P - 2);
 	//indices que serao trocados
 	int id_pack1, id_pack2;
@@ -1159,28 +1118,22 @@ void Heuristica::mutar(individuo & solu){
 
 //ALGORITMO GENÉTICO
 void Heuristica::funcaoteste() {
-	srand(time(NULL));
 	definir_parametros();
 	vector<individuo> Populacao(0);
 
 	std::cout << "Gerando populacao inicial\n";
 
 	auto start = chrono::system_clock::now();
-	
-	for (int i = 0; i < 500*(P + H + O); i++)
+
+	for (int i = 0; i < 500 * (P + H + O); i++)
 	{
 		individuo solucao = GerarSoluGRASP();
-		/*if (!viavel(solucao)) {
-			std::cout << "Erro! Solucao gulosa gerada inviavel!" << endl;
-			exit(0);
-		}
-		else {*/
 		solucao.fitness = fitness(solucao);
 		Populacao.push_back(solucao);
 	}
 
 	selecao(Populacao);
-	
+
 	/*for (auto elemento : Populacao)
 		std::cout << "FO = " << elemento.fitness << endl;*/
 	std::cout << "Populacao inicial gerada e elitizada\n";
@@ -1192,32 +1145,31 @@ void Heuristica::funcaoteste() {
 		//std::cout << "\n\n Geracao" << i << endl;
 		//double fit = Populacao[TamanhoDaPopulacao - 1].fitness;
 
-		list<individuo> Offspring = cruzamento(Populacao);
+		list<individuo> Offspring = cruzamento_diferenciado(Populacao);
 		Populacao.insert(Populacao.end(), Offspring.begin(), Offspring.end());
 		selecao(Populacao);
 		if ((i + 1) % 5 == 0)
 			std::cout << "Geracao:" << i << " -- Melhor FO = " << Populacao[0].fitness << endl;
 
-		/*if (i % 25 == 0) {
-			Restart(Populacao);
-			selecao(Populacao);
-		}*/
-		/*if (fit == populacao[tamanhodapopulacao - 1].fitness) {
-			nao_melhoras++;
-			prob_mutacao *= 1.5;
-		}
-		else
-			nao_melhoras = 0;
-
-		if (nao_melhoras > 25) {
-			std::cout << "geracao:" << i << endl;
-			break;
-
-			/*restart(populacao);
-			selecao(populacao);
-			n_restarts++;
-			nao_melhoras = 0;*/
+		Restart(Populacao);
+		selecao(Populacao);
 	}
+	/*if (fit == populacao[tamanhodapopulacao - 1].fitness) {
+		nao_melhoras++;
+		prob_mutacao *= 1.5;
+	}
+	else
+		nao_melhoras = 0;
+
+	if (nao_melhoras > 25) {
+		std::cout << "geracao:" << i << endl;
+		break;
+
+		/*restart(populacao);
+		selecao(populacao);
+		n_restarts++;
+		nao_melhoras = 0;*/
+
 	
 
 	std::cout << "Aplicando Vizinhanca..." << endl;
@@ -1242,7 +1194,7 @@ void Heuristica::funcaoteste() {
 
 
 
-inline individuo Heuristica::insert(individuo solu, int a, int b) {
+inline Heuristica::individuo Heuristica::insert(individuo solu, int a, int b) {
 
 	individuo vizinho = solu;
 		
@@ -1271,7 +1223,7 @@ inline individuo Heuristica::insert(individuo solu, int a, int b) {
 	return vizinho;
 }
 
-individuo Heuristica::melhor_vizinho(individuo solu)
+Heuristica::individuo Heuristica::melhor_vizinho(individuo solu)
 {
 	individuo melhor = solu;
 	for (int i = 0; i < P - 2; i++) {
@@ -1332,9 +1284,6 @@ void Heuristica::torneio(vector<individuo> &Popu)	//Selecao por torneio aleatori
 		nao_escolhido.push_back(i);
 	}
 
-
-	default_random_engine generator;
-	generator.seed(time(NULL));
 	
 
 	for (int i2 = 1; i2 < TamanhoDaPopulacao; i2++){
@@ -1382,3 +1331,4 @@ void Heuristica::Restart(vector<individuo> &Popu)
 	}
 	selecao(Popu);
 }
+

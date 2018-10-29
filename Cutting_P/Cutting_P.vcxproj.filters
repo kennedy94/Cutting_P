@@ -39,6 +39,9 @@
     <ClCompile Include="Heuristica.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GA_Novo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modelo_Cplex.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Heuristica.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GA_Novo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

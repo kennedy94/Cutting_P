@@ -38,6 +38,7 @@ protected:
 	vector<Padrao_Corte> CutPatterns;
 	vector<Padrao_Pack> PackPatterns;
 	vector<Padrao_Traspasse> SplPatterns;
+	vector<int> Gamma_Associado;
 	
 	vector<double> FORMAS, b, L, l, Menor_tamanho;
 	vector<int> e;

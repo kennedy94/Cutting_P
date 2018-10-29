@@ -7,73 +7,6 @@
 #include <algorithm>
 #include <iomanip>
 
-struct individuo {
-	vector<int> ind;
-	vector<int> n_vezes;
-	double fitness;
-
-	double distancia(individuo indie, int P, int H, int O) {
-		int distancia = 0;
-		vector<int>
-			auxP(P - 1, 0),
-			auxH(H, 0),
-			auxO(O, 0);
-
-		for (int i = 1; i < P; i++) {
-			int valor_desse, valor_daquele;
-			for (int j = 0; j < P - 1; j++)
-				if (this->ind[j] == i) {
-					valor_desse = this->n_vezes[j];
-					break;
-				}
-			for (int j = 0; j < P - 1; j++)
-				if (indie.ind[j] == i) {
-					valor_daquele = indie.n_vezes[j];
-					break;
-				}
-			distancia += abs(valor_desse - valor_daquele);
-		}
-
-		for (int i = 0; i < H; i++) {
-			int valor_desse, valor_daquele;
-			for (int j = P - 1; j < P - 1 + H; j++)
-				if (this->ind[j] == i) {
-					valor_desse = this->n_vezes[j];
-					break;
-				}
-			for (int j = P - 1; j < P - 1 + H; j++)
-				if (indie.ind[j] == i) {
-					valor_daquele = indie.n_vezes[j];
-					break;
-				}
-			distancia += abs(valor_desse - valor_daquele);
-		}
-
-
-
-		for (int i = 0; i < O; i++) {
-			int valor_desse, valor_daquele;
-			for (int j = P - 1 + H; j < P - 1 + H + O; j++)
-				if (this->ind[j] == i) {
-					valor_desse = this->n_vezes[j];
-					break;
-				}
-			for (int j = P - 1 + H; j < P - 1 + H + O; j++)
-				if (indie.ind[j] == i) {
-					valor_daquele = indie.n_vezes[j];
-					break;
-				}
-			
-			distancia += abs(valor_desse - valor_daquele);
-		}
-
-		return distancia;
-	}
-
-	bool operator<(const individuo& rhs) const {
-		return fitness < rhs.fitness;
-	}
-};
 
 class Heuristica :
 	public Problema
@@ -84,14 +17,90 @@ private:
 	double	prob_mutacao,
 		prob_cruzamento;
 			//taxa_aumento_mut;
+
+	default_random_engine generator;
 			
 protected:
-	
+	struct Utilizacao{
+		int idx, util;
+		bool operator<(const Utilizacao& rhs) const {
+			return util < rhs.util;
+		}
+	};
+	struct individuo {
+		vector<int> ind;
+		vector<int> n_vezes;
+		double fitness;
+
+		double distancia(individuo indie, int P, int H, int O) {
+			int distancia = 0;
+			vector<int>
+				auxP(P - 1, 0),
+				auxH(H, 0),
+				auxO(O, 0);
+
+			for (int i = 1; i < P; i++) {
+				int valor_desse, valor_daquele;
+				for (int j = 0; j < P - 1; j++)
+					if (this->ind[j] == i) {
+						valor_desse = this->n_vezes[j];
+						break;
+					}
+				for (int j = 0; j < P - 1; j++)
+					if (indie.ind[j] == i) {
+						valor_daquele = indie.n_vezes[j];
+						break;
+					}
+				distancia += abs(valor_desse - valor_daquele);
+			}
+
+			for (int i = 0; i < H; i++) {
+				int valor_desse, valor_daquele;
+				for (int j = P - 1; j < P - 1 + H; j++)
+					if (this->ind[j] == i) {
+						valor_desse = this->n_vezes[j];
+						break;
+					}
+				for (int j = P - 1; j < P - 1 + H; j++)
+					if (indie.ind[j] == i) {
+						valor_daquele = indie.n_vezes[j];
+						break;
+					}
+				distancia += abs(valor_desse - valor_daquele);
+			}
+
+
+
+			for (int i = 0; i < O; i++) {
+				int valor_desse, valor_daquele;
+				for (int j = P - 1 + H; j < P - 1 + H + O; j++)
+					if (this->ind[j] == i) {
+						valor_desse = this->n_vezes[j];
+						break;
+					}
+				for (int j = P - 1 + H; j < P - 1 + H + O; j++)
+					if (indie.ind[j] == i) {
+						valor_daquele = indie.n_vezes[j];
+						break;
+					}
+
+				distancia += abs(valor_desse - valor_daquele);
+			}
+
+			return distancia;
+		}
+
+		bool operator<(const individuo& rhs) const {
+			return fitness < rhs.fitness;
+		}
+	};
 	void definir_parametros() {
 		TamanhoDaPopulacao = 50;
 		prob_mutacao = 0.05;
 		prob_cruzamento = 0.25;
 		NGeracoes = 5000;
+		generator.seed(time(NULL));
+		srand(time(NULL));
 	}
 
 	double distancia_total_popu(vector<individuo> Popu);

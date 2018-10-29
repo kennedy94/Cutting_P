@@ -214,13 +214,23 @@ Problema::Problema(const char* filename) {
 	cout << endl;
 	instancia.close();
 
+	//Guardar os tamanhos de formas que estão associados aos padrões
+	Gamma_Associado = vector<int>(P, 0);
+	Gamma_Associado[0] = -1;
+	for(int i = 1; i <= P - 1; i++){
+		for (int gamma = 0; gamma < Gamma; gamma++) {
+			if (PackPatterns[i].maximal(L[gamma], TipoVigas[PackPatterns[i].tipo].comprimentos)) {
+				Gamma_Associado[i] = gamma;
+				break;
+			}
+		}
+	}
+
 	for (int i = 0; i < 50; i++) cout << "_";
 	cout << endl;
 	cout << "\t \t Leitura da instancia completa" << endl;
 	for (int i = 0; i < 50; i++) cout << "_";
 	cout << endl;
-
-
 }
 
 
