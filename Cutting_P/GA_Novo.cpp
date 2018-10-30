@@ -293,12 +293,15 @@ bool GA_Novo::viavel(individuo solu)
 		
 	for (int i = 0; i < n_genes; i++) {
 		//se representa um padrao de corte
-		if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H)
-			EstoqueUsado[CutPatterns[solu.ind[i]].index_barra] += solu.n_vezes[i];
+		if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H) {
+			int indice_pat = solu.ind[i] - P;
+			EstoqueUsado[CutPatterns[indice_pat].index_barra] += solu.n_vezes[i];
+		}
 		//se representa um padrao de splicing
 		else if(solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O){
+			int indice_pat = solu.ind[i] - P - H;
 			for (int v = 0; v < V; v++)
-				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[solu.ind[i]].tamanhos[v];
+				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[indice_pat].tamanhos[v];
 		}
 	}
 
@@ -346,25 +349,28 @@ void GA_Novo::funcao_teste()
 	definir_parametros();
 	vector<individuo> Populacao(0);
 
-	double melhor = 999999;
-	for (int i = 0; i < 500*P; i++)
+
+	for (int i = 0; i < 10*(P + O + H); i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 		
 		solucao.fitness = fitness(solucao);
 		if (!viavel(solucao)) {
 			cout << "Erro!!" << endl;
-			exit(0);
+			exit(1);
 		}
-		if (solucao.fitness < melhor)
-			melhor = solucao.fitness;
-
 		Populacao.push_back(solucao);
 	}
 	selecao(Populacao);
-	cruzar(Populacao[0], Populacao[1]);
 
-	cout << melhor << endl;
+	for (int i = 0; i < NGeracoes; i++) {
+		individuo filho = cruzamento_unico(Populacao);
+		Populacao.push_back(filho);
+		selecao(Populacao);
+
+		cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
+	}
+
 }
 
 //IMPRIME REPRESENTAÇÃO DE SOLUÇÃO
@@ -434,6 +440,10 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		filho.n_vezes.push_back(valor);
 	}
 
+
+	if (!viavel(filho))
+		corrigir(filho);
+
 	for (int i = 0; i < n_mae; i++) {
 		int ind_mae = mae.ind[i];
 		int valor = mae.n_vezes[i];
@@ -449,9 +459,8 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 			filho.n_vezes.push_back(valor);
 		}
 	}
-	cout << viavel(filho) << endl;
-	corrigir(filho);
 
+	filho.fitness = fitness(filho);
 	return filho;
 }
 
@@ -620,8 +629,163 @@ void GA_Novo::corrigir(individuo solu) {
 			}
 		}
 	}
-	cout << endl;
 
+	for (int gamma = 0; gamma < Gamma; gamma++) {
+		if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+
+			//Se tem em excesso, remover dos padrões que só tem o tipo gamma
+			for (int i = 0; i < n_genes; i++) {
+				if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H) {
+					int indice_real = solu.ind[i] - P;
+
+					//só gera formas do tipo gamma?
+					bool gera_gamma = true;
+					for (int tam = 0; tam < Gamma; tam++) {
+						if (tam != gamma && CutPatterns[indice_real].tamanhos[tam] > 0) {
+							gera_gamma = false;
+							break;
+						}
+					}
+					if (gera_gamma && CutPatterns[indice_real].tamanhos[gamma] == 0)
+						gera_gamma = false;
+
+					if (gera_gamma) {
+						int remover = min(solu.n_vezes[i], (int)ceil((double)(BarrasGeradas[gamma] - FormasQueDevemSerGeradas[gamma])
+							/ CutPatterns[indice_real].tamanhos[gamma]));
+
+						solu.n_vezes[i] -= remover;
+						BarrasGeradas[gamma] -= remover * CutPatterns[indice_real].tamanhos[gamma];
+						EstoqueUsado[CutPatterns[indice_real].index_barra] -= remover;
+
+
+					}
+					if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+						break;
+				}
+
+			}
+
+
+			//Se continuar, remova dos traspasses
+			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
+				for (int i = 0; i < n_genes; i++){
+					if (solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O) {
+						int indice_real = solu.ind[i] - P - H;
+
+						if (SplPatterns[indice_real].barra_gerada == gamma && solu.n_vezes[i] > 0) {
+							int remover = min(solu.n_vezes[i], BarrasGeradas[gamma] - FormasQueDevemSerGeradas[gamma]);
+							solu.n_vezes[i] -= remover;
+							BarrasGeradas[gamma] -= remover;
+
+							for (int v = 0; v < V; v++)
+								EstoqueUsado[W + v] -= remover * SplPatterns[indice_real].tamanhos[v];
+						}
+						if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
+							break;
+					}
+				}
+			}
+		}
+
+
+
+		if (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+
+			//Se ta em falta, adiciona
+			for (int i = 0; i < n_genes; i++) {
+				if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H) {
+					int indice_real = solu.ind[i] - P;
+					//Se gera só gamma
+					bool gera_gamma = true;
+					for (int tam = 0; tam < Gamma; tam++) {
+						if (tam != gamma && CutPatterns[indice_real].tamanhos[tam] > 0) {
+							gera_gamma = false;
+							break;
+						}
+					}
+					if (gera_gamma && CutPatterns[indice_real].tamanhos[gamma] == 0)
+						gera_gamma = false;
+
+
+					//se o padrão cobre uma barra de tamanho gamma
+					if (gera_gamma) {
+						//enquanto ainda é menor e o padrão não interfere no estoque da barra
+						int adicionar = min((int)(floor((double)(FormasQueDevemSerGeradas[gamma] - BarrasGeradas[gamma]) / CutPatterns[indice_real].tamanhos[gamma])),
+							e[CutPatterns[indice_real].index_barra] - EstoqueUsado[CutPatterns[indice_real].index_barra]);
+
+						EstoqueUsado[CutPatterns[indice_real].index_barra] += adicionar;
+						solu.n_vezes[i] += adicionar;
+
+						BarrasGeradas[gamma] += adicionar * CutPatterns[indice_real].tamanhos[gamma];
+
+						if (BarrasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
+							break;
+					}
+				}
+			}
+			//Se ainda não supriu adiciona splicing feito doido
+			if (BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+				for (int i = 0; i < n_genes; i++) {
+					if (solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O) {
+						int indice_real = solu.ind[i] - P - H;
+						if (SplPatterns[indice_real].barra_gerada == gamma) {
+							bool pode_ser_adicionado = true;
+							while (pode_ser_adicionado  && BarrasGeradas[gamma] < FormasQueDevemSerGeradas[gamma]) {
+
+								for (int v = 0; v < V; v++) {
+									if (EstoqueUsado[W + v] + SplPatterns[indice_real].tamanhos[v] > e[W + v]) {
+										pode_ser_adicionado = false;
+										break;
+									}
+								}
+								if (pode_ser_adicionado) {
+									solu.n_vezes[i]++;
+									BarrasGeradas[gamma]++;
+									for (int v = 0; v < V; v++)
+										EstoqueUsado[W + v] += SplPatterns[indice_real].tamanhos[v];
+								}
+							}
+							if (BarrasGeradas[gamma] == FormasQueDevemSerGeradas[gamma])
+								break;
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+
+	vector<int> serao_removidos;
+	for (int i = 0; i < n_genes; i++)
+		if (solu.n_vezes[i] == 0) 
+			serao_removidos.push_back(i);
+
+	for (int i = serao_removidos.size() - 1; i >= 0; i--) {
+		solu.ind.erase(solu.ind.begin() + serao_removidos[i]);
+		solu.n_vezes.erase(solu.n_vezes.begin() + serao_removidos[i]);
+	}
+
+	
+
+	if (!viavel(solu)) {
+		cout << "Erro!" << endl;
+		exit(1);
+	}
+
+}
+
+GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
+{
+	uniform_int_distribution<int> distribuicao(0, Populacao.size() - 1);
+
+	int i = distribuicao(generator),
+		j = distribuicao(generator);
+	while (i == j)
+		j = distribuicao(generator);
+
+
+	return cruzar(Populacao[i], Populacao[j]);
 }
 
 
