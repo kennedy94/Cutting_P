@@ -49,7 +49,7 @@ protected:
 		srand(time(NULL));
 		TamanhoDaPopulacao = 50;
 		prob_mutacao = 0.1;
-		NGeracoes = 5000*P;
+		NGeracoes = 100*P;
 		generator.seed(time(NULL));
 	}
 	double fitness(individuo solu);

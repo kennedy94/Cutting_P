@@ -391,13 +391,16 @@ void GA_Novo::funcao_teste()
 			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
 		}*/
 
-		if (sem_melhora > 10000) {
+		if (sem_melhora > 10*P) {
 			//cout << "Restart" << endl;
 			Restart(Populacao);
 			sem_melhora = 0;
 			n_restarts++;
 		}
-		if (n_restarts == 5)
+		if (n_restarts == 10)
+			break;
+		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
+		if (current_elapsed_seconds.count() > 3600)
 			break;
 	}
 	auto end = chrono::system_clock::now();
