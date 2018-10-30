@@ -349,27 +349,61 @@ void GA_Novo::funcao_teste()
 	definir_parametros();
 	vector<individuo> Populacao(0);
 
+	auto start = chrono::system_clock::now();
 
-	for (int i = 0; i < 10*(P + O + H); i++)
+	for (int i = 0; i < 100*(P + O + H); i++)
 	{
 		individuo solucao = GerarSoluGRASP();
-		
-		solucao.fitness = fitness(solucao);
-		if (!viavel(solucao)) {
-			cout << "Erro!!" << endl;
-			exit(1);
+
+		if (!viavel(solucao))
+			corrigir(solucao);
+
+		if (viavel(solucao)) {
+			solucao.fitness = fitness(solucao);
+			Populacao.push_back(solucao);
 		}
-		Populacao.push_back(solucao);
 	}
 	selecao(Populacao);
 
+	//mutar(Populacao[0]);
+
+	double fit_antiga = Populacao[0].fitness;
+	int sem_melhora = 0,
+		n_restarts = 0;
+
 	for (int i = 0; i < NGeracoes; i++) {
 		individuo filho = cruzamento_unico(Populacao);
-		Populacao.push_back(filho);
+		if (viavel(filho)) {
+			filho.fitness = fitness(filho);
+			Populacao.push_back(filho);
+		}
 		selecao(Populacao);
 
-		cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
+		if (fit_antiga == Populacao[0].fitness)
+			sem_melhora++;
+		else
+			sem_melhora = 0;
+
+		fit_antiga = Populacao[0].fitness;
+
+
+		/*if (i % 100 == 0) {
+			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
+		}*/
+
+		if (sem_melhora > 10000) {
+			//cout << "Restart" << endl;
+			Restart(Populacao);
+			sem_melhora = 0;
+			n_restarts++;
+		}
+		if (n_restarts == 5)
+			break;
 	}
+	auto end = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds = end - start;
+	std::cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
+	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
 }
 
@@ -437,12 +471,11 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 			}
 		}
 		filho.ind.push_back(ind_pai);
-		filho.n_vezes.push_back(valor);
+		if(distribuicao(generator) > prob_mutacao)
+			filho.n_vezes.push_back(valor);
+		else
+			filho.n_vezes.push_back(0);
 	}
-
-
-	if (!viavel(filho))
-		corrigir(filho);
 
 	for (int i = 0; i < n_mae; i++) {
 		int ind_mae = mae.ind[i];
@@ -456,15 +489,25 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		}
 		if (unico_na_mae) {
 			filho.ind.push_back(ind_mae);
-			filho.n_vezes.push_back(valor);
+			if (distribuicao(generator) > prob_mutacao)
+				filho.n_vezes.push_back(0);
+			else
+				filho.n_vezes.push_back(valor);
 		}
 	}
 
-	filho.fitness = fitness(filho);
+	
+	if (distribuicao(generator) < prob_mutacao)
+		mutar(filho);
+
+	if (!viavel(filho))
+		corrigir(filho);
+
+
 	return filho;
 }
 
-void GA_Novo::corrigir(individuo solu) {
+void GA_Novo::corrigir(individuo &solu) {
 	int n_genes = solu.ind.size();
 
 	vector<Tipo_Viga> DemandasAuxiliares = TipoVigas;
@@ -488,10 +531,12 @@ void GA_Novo::corrigir(individuo solu) {
 							+= PackPatterns[solu.ind[i]].tamanhos[tam];
 					}
 					bool n_atendeu_demanda = false;
-					for (int c = 0; c < C; c++)
-						for (int k = 0; k < TipoVigas[c].n_comprimentos; k++)
+					for (int c = 0; c < C; c++) {
+						for (int k = 0; k < TipoVigas[c].n_comprimentos; k++) {
 							if (DemandasAuxiliares[c].demandas[k] < TipoVigas[c].demandas[k])
 								n_atendeu_demanda = true;
+						}
+					}
 					if (!n_atendeu_demanda) {
 						ja_encheu = true;
 						solu.n_vezes[i] = nvezes + 1;
@@ -513,9 +558,11 @@ void GA_Novo::corrigir(individuo solu) {
 				uniform_real_distribution<double> distribution(0.0, 1.0);
 
 				for (int i = 0; i < n_genes; i++) {
-					if (PackPatterns[solu.ind[i]].tipo == c && PackPatterns[solu.ind[i]].tamanhos[k] > 0 && distribution(generator) < 0.5) {
-						padrao_escolhido = i;
-						break;
+					if (solu.ind[i] <= P - 1) {
+						if (PackPatterns[solu.ind[i]].tipo == c && PackPatterns[solu.ind[i]].tamanhos[k] > 0 && distribution(generator) < 0.5) {
+							padrao_escolhido = i;
+							break;
+						}
 					}
 				}
 				if (padrao_escolhido != -1) {
@@ -525,8 +572,9 @@ void GA_Novo::corrigir(individuo solu) {
 
 					solu.n_vezes[padrao_escolhido] += n_add;
 
-					for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++)
+					for (int k2 = 0; k2 < TipoVigas[c].n_comprimentos; k2++) {
 						DemandasAuxiliares[c].demandas[k2] += n_add*PackPatterns[solu.ind[padrao_escolhido]].tamanhos[k2];
+					}
 				}
 			}
 		}
@@ -553,10 +601,11 @@ void GA_Novo::corrigir(individuo solu) {
 			int indice_real = solu.ind[i] - P;
 			EstoqueUsado[CutPatterns[indice_real].index_barra] += solu.n_vezes[i];
 		}
-		else if(solu.ind[i] >= P){
+		else if (solu.ind[i] >= P) {
 			int indice_real = solu.ind[i] - P - H;
-			for (int v = 0; v < V; v++)
+			for (int v = 0; v < V; v++) {
 				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[indice_real].tamanhos[v];
+			}
 		}
 	}
 	
@@ -601,9 +650,9 @@ void GA_Novo::corrigir(individuo solu) {
 								int(floor((double)retirar / SplPatterns[ind_real].tamanhos[w - W])));
 							solu.n_vezes[i] -= remover;
 
-							for (int v = 0; v < V; v++)
+							for (int v = 0; v < V; v++) {
 								EstoqueUsado[w] -= SplPatterns[ind_real].tamanhos[v - W] * remover;
-
+							}
 							retirar -= remover;
 							if (retirar <= 0)
 								break;
@@ -618,7 +667,7 @@ void GA_Novo::corrigir(individuo solu) {
 	vector<int> BarrasGeradas(Gamma, 0);
 	for (int gamma = 0; gamma < Gamma; gamma++) {
 		for (int i = 0; i < n_genes; i++) {
-			if (solu.ind[i] >= P && solu.ind[i] <= P + H) {
+			if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H) {
 				int ind_real = solu.ind[i] - P;
 				BarrasGeradas[gamma] += solu.n_vezes[i] * CutPatterns[ind_real].tamanhos[gamma];
 			}
@@ -677,8 +726,9 @@ void GA_Novo::corrigir(individuo solu) {
 							solu.n_vezes[i] -= remover;
 							BarrasGeradas[gamma] -= remover;
 
-							for (int v = 0; v < V; v++)
+							for (int v = 0; v < V; v++) {
 								EstoqueUsado[W + v] -= remover * SplPatterns[indice_real].tamanhos[v];
+							}
 						}
 						if (BarrasGeradas[gamma] <= FormasQueDevemSerGeradas[gamma])
 							break;
@@ -756,23 +806,23 @@ void GA_Novo::corrigir(individuo solu) {
 	}
 
 
-	vector<int> serao_removidos;
-	for (int i = 0; i < n_genes; i++)
-		if (solu.n_vezes[i] == 0) 
-			serao_removidos.push_back(i);
+	/*if (!viavel(solu)) {
+		cout << "Erro!" << endl;
+		system("pause");
+		exit(1);
+	}*/
 
+	//Remover os elementos com n_vezes iguais a zero
+	vector<int> serao_removidos(0, 0);
+	for (int i = 0; i < n_genes; i++) {
+		if (solu.n_vezes[i] == 0) {
+			serao_removidos.push_back(i);
+		}
+	}
 	for (int i = serao_removidos.size() - 1; i >= 0; i--) {
 		solu.ind.erase(solu.ind.begin() + serao_removidos[i]);
 		solu.n_vezes.erase(solu.n_vezes.begin() + serao_removidos[i]);
 	}
-
-	
-
-	if (!viavel(solu)) {
-		cout << "Erro!" << endl;
-		exit(1);
-	}
-
 }
 
 GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
@@ -788,4 +838,69 @@ GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
 	return cruzar(Populacao[i], Populacao[j]);
 }
 
+void GA_Novo::mutar(individuo &solu){
+	int n_genes = solu.ind.size();
+	
+	uniform_int_distribution<int> 
+		uniformeP(1, P - 1 + H + O),
+		uniforme_mutar(0, n_genes - 1);
 
+	int mutado;
+	do
+	{
+		mutado = uniforme_mutar(generator);
+	} while (solu.n_vezes[mutado] == 0);
+	solu.n_vezes[mutado] --;
+
+
+
+	int mutante;
+	bool ja_esta;
+	do {
+		mutante = uniformeP(generator);
+		ja_esta = (find(solu.ind.begin(), solu.ind.end(), mutante) != solu.ind.end());
+	} while (ja_esta);
+
+	solu.ind.push_back(mutante);
+	solu.n_vezes.push_back(1);
+	corrigir(solu);
+}
+
+void GA_Novo::Restart(vector<individuo>& Populacao)
+{
+	//Orderna populacao por fitness
+	std::sort(Populacao.begin(), Populacao.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+	//Salva populacao antiga
+	vector<individuo> Auxiliar = Populacao;
+	//Limpar populacao para adicionar os individuos selecionados
+	Populacao.clear();
+
+	//Elistimo
+	for(int i = 0; i < 10; i++)
+		Populacao.push_back(Auxiliar[i]);
+	
+	for (int i = 0; i < max(TamanhoDaPopulacao*10, 10*(P + O + H)); i++)
+	{
+		individuo solucao = GerarSoluGRASP();
+
+		if (!viavel(solucao))
+			corrigir(solucao);
+
+		if (viavel(solucao)) {
+			solucao.fitness = fitness(solucao);
+			Populacao.push_back(solucao);
+		}
+
+	}
+	selecao(Populacao);
+}
+
+
+void GA_Novo::ImprimirArquivo(individuo solu, double time)
+{
+	ofstream resultados("resultados_GA.txt", fstream::app);
+
+	resultados << endl << nome_instancia << "," << solu.fitness << "," << time << endl;
+
+	resultados.close();
+}

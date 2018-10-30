@@ -31,9 +31,10 @@ int main(int argc, char *argv[]) {
 		GA.funcaoteste();
 	}*/
 
-
-	GA_Novo GA(inst);
-	GA.funcao_teste();
+	for (int i = 0; i < 1; i++) {
+		GA_Novo GA(inst);
+		GA.funcao_teste();
+	}
 
 	return 0;
 }

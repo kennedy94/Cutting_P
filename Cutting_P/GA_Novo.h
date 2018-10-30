@@ -2,6 +2,7 @@
 #include "Problema.h"
 #include <numeric>
 #include <random>
+#include <chrono>
 #include <time.h>
 
 class GA_Novo :
@@ -47,10 +48,9 @@ protected:
 	void definir_parametros() {
 		srand(time(NULL));
 		TamanhoDaPopulacao = 50;
-		prob_mutacao = 0.05;
-		NGeracoes = 5000;
+		prob_mutacao = 0.1;
+		NGeracoes = 5000*P;
 		generator.seed(time(NULL));
-		srand(time(NULL));
 	}
 	double fitness(individuo solu);
 
@@ -64,9 +64,17 @@ protected:
 
 	individuo cruzar(individuo pai, individuo mae);
 
-	void corrigir(individuo solu);
+	void corrigir(individuo &solu);
 
 	individuo cruzamento_unico(vector<individuo> Populacao);
+
+	void mutar(individuo &solu);
+
+	void Restart(vector<individuo> &Populacao);
+
+	void ImprimirArquivo(individuo solu, double time);
+
+	individuo melhor_vizinho(individuo solu);
 
 public:
 	void funcao_teste();
