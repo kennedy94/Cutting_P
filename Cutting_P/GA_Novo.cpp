@@ -387,12 +387,11 @@ void GA_Novo::funcao_teste()
 		fit_antiga = Populacao[0].fitness;
 
 
-		/*if (i % 10000 == 0) {
+		/*if (i % 1000 == 0) {
 			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
 		}*/
 
 		if (sem_melhora > ceil(taxa_restart * NGeracoes)) {
-			
 			Restart(Populacao);
 			sem_melhora = 0;
 		}
@@ -476,7 +475,10 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 			}
 		}
 		filho.ind.push_back(ind_pai);
-		filho.n_vezes.push_back(ceil((double)valor/ 2));
+		if(distribuicao(generator) > prob_mutacao)
+			filho.n_vezes.push_back(ceil((double)valor/ 2));
+		else
+			filho.n_vezes.push_back(0);
 	}
 
 	for (int i = 0; i < n_mae; i++) {
@@ -491,7 +493,11 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		}
 		if (unico_na_mae) {
 			filho.ind.push_back(ind_mae);
-			filho.n_vezes.push_back(ceil((double)valor / 2));
+
+			if (distribuicao(generator) > prob_mutacao)
+				filho.n_vezes.push_back(ceil((double)valor / 2));
+			else
+				filho.n_vezes.push_back(0);
 		}
 	}
 
@@ -893,7 +899,6 @@ void GA_Novo::Restart(vector<individuo>& Populacao)
 	}
 	selecao(Populacao);
 }
-
 
 void GA_Novo::ImprimirArquivo(individuo solu, double time)
 {

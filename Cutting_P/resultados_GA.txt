@@ -97,3 +97,6 @@ Instancias\\cwp005,10.6,30.3457
 Instancias\\cwp005,10.6,33.8209
 
 Instancias\\cwp003,10.15,33.6609
+Instancias\\cwp001,6.3,13.5418
+Instancias\\cwp005,10.6,35.9631
+Instancias\\cwp001,6.1,10.2286
