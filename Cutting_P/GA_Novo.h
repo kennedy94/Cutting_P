@@ -10,7 +10,7 @@ class GA_Novo :
 {
 private:
 	int	TamanhoDaPopulacao,NGeracoes;
-	double	prob_mutacao;
+	double	prob_mutacao, taxa_restart;
 	default_random_engine generator;
 
 
@@ -48,8 +48,9 @@ protected:
 	void definir_parametros() {
 		srand(time(NULL));
 		TamanhoDaPopulacao = 50;
-		prob_mutacao = 0.1;
-		NGeracoes = 100*P;
+		taxa_restart = 0.2;
+		prob_mutacao = 0.05;
+		NGeracoes = P * P;
 		generator.seed(time(NULL));
 	}
 	double fitness(individuo solu);
@@ -73,6 +74,8 @@ protected:
 	void Restart(vector<individuo> &Populacao);
 
 	void ImprimirArquivo(individuo solu, double time);
+
+	GA_Novo::individuo insert(individuo solu, int a, int b);
 
 	individuo melhor_vizinho(individuo solu);
 

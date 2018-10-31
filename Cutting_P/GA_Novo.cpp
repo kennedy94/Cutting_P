@@ -351,7 +351,7 @@ void GA_Novo::funcao_teste()
 
 	auto start = chrono::system_clock::now();
 
-	for (int i = 0; i < 100*(P + O + H); i++)
+	for (int i = 0; i < P*P; i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 
@@ -368,8 +368,7 @@ void GA_Novo::funcao_teste()
 	//mutar(Populacao[0]);
 
 	double fit_antiga = Populacao[0].fitness;
-	int sem_melhora = 0,
-		n_restarts = 0;
+	int sem_melhora = 0;
 
 	for (int i = 0; i < NGeracoes; i++) {
 		individuo filho = cruzamento_unico(Populacao);
@@ -378,6 +377,7 @@ void GA_Novo::funcao_teste()
 			Populacao.push_back(filho);
 		}
 		selecao(Populacao);
+		
 
 		if (fit_antiga == Populacao[0].fitness)
 			sem_melhora++;
@@ -387,23 +387,26 @@ void GA_Novo::funcao_teste()
 		fit_antiga = Populacao[0].fitness;
 
 
-		/*if (i % 100 == 0) {
+		/*if (i % 10000 == 0) {
 			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
 		}*/
 
-		if (sem_melhora > 10*P) {
-			//cout << "Restart" << endl;
+		if (sem_melhora > ceil(taxa_restart * NGeracoes)) {
+			
 			Restart(Populacao);
 			sem_melhora = 0;
-			n_restarts++;
 		}
-		if (n_restarts == 10)
-			break;
 		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
 		if (current_elapsed_seconds.count() > 3600)
 			break;
 	}
+	
+	for(auto &viz: Populacao)
+		viz = melhor_vizinho(viz);
+	std::sort(Populacao.begin(), Populacao.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+
 	auto end = chrono::system_clock::now();
+	cout << viavel(Populacao[0]) << endl;
 	chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
 	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
@@ -466,18 +469,14 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		int ind_pai = pai.ind[i];
 		int valor = pai.n_vezes[i];
 
-
 		for (int j = 0; j < n_mae; j++) {
 			if (mae.ind[j] == ind_pai) {
-				valor = ceil((double)(valor + mae.n_vezes[j]) / 2);
+				valor += mae.n_vezes[j];
 				break;
 			}
 		}
 		filho.ind.push_back(ind_pai);
-		if(distribuicao(generator) > prob_mutacao)
-			filho.n_vezes.push_back(valor);
-		else
-			filho.n_vezes.push_back(0);
+		filho.n_vezes.push_back(ceil((double)valor/ 2));
 	}
 
 	for (int i = 0; i < n_mae; i++) {
@@ -492,10 +491,7 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		}
 		if (unico_na_mae) {
 			filho.ind.push_back(ind_mae);
-			if (distribuicao(generator) > prob_mutacao)
-				filho.n_vezes.push_back(0);
-			else
-				filho.n_vezes.push_back(valor);
+			filho.n_vezes.push_back(ceil((double)valor / 2));
 		}
 	}
 
@@ -853,10 +849,7 @@ void GA_Novo::mutar(individuo &solu){
 	{
 		mutado = uniforme_mutar(generator);
 	} while (solu.n_vezes[mutado] == 0);
-	solu.n_vezes[mutado] --;
-
-
-
+	
 	int mutante;
 	bool ja_esta;
 	do {
@@ -865,7 +858,10 @@ void GA_Novo::mutar(individuo &solu){
 	} while (ja_esta);
 
 	solu.ind.push_back(mutante);
-	solu.n_vezes.push_back(1);
+	solu.n_vezes.push_back(solu.n_vezes[mutado]);
+
+	solu.n_vezes[mutado] = 0;
+
 	corrigir(solu);
 }
 
@@ -903,7 +899,51 @@ void GA_Novo::ImprimirArquivo(individuo solu, double time)
 {
 	ofstream resultados("resultados_GA.txt", fstream::app);
 
-	resultados << endl << nome_instancia << "," << solu.fitness << "," << time << endl;
+	resultados << nome_instancia << "," << solu.fitness << "," << time << endl;
 
 	resultados.close();
+}
+
+inline GA_Novo::individuo GA_Novo::insert(individuo solu, int a, int b) {
+
+	individuo vizinho = solu;
+
+	vizinho.ind[b] = solu.ind[a];
+	vizinho.n_vezes[b] = solu.n_vezes[a];
+
+	for (int c = a; c < b; c++) {
+		vizinho.ind[c] = solu.ind[c + 1];
+		vizinho.n_vezes[c] = solu.n_vezes[c + 1];
+	}
+
+	for (int c = 0; c < a; c++) {
+		vizinho.ind[c] = solu.ind[c];
+		vizinho.n_vezes[c] = solu.n_vezes[c];
+	}
+	for (int c = b + 1; c < solu.ind.size(); c++) {
+		vizinho.ind[c] = solu.ind[c];
+		vizinho.n_vezes[c] = solu.n_vezes[c];
+	}
+	//não precisa corrigir porque já qualquer permutação é viável
+
+	vizinho.fitness = fitness(vizinho);
+
+	return vizinho;
+}
+
+
+GA_Novo::individuo GA_Novo::melhor_vizinho(individuo solu)
+{
+	individuo melhor = solu;
+	for (int i = 0; i < solu.ind.size() - 1; i++) {
+		for (int j = i + 1; j < solu.ind.size(); j++) {
+			individuo aux = insert(solu, i, j);
+			if (aux.fitness < melhor.fitness) {
+				melhor = aux;
+				cout << "Houve melhora!" << endl;
+			}
+		}
+	}
+
+	return melhor;
 }
