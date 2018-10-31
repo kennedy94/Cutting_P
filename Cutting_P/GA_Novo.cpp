@@ -351,7 +351,7 @@ void GA_Novo::funcao_teste()
 
 	auto start = chrono::system_clock::now();
 
-	for (int i = 0; i < P*P; i++)
+	for (int i = 0; i < N_aleatorios; i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 
@@ -387,9 +387,9 @@ void GA_Novo::funcao_teste()
 		fit_antiga = Populacao[0].fitness;
 
 
-		/*if (i % 1000 == 0) {
+		if (i % 1000 == 0) {
 			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
-		}*/
+		}
 
 		if (sem_melhora > ceil(taxa_restart * NGeracoes)) {
 			Restart(Populacao);
@@ -502,6 +502,63 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 	}
 
 	
+	if (distribuicao(generator) < prob_mutacao)
+		mutar(filho);
+
+	if (!viavel(filho))
+		corrigir(filho);
+
+
+	return filho;
+}
+
+GA_Novo::individuo GA_Novo::cruzar_diferenciado(individuo pai, individuo mae)
+{
+	int n_pai = pai.ind.size(),
+		n_mae = mae.ind.size();
+
+	individuo filho;
+
+	uniform_real_distribution<double> distribuicao(0.0, 1.0);
+
+	for (int i = 0; i < n_pai; i++) {
+		int ind_pai = pai.ind[i];
+		int valor = pai.n_vezes[i];
+
+		for (int j = 0; j < n_mae; j++) {
+			if (mae.ind[j] == ind_pai) {
+				valor = ceil(((double)valor + mae.n_vezes[j])/2);
+				break;
+			}
+		}
+		filho.ind.push_back(ind_pai);
+		if (distribuicao(generator) > prob_mutacao)
+			filho.n_vezes.push_back(valor);
+		else
+			filho.n_vezes.push_back(0);
+	}
+
+	for (int i = 0; i < n_mae; i++) {
+		int ind_mae = mae.ind[i];
+		int valor = mae.n_vezes[i];
+		bool unico_na_mae = true;
+
+		for (int j = 0; j < n_pai; j++) {
+			if (pai.ind[j] == ind_mae) {
+				unico_na_mae = false;
+			}
+		}
+		if (unico_na_mae) {
+			filho.ind.push_back(ind_mae);
+
+			if (distribuicao(generator) > prob_mutacao)
+				filho.n_vezes.push_back(0);
+			else
+				filho.n_vezes.push_back(valor);
+		}
+	}
+
+
 	if (distribuicao(generator) < prob_mutacao)
 		mutar(filho);
 
@@ -839,8 +896,18 @@ GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
 	while (i == j)
 		j = distribuicao(generator);
 
+	switch (crossover_media)
+	{
+	case(true):
+		return cruzar(Populacao[i], Populacao[j]);
+		break;
+	case(false):
+		return cruzar_diferenciado(Populacao[i], Populacao[j]);
+		break;
+	}
+	
 
-	return cruzar(Populacao[i], Populacao[j]);
+	
 }
 
 void GA_Novo::mutar(individuo &solu){
@@ -881,10 +948,10 @@ void GA_Novo::Restart(vector<individuo>& Populacao)
 	Populacao.clear();
 
 	//Elistimo
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < ceil(taxa_elistimo * TamanhoDaPopulacao); i++)
 		Populacao.push_back(Auxiliar[i]);
 	
-	for (int i = 0; i < max(TamanhoDaPopulacao*10, 10*(P + O + H)); i++)
+	for (int i = 0; i < N_aleatorios; i++)
 	{
 		individuo solucao = GerarSoluGRASP();
 

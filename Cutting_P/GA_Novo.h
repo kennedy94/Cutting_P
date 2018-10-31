@@ -9,8 +9,9 @@ class GA_Novo :
 	public Problema
 {
 private:
-	int	TamanhoDaPopulacao,NGeracoes;
-	double	prob_mutacao, taxa_restart;
+	int	TamanhoDaPopulacao,NGeracoes, N_aleatorios;
+	double	prob_mutacao, taxa_restart, taxa_elistimo;
+	bool crossover_media;
 	default_random_engine generator;
 
 
@@ -47,11 +48,15 @@ protected:
 	
 	void definir_parametros() {
 		srand(time(NULL));
+		N_aleatorios = 100*P;
 		TamanhoDaPopulacao = 50;
 		taxa_restart = 0.2;
 		prob_mutacao = 0.05;
-		NGeracoes = P * P;
+		NGeracoes = 100*P;
+		taxa_elistimo = 0.2;
 		generator.seed(time(NULL));
+		crossover_media = false;
+
 	}
 	double fitness(individuo solu);
 
@@ -64,6 +69,8 @@ protected:
 	void selecao(vector<individuo>& Popu);
 
 	individuo cruzar(individuo pai, individuo mae);
+
+	individuo cruzar_diferenciado(individuo pai, individuo mae);
 
 	void corrigir(individuo &solu);
 
