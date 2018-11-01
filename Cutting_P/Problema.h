@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <sstream>
 #include <list>
+#include <limits>
+#include <climits>
 #include "Tipo_Viga.h"
 #include "Padrao_Corte.h"
 #include "Padrao_Pack.h"
@@ -39,7 +41,7 @@ protected:
 	vector<Padrao_Pack> PackPatterns;
 	vector<Padrao_Traspasse> SplPatterns;
 	vector<int> Gamma_Associado;
-	
+
 	vector<double> FORMAS, b, L, l, Menor_tamanho;
 	vector<int> e;
 

@@ -108,3 +108,13 @@ Instancias\\cwp001,6.35,14.9979
 Instancias\\cwp001,6.2,8.96551
 Instancias\\cwp001,6.25,8.55949
 Instancias\\cwp001,6.3,8.47748
+Instancias\\cwp001,6.2,30.1567
+Instancias\\cwp001,6.15,29.7377
+Instancias\\cwp001,6.2,29.4157
+Instancias\\cwp001,6.15,24.1954
+Instancias\\cwp001,6.25,29.3617
+Instancias\\cwp001,6.35,24.6614
+Instancias\\cwp001,6.4,24.0954
+Instancias\\cwp001,6.35,29.4497
+Instancias\\cwp001,6.35,29.6167
+Instancias\\cwp001,6.2,29.5137

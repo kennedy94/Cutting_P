@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 			exit(0);
 		}
 	}
-	
+
 	/*Modelo_Cplex Modelo(inst);
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
 	Modelo.ImprimirSolucao();*/
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
-	
+
 	/*for (int i = 0; i < 1; i++){
-		Heuristica GA(inst);
-		GA.funcaoteste();
+	Heuristica GA(inst);
+	GA.funcaoteste();
 	}*/
 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 10; i++) {
 		GA_Novo GA(inst);
 		GA.funcao_teste();
 	}
@@ -39,4 +39,3 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
- 

@@ -1,7 +1,7 @@
 #include "GA_Novo.h"
 
 //CALCULA FUNÇÃO OBJETIVO
-double GA_Novo::fitness(individuo solu){
+double GA_Novo::fitness(individuo solu) {
 
 	int tamanho_gene = solu.ind.size();
 	vector<int> UtilizacaoFormas(M, 0);
@@ -26,7 +26,7 @@ double GA_Novo::fitness(individuo solu){
 	{
 		if (solu.ind[i] <= P - 1) {
 			int tipo_da_forma = Gamma_Associado[solu.ind[i]];
-			
+
 			for (int vezes = 0; vezes < solu.n_vezes[i]; vezes++) {
 				std::sort(UtilFormas.begin(), UtilFormas.end());
 				//forma atual recebe argmin da utilização que acomoda o padrão
@@ -55,11 +55,11 @@ double GA_Novo::fitness(individuo solu){
 			if (CutPatterns[indice_pat].index_barra >= W)
 				Sobra3 += solu.n_vezes[i] * (b[CutPatterns[indice_pat].index_barra] - CutPatterns[indice_pat].cap);
 		}
-		else if(solu.ind[i] <= P - 1 + H + O) {
+		else if (solu.ind[i] <= P - 1 + H + O) {
 			int indice_pat = solu.ind[i] - P - H;
 			Sobra3 += solu.n_vezes[i] * (SplPatterns[indice_pat].folga);
 		}
-		
+
 	}
 	Utilizacao valor = *max_element(UtilFormas.begin(), UtilFormas.end());
 	Makespan = valor.util;
@@ -235,10 +235,10 @@ GA_Novo::individuo GA_Novo::GerarSoluGRASP() {
 		if (solu2[i] > 0) {
 			solucao.n_vezes.push_back(solu2[i]);
 			if (i < P - 1)
-				solucao.ind.push_back(solu1[i]);	
+				solucao.ind.push_back(solu1[i]);
 			else if (i < P - 1 + H)
 				solucao.ind.push_back(solu1[i] + P);
-			else if(i < P - 1 + H + O)
+			else if (i < P - 1 + H + O)
 				solucao.ind.push_back(solu1[i] + P + H);
 		}
 	}
@@ -282,7 +282,7 @@ bool GA_Novo::viavel(individuo solu)
 	{
 		//Se caracteriza um padrao de empacotamento
 		if (solu.ind[i] <= P - 1) {
-			FormasQueDevemSerGeradas[Gamma_Associado[solu.ind[i]]] += 
+			FormasQueDevemSerGeradas[Gamma_Associado[solu.ind[i]]] +=
 				TipoVigas[PackPatterns[solu.ind[i]].tipo].n_barras * solu.n_vezes[i];
 		}
 	}
@@ -290,7 +290,7 @@ bool GA_Novo::viavel(individuo solu)
 
 	//Viabilidade por estoque
 	vector<int> EstoqueUsado(W + V, 0);
-		
+
 	for (int i = 0; i < n_genes; i++) {
 		//se representa um padrao de corte
 		if (solu.ind[i] >= P && solu.ind[i] <= P - 1 + H) {
@@ -298,7 +298,7 @@ bool GA_Novo::viavel(individuo solu)
 			EstoqueUsado[CutPatterns[indice_pat].index_barra] += solu.n_vezes[i];
 		}
 		//se representa um padrao de splicing
-		else if(solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O){
+		else if (solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O) {
 			int indice_pat = solu.ind[i] - P - H;
 			for (int v = 0; v < V; v++)
 				EstoqueUsado[W + v] += solu.n_vezes[i] * SplPatterns[indice_pat].tamanhos[v];
@@ -342,82 +342,12 @@ bool GA_Novo::viavel(individuo solu)
 	return true;
 }
 
-//ALGORITMO GENÉTICO
-void GA_Novo::funcao_teste()
-{
-	
-	definir_parametros();
-	vector<individuo> Populacao(0);
-
-	auto start = chrono::system_clock::now();
-
-	for (int i = 0; i < N_aleatorios; i++)
-	{
-		individuo solucao = GerarSoluGRASP();
-
-		if (!viavel(solucao))
-			corrigir(solucao);
-
-		if (viavel(solucao)) {
-			solucao.fitness = fitness(solucao);
-			Populacao.push_back(solucao);
-		}
-	}
-	selecao(Populacao);
-
-	//mutar(Populacao[0]);
-
-	double fit_antiga = Populacao[0].fitness;
-	int sem_melhora = 0;
-
-	for (int i = 0; i < NGeracoes; i++) {
-		individuo filho = cruzamento_unico(Populacao);
-		if (viavel(filho)) {
-			filho.fitness = fitness(filho);
-			Populacao.push_back(filho);
-		}
-		selecao(Populacao);
-		
-
-		if (fit_antiga == Populacao[0].fitness)
-			sem_melhora++;
-		else
-			sem_melhora = 0;
-
-		fit_antiga = Populacao[0].fitness;
-
-
-		if (i % 1000 == 0) {
-			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
-		}
-
-		if (sem_melhora > ceil(taxa_restart * NGeracoes)) {
-			Restart(Populacao);
-			sem_melhora = 0;
-		}
-		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
-		if (current_elapsed_seconds.count() > 3600)
-			break;
-	}
-	
-	for(auto &viz: Populacao)
-		viz = melhor_vizinho(viz);
-	std::sort(Populacao.begin(), Populacao.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
-
-	auto end = chrono::system_clock::now();
-	cout << viavel(Populacao[0]) << endl;
-	chrono::duration<double> elapsed_seconds = end - start;
-	std::cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
-	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
-
-}
-
 //IMPRIME REPRESENTAÇÃO DE SOLUÇÃO
 void GA_Novo::ImprimirVetorSolu(individuo solu)
 {
 	cout << endl;
 	cout << endl;
-	for(int i = 0; i < solu.ind.size(); i ++)
+	for (int i = 0; i < solu.ind.size(); i++)
 	{
 		cout << solu.ind[i] << "," << solu.n_vezes[i] << "  ";
 	}
@@ -475,8 +405,8 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 			}
 		}
 		filho.ind.push_back(ind_pai);
-		if(distribuicao(generator) > prob_mutacao)
-			filho.n_vezes.push_back(ceil((double)valor/ 2));
+		if (distribuicao(generator) > prob_mutacao)
+			filho.n_vezes.push_back(ceil((double)valor / 2));
 		else
 			filho.n_vezes.push_back(0);
 	}
@@ -501,7 +431,7 @@ GA_Novo::individuo GA_Novo::cruzar(individuo pai, individuo mae)
 		}
 	}
 
-	
+
 	if (distribuicao(generator) < prob_mutacao)
 		mutar(filho);
 
@@ -521,23 +451,41 @@ GA_Novo::individuo GA_Novo::cruzar_diferenciado(individuo pai, individuo mae)
 
 	uniform_real_distribution<double> distribuicao(0.0, 1.0);
 
+	//para cada gene do pai
 	for (int i = 0; i < n_pai; i++) {
 		int ind_pai = pai.ind[i];
 		int valor = pai.n_vezes[i];
 
+		bool unico_no_pai = true;
+		//olha se o índice existe só no 
+		//para cada gene da mae
 		for (int j = 0; j < n_mae; j++) {
+			//se o indice da mae esta no pai
 			if (mae.ind[j] == ind_pai) {
-				valor = ceil(((double)valor + mae.n_vezes[j])/2);
+				//gene está nos dois
+				unico_no_pai = false;
+				//valor pra o filho sera o teto da média
+				valor = ceil(((double)valor + mae.n_vezes[j]) / 2);
 				break;
 			}
 		}
+		//adiciona o índice de qqr maneira
 		filho.ind.push_back(ind_pai);
-		if (distribuicao(generator) > prob_mutacao)
-			filho.n_vezes.push_back(valor);
-		else
-			filho.n_vezes.push_back(0);
-	}
 
+		if (unico_no_pai) {
+			//se só existe no pai, joga uma moeda para saber se entra 0 ou o valor do pai
+			if (distribuicao(generator) > 0.5)
+				filho.n_vezes.push_back(valor);
+			else
+				filho.n_vezes.push_back(0);
+		}
+		else {
+			//se está nos dois cromossomos entra a média no filho
+			filho.n_vezes.push_back(valor);
+		}
+		
+	}
+	//Atualiza os que são únicos na mãe
 	for (int i = 0; i < n_mae; i++) {
 		int ind_mae = mae.ind[i];
 		int valor = mae.n_vezes[i];
@@ -551,10 +499,10 @@ GA_Novo::individuo GA_Novo::cruzar_diferenciado(individuo pai, individuo mae)
 		if (unico_na_mae) {
 			filho.ind.push_back(ind_mae);
 
-			if (distribuicao(generator) > prob_mutacao)
-				filho.n_vezes.push_back(0);
-			else
+			if (distribuicao(generator) > 0.5)
 				filho.n_vezes.push_back(valor);
+			else
+				filho.n_vezes.push_back(0);
 		}
 	}
 
@@ -670,7 +618,7 @@ void GA_Novo::corrigir(individuo &solu) {
 			}
 		}
 	}
-	
+
 	for (int w = 0; w < W + V; w++) {
 		//se desobedece o estoque
 		if (EstoqueUsado[w] > e[w]) {
@@ -733,7 +681,7 @@ void GA_Novo::corrigir(individuo &solu) {
 				int ind_real = solu.ind[i] - P;
 				BarrasGeradas[gamma] += solu.n_vezes[i] * CutPatterns[ind_real].tamanhos[gamma];
 			}
-			else if(solu.ind[i] >= P){
+			else if (solu.ind[i] >= P) {
 				int ind_real = solu.ind[i] - P - H;
 				if (SplPatterns[ind_real].barra_gerada == gamma)
 					BarrasGeradas[gamma] += solu.n_vezes[i];
@@ -779,7 +727,7 @@ void GA_Novo::corrigir(individuo &solu) {
 
 			//Se continuar, remova dos traspasses
 			if (BarrasGeradas[gamma] > FormasQueDevemSerGeradas[gamma]) {
-				for (int i = 0; i < n_genes; i++){
+				for (int i = 0; i < n_genes; i++) {
 					if (solu.ind[i] >= P + H && solu.ind[i] <= P - 1 + H + O) {
 						int indice_real = solu.ind[i] - P - H;
 
@@ -869,9 +817,9 @@ void GA_Novo::corrigir(individuo &solu) {
 
 
 	/*if (!viavel(solu)) {
-		cout << "Erro!" << endl;
-		system("pause");
-		exit(1);
+	cout << "Erro!" << endl;
+	system("pause");
+	exit(1);
 	}*/
 
 	//Remover os elementos com n_vezes iguais a zero
@@ -898,22 +846,22 @@ GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
 
 	switch (crossover_media)
 	{
-	case(true):
+	case(1):
 		return cruzar(Populacao[i], Populacao[j]);
 		break;
-	case(false):
+	case(2):
 		return cruzar_diferenciado(Populacao[i], Populacao[j]);
 		break;
 	}
-	
 
-	
+
+
 }
 
-void GA_Novo::mutar(individuo &solu){
+void GA_Novo::mutar(individuo &solu) {
 	int n_genes = solu.ind.size();
-	
-	uniform_int_distribution<int> 
+
+	uniform_int_distribution<int>
 		uniformeP(1, P - 1 + H + O),
 		uniforme_mutar(0, n_genes - 1);
 
@@ -922,7 +870,7 @@ void GA_Novo::mutar(individuo &solu){
 	{
 		mutado = uniforme_mutar(generator);
 	} while (solu.n_vezes[mutado] == 0);
-	
+
 	int mutante;
 	bool ja_esta;
 	do {
@@ -948,9 +896,9 @@ void GA_Novo::Restart(vector<individuo>& Populacao)
 	Populacao.clear();
 
 	//Elistimo
-	for(int i = 0; i < ceil(taxa_elistimo * TamanhoDaPopulacao); i++)
+	for (int i = 0; i < ceil(taxa_elistimo * TamanhoDaPopulacao); i++)
 		Populacao.push_back(Auxiliar[i]);
-	
+
 	for (int i = 0; i < N_aleatorios; i++)
 	{
 		individuo solucao = GerarSoluGRASP();
@@ -1018,4 +966,75 @@ GA_Novo::individuo GA_Novo::melhor_vizinho(individuo solu)
 	}
 
 	return melhor;
+}
+
+
+
+//ALGORITMO GENÉTICO
+void GA_Novo::funcao_teste()
+{
+	definir_parametros();
+	vector<individuo> Populacao(0);
+
+	auto start = chrono::system_clock::now();
+
+	for (int i = 0; i < N_aleatorios; i++)
+	{
+		individuo solucao = GerarSoluGRASP();
+
+		if (!viavel(solucao))
+			corrigir(solucao);
+
+		if (viavel(solucao)) {
+			solucao.fitness = fitness(solucao);
+			Populacao.push_back(solucao);
+		}
+	}
+	selecao(Populacao);
+
+	//mutar(Populacao[0]);
+
+	double fit_antiga = Populacao[0].fitness;
+	int sem_melhora = 0;
+
+	for (int i = 0; i < NGeracoes; i++) {
+		/*if (i % 1000 == 0) {
+			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
+		}*/
+
+		individuo filho = cruzamento_unico(Populacao);
+		if (viavel(filho)) {
+			filho.fitness = fitness(filho);
+			Populacao.push_back(filho);
+		}
+		selecao(Populacao);
+
+
+		if (fit_antiga == Populacao[0].fitness)
+			sem_melhora++;
+		else
+			sem_melhora = 0;
+
+		fit_antiga = Populacao[0].fitness;
+
+
+		if (sem_melhora > ceil(taxa_restart * NGeracoes)) {
+			Restart(Populacao);
+			sem_melhora = 0;
+		}
+		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
+		if (current_elapsed_seconds.count() > 3600)
+			break;
+	}
+
+	for (auto &viz : Populacao)
+		viz = melhor_vizinho(viz);
+	std::sort(Populacao.begin(), Populacao.end(), [](individuo i1, individuo i2) {return i1.fitness < i2.fitness; });
+
+	auto end = chrono::system_clock::now();
+	cout << viavel(Populacao[0]) << endl;
+	chrono::duration<double> elapsed_seconds = end - start;
+	std::cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
+	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
+
 }
