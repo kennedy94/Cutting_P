@@ -45,8 +45,11 @@ protected:
 	vector<double> FORMAS, b, L, l, Menor_tamanho;
 	vector<int> e;
 
+	
+
 public:
 	Problema(const char * filename);
+	double calculo_lowerbound();
 	~Problema();
 };
 

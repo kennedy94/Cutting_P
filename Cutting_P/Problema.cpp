@@ -1,7 +1,5 @@
 #include "Problema.h"
 
-
-
 Problema::Problema(const char* filename) {
 	//Criar nome dos arquivos de padroes com base no nome da instância
 	Parameter_alpha_1 = 1;
@@ -237,3 +235,53 @@ Problema::Problema(const char* filename) {
 Problema::~Problema()
 {
 }
+
+//
+//double Problema::calculo_lowerbound()
+//{
+//	double makespan = 0.0 , soma_aux = 0.0;
+//
+//	//Lower bound do makespan
+//	for (int i = 0; i < C; i++)
+//	{
+//		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+//		{
+//			makespan += TipoVigas[i].tempo_cura* TipoVigas[i].comprimentos[k] * TipoVigas[i].demandas[k];
+//		}
+//	}
+//	for (int m = 0; m < M; m++)
+//	{
+//		soma_aux += FORMAS[m];
+//	}
+//
+//	makespan = ceil(makespan / soma_aux);
+//
+//
+//	//Lower bound da sobra
+//
+//
+//	double melhor_sobra = INT_MAX;
+//	for (int gamma = 0; gamma < Gamma; gamma++)
+//	{
+//		double qtde_min_barras = 0;
+//		for (int i = 0; i < C; i++)
+//		{
+//			for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+//			{
+//				qtde_min_barras += TipoVigas[i].n_barras* TipoVigas[i].comprimentos[k] * TipoVigas[i].demandas[k];
+//			}
+//		}
+//		qtde_min_barras = qtde_min_barras / L[gamma];
+//
+//		double melhor_padrao = INT_MAX;
+//
+//		vector<double> folgas(0, 0);
+//		for(auto h: H)
+//
+//
+//	}
+//
+//
+//
+//	return makespan;
+//}

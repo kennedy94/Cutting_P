@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	/*Modelo_Cplex Modelo(inst);
+	Modelo_Cplex Modelo(inst);
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
 	Modelo.ImprimirSolucaoArquivo();
-	Modelo.ImprimirSolucao();*/
+	Modelo.ImprimirSolucao();
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
 
@@ -31,10 +31,11 @@ int main(int argc, char *argv[]) {
 	GA.funcaoteste();
 	}*/
 
-	for (int i = 0; i < 10; i++) {
+	/*for (int i = 0; i < 10; i++) {
 		GA_Novo GA(inst);
+		cout << GA.calculo_lowerbound() << endl;
 		GA.funcao_teste();
-	}
+	}*/
 
 	return 0;
 }
