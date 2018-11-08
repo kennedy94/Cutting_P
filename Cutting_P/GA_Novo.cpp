@@ -1037,4 +1037,6 @@ void GA_Novo::funcao_teste()
 	std::cout << "\t Tempo Total " << elapsed_seconds.count() << "s" << endl;
 	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
+	ImprimirVetorSolu(Populacao[0]);
+
 }

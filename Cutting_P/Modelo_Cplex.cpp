@@ -92,7 +92,7 @@ void Modelo_Cplex::resolver_inteira() {
 	try
 	{
 		//cplex.setParam(IloCplex::PreInd, 0);
-		cplex.setParam(IloCplex::NumericalEmphasis, 1);
+		//cplex.setParam(IloCplex::NumericalEmphasis, 1);
 		cplex.setParam(IloCplex::TiLim, 3600);
 		auto start = chrono::system_clock::now();
 		cplex.solve();
@@ -479,7 +479,7 @@ void Modelo_Cplex::MontarModelo() {
 
 		
 		cplex = IloCplex(model);
-		cplex.exportModel("Modelo.lp");
+		//cplex.exportModel("Modelo.lp");
 	}
 	catch (IloException& e) {
 		cerr << "Erro: " << e.getMessage() << endl;
@@ -693,3 +693,4 @@ void Modelo_Cplex::PlotarBarras() {
 	cout << "Barras Gerado! :)" << endl;
 
 }
+

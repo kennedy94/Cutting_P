@@ -225,6 +225,7 @@
     <ClCompile Include="Padrao_Pack.cpp" />
     <ClCompile Include="Padrao_Traspasse.cpp" />
     <ClCompile Include="Problema.cpp" />
+    <ClCompile Include="Relaxacao_Linear.cpp" />
     <ClCompile Include="Tipo_Viga.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +236,7 @@
     <ClInclude Include="Padrao_Pack.h" />
     <ClInclude Include="Padrao_Traspasse.h" />
     <ClInclude Include="Problema.h" />
+    <ClInclude Include="Relaxacao_Linear.h" />
     <ClInclude Include="Tipo_Viga.h" />
   </ItemGroup>
   <ItemGroup>

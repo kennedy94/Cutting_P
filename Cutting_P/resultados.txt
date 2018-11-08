@@ -94,3 +94,19 @@ Instancia_novas\\cwp003,5,2,3,0,0,0.893051
 Instancia_novas\\cwp003,5,2,3,0,0,0.298017
 
 Instancia_novas\\cwp001,5,2,3,0,0,0.593034
+
+Instancia_novas\\numerica,2.3,2,0.3,0,0,0.132008
+
+Instancias\\cwp001,6.05,4,2.05,888,0,1.8081
+
+Instancias\\cwp002,8.1,4,4.1,47,0,2.27613
+
+Instancias\\cwp002,8.1,4,4.1,47,0,2.75716
+
+Instancias\\cwp001,5.55,3.58247,2.04713,1.53534,0.0780045
+
+Instancias\\cwp050,38.4,26.8434,6.37545,20.468,64.2717
+
+Instancias\\cwp001,5.55,3.58247,2.04713,1.53534,0.087005
+
+Instancias\\cwp009,7.2,3,4.2,48207,0,44.3945

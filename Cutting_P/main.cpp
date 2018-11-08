@@ -1,6 +1,7 @@
 #include "Modelo_Cplex.h"
 #include "Heuristica.h"
 #include "GA_Novo.h"
+#include "Relaxacao_Linear.h"
 using namespace std;
 
 
@@ -18,11 +19,19 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	Modelo_Cplex Modelo(inst);
+	/*Modelo_Cplex Modelo(inst);
 	Modelo.MontarModelo();
 	Modelo.resolver_inteira();
-	Modelo.ImprimirSolucaoArquivo();
-	Modelo.ImprimirSolucao();
+	Modelo.ImprimirSolucaoArquivo();*/
+	//Modelo.ImprimirSolucao();
+
+	/*Relaxacao_Linear Linear(inst);
+	Linear.MontarModelo();
+	Linear.resolver_linear();
+	Linear.ImprimirSolucaoArquivo();*/
+
+	
+
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
 
@@ -31,11 +40,10 @@ int main(int argc, char *argv[]) {
 	GA.funcaoteste();
 	}*/
 
-	/*for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 1; i++) {
 		GA_Novo GA(inst);
-		cout << GA.calculo_lowerbound() << endl;
 		GA.funcao_teste();
-	}*/
+	}
 
 	return 0;
 }

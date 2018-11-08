@@ -49,7 +49,6 @@ protected:
 
 public:
 	Problema(const char * filename);
-	double calculo_lowerbound();
 	~Problema();
 };
 
