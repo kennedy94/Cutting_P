@@ -40,7 +40,7 @@ ax.set_xlabel("Time")
 fontP = FontProperties()
 fontP.set_size('small')
 #plt.legend(handles=[blackpatch,graypatch,greenpatch,bluepatch, red_patch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-plt.legend(handles=[blackpatch,graypatch,whitepatch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+plt.legend(handles=[blackpatch],bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 plt.tight_layout()       
 #plt.show()

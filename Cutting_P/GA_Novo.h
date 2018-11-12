@@ -50,16 +50,15 @@ protected:
 		srand(time(NULL));
 		generator.seed(time(NULL));
 
-		TamanhoDaPopulacao = 25;
-		NGeracoes = 500 * P;
+		TamanhoDaPopulacao = 25;	//50, 100, 150
+		NGeracoes = 500 * P;		//100P, 300P, 500P, P^2
+		prob_mutacao = 0.01;		//0.01, 0.05, 0.10
+		taxa_elistimo = 0.1;		//0.10, 0.25, 0.50
 
-		prob_mutacao = 0.01;
+		//Fixo depois dos primeiros taguchi
 		taxa_restart = 0.2;
-
-
-		N_aleatorios = 500 * P;
-		crossover_media = 1; // 1;
-		taxa_elistimo = 0.1;
+		N_aleatorios = 100 * P;
+		crossover_media = 1; // 1;		
 	}
 	double fitness(individuo solu);
 

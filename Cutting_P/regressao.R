@@ -4,11 +4,14 @@ data = read.csv(file.choose())
 
 modelo = lm(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
 modelo = lm(SNR ~ TP + NG + MUT + RST + AS + CRS + TER,data)
+anova(modelo)
 summary(anova(modelo))
 #aov(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
-
-plot(data$Instance,data$LP, type = "+")
-plot(data$LB, type = "o", lty=1, pch=1, xlab = "Instance",ylab = "Value")
-lines(data$IP, type = "o", lty=2, pch=3)
-lines(data$LP, type = "o", lty=5, pch = 2)
-legend("topright", legend = c(" ", " "))
+interaction.plot(x.factor = data$MUT,
+                 response = data$DESEM,
+                 trace.factor = data$CRS,
+                 fun = mean,
+                 col=c("black","red","green"),  ### Colors for levels of trace var.
+                 pch=c(19, 17, 15),             ### Symbols for levels of trace var.
+                 fixed=TRUE,                    ### Order by factor order in data
+                 leg.bty = "o")

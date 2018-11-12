@@ -1,5 +1,5 @@
 library(AlgDesign)
-levels.design = c(3,2,3,2,2,2,2)
+levels.design = c(4,3,3,3)
 f.design <- gen.factorial(levels = levels.design,
                           varNames = c("Popu","Gen", "Mut", "Restart", "NAlea", "Crossover","tax_elitismo"),
                           factors = "all")

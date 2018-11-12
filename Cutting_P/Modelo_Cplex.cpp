@@ -575,7 +575,7 @@ void Modelo_Cplex::ImprimirGantt() {
 				if (PackPatterns[i].maximal(FORMAS[m], TipoVigas[PackPatterns[i].tipo].comprimentos)
 					&& cplex.isExtracted(CPLEX_x[i][m][t])
 					&& cplex.getValue(CPLEX_x[i][m][t]) == 1) {
-					txtsolu << m + 1 << "," << t + 0.1 << "," << t + TipoVigas[PackPatterns[i].tipo].tempo_cura - 0.1 << ",Type " << PackPatterns[i].tipo + 1 << endl;
+					txtsolu << m + 1 << "," << t + 0.01 << "," << t + TipoVigas[PackPatterns[i].tipo].tempo_cura - 0.01 << ",Type " << PackPatterns[i].tipo + 1 << endl;
 					usou = true;
 				}
 		if (!usou)
