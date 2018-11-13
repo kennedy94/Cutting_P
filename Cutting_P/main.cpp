@@ -19,11 +19,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	//Modelo_Cplex Modelo(inst);
-	//Modelo.MontarModelo();
-	//Modelo.resolver_inteira();
-	//Modelo.ImprimirSolucaoArquivo();
-	//Modelo.ImprimirSolucao();
+	/*Modelo_Cplex Modelo(inst);
+	Modelo.MontarModelo();
+	Modelo.resolver_inteira();
+	Modelo.ImprimirSolucaoArquivo();
+	Modelo.ImprimirSolucao();*/
 
 	/*Relaxacao_Linear Linear(inst);
 	Linear.MontarModelo();
@@ -31,7 +31,6 @@ int main(int argc, char *argv[]) {
 	Linear.ImprimirSolucaoArquivo();*/
 
 	
-
 	//Modelo.ImprimirGantt();
 	//Modelo.PlotarBarras();
 

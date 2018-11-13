@@ -65,6 +65,12 @@ public:
 
 	void PlotarBarras();
 
+	void CPLEX_objective_function_transformada();
+
+	IloNum LB_makespan();
+
+	double LB_custo();
+
 	void resolver_inteira();
 
 	~Modelo_Cplex();

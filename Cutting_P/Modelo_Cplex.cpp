@@ -459,7 +459,9 @@ void Modelo_Cplex::MontarModelo() {
 
 		iniciar_variaveis();
 
-		CPLEX_objective_function();
+		//CPLEX_objective_function_transformada();
+
+		CPLEX_objective_function_transformada();
 
 		restricoes_onlyone();
 
@@ -694,3 +696,127 @@ void Modelo_Cplex::PlotarBarras() {
 
 }
 
+
+
+void Modelo_Cplex::CPLEX_objective_function_transformada() {
+	IloExpr soma1(env), soma2(env), soma3(env), expr(env);
+
+
+	IloInt t;
+
+	IloExpr costSum(env);
+	for (t = 0; t < T; t++)
+		costSum += z[t];
+
+
+	for (auto h : H_menos) {
+		if (CutPatterns[h].index_barra < W) {
+			soma1 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
+		}
+	}
+	for (auto mu : SplPatterns) {
+		expr += mu.folga * CPLEX_o[mu.id];
+	}
+
+	for (auto h : H_mais) {
+		if (CutPatterns[h].index_barra < W) {
+			for (IloInt v = 0; v < V; v++) {
+				if (CutPatterns[h].Gera_LeftOver(Gamma, v)) {
+					soma2 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_tri[h][CutPatterns[h].index_barra][v];
+				}
+			}
+		}
+	}
+
+	for (auto h : H_menos) {
+		if (CutPatterns[h].index_barra >= W) {
+			soma3 += (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) * CPLEX_y_bi[h][CutPatterns[h].index_barra];
+		}
+	}
+	Makespan = IloNumVar(env, 0, T);
+	Custo = IloNumVar(env, 0, 99999999);
+
+	model.add(costSum == Makespan);
+	model.add(Custo == soma1 + Parameter_alpha_1*soma2 + Parameter_alpha_2*(soma3 + expr));
+	model.add(IloMinimize(env, Makespan/LB_makespan() + Custo/LB_custo()));
+
+	soma1.end();
+	soma2.end();
+	soma3.end();
+	expr.end();
+	costSum.end();
+}
+
+
+IloNum Modelo_Cplex::LB_makespan()
+{
+	IloNum makespan = 0.0, soma_aux = 0.0;
+
+	//Lower bound do makespan
+	for (int i = 0; i < C; i++)
+	{
+		for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+		{
+			makespan += TipoVigas[i].tempo_cura* TipoVigas[i].comprimentos[k] * TipoVigas[i].demandas[k];
+		}
+	}
+	for (int m = 0; m < M; m++)
+	{
+		soma_aux += FORMAS[m];
+	}
+
+	makespan = ceil(makespan / soma_aux);
+
+	return makespan;
+}
+
+IloNum Modelo_Cplex::LB_custo()
+{
+	IloNum melhor_sobra = (double)INT_MAX;
+	for (int gamma = 0; gamma < Gamma; gamma++)
+	{
+		double qtde_min_barras = 0;
+		for (int i = 0; i < C; i++)
+		{
+			for (int k = 0; k < TipoVigas[i].n_comprimentos; k++)
+			{
+				qtde_min_barras += TipoVigas[i].n_barras* TipoVigas[i].comprimentos[k] * TipoVigas[i].demandas[k];
+			}
+		}
+		qtde_min_barras = ceil(qtde_min_barras / L[gamma]);
+
+		//min
+		double melhor_padrao = (double)INT_MAX;
+		//min f_hw
+		for (auto h : H_menos) {
+			if (CutPatterns[h].index_barra < W)
+				if (CutPatterns[h].tamanhos[gamma] > 0 && (b[CutPatterns[h].index_barra] - CutPatterns[h].cap < melhor_padrao) / CutPatterns[h].tamanhos[gamma])
+					melhor_padrao = (b[CutPatterns[h].index_barra] - CutPatterns[h].cap) / CutPatterns[h].tamanhos[gamma];
+		}
+		//min alpha' f_hwv
+		for (auto h : H_mais) {
+			if (CutPatterns[h].tamanhos[gamma] > 0 && Parameter_alpha_1*(b[CutPatterns[h].index_barra] - CutPatterns[h].cap < melhor_padrao) / CutPatterns[h].tamanhos[gamma])
+				melhor_padrao = Parameter_alpha_1*(b[CutPatterns[h].index_barra] - CutPatterns[h].cap) / CutPatterns[h].tamanhos[gamma];
+		}
+
+		//min alpha'' fhw
+		for (auto h : H_menos) {
+			if (CutPatterns[h].index_barra >= W)
+				if (CutPatterns[h].tamanhos[gamma] > 0 && Parameter_alpha_2*(b[CutPatterns[h].index_barra] - CutPatterns[h].cap < melhor_padrao) / CutPatterns[h].tamanhos[gamma])
+					melhor_padrao = Parameter_alpha_2*(b[CutPatterns[h].index_barra] - CutPatterns[h].cap) / CutPatterns[h].tamanhos[gamma];
+		}
+
+		for (auto mu : SplPatterns) {
+			if (mu.barra_gerada == gamma && Parameter_alpha_2 * mu.folga < melhor_padrao)
+				melhor_padrao = Parameter_alpha_2 * mu.folga;
+		}
+
+
+		if (melhor_sobra > qtde_min_barras*melhor_padrao)
+			melhor_sobra = qtde_min_barras*melhor_padrao;
+	}
+
+
+	return melhor_sobra;
+
+}
