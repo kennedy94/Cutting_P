@@ -2,6 +2,7 @@
 data = read.csv(file.choose())
 #plot(data)
 
+modelo = lm(DESEM ~ TP + NG + MUT + TER,data)
 modelo = lm(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
 modelo = lm(SNR ~ TP + NG + MUT + RST + AS + CRS + TER,data)
 anova(modelo)

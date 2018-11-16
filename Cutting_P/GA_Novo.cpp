@@ -971,7 +971,7 @@ GA_Novo::individuo GA_Novo::melhor_vizinho(individuo solu)
 
 
 //ALGORITMO GENÉTICO
-void GA_Novo::funcao_teste()
+void GA_Novo::Algoritmo_Genetico()
 {
 	definir_parametros();
 	vector<individuo> Populacao(0);
@@ -1039,4 +1039,22 @@ void GA_Novo::funcao_teste()
 
 	ImprimirVetorSolu(Populacao[0]);
 
+}
+
+void GA_Novo::teste()
+{
+	definir_parametros();
+
+	individuo pai = GerarSoluGRASP();
+	individuo mae = GerarSoluGRASP();
+	ImprimirVetorSolu(pai);
+	ImprimirVetorSolu(mae);
+
+	ImprimirVetorSolu(cruzar(pai, mae));
+
+	ImprimirVetorSolu(cruzar_diferenciado(pai, mae));
+	
+
+	if (!viavel(pai) || !viavel(mae))
+		cerr << "Erro!\n" << endl;
 }

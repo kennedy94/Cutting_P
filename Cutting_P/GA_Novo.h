@@ -89,7 +89,9 @@ protected:
 	individuo melhor_vizinho(individuo solu);
 
 public:
-	void funcao_teste();
+	void Algoritmo_Genetico();
+
+	void teste();
 
 	GA_Novo(const char * filename) : Problema(filename) { };
 };
