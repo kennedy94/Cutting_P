@@ -83,7 +83,6 @@ GA_Novo::individuo GA_Novo::GerarSoluGRASP() {
 	random_shuffle(solu1.begin() + P - 1, solu1.begin() + P - 1 + H);
 	random_shuffle(solu1.begin() + P - 1 + H, solu1.end());
 
-
 	//prenchendo os padrões de empacotamento até a demanda ser atendida
 	vector<Tipo_Viga> DemandasAuxiliares = TipoVigas;
 
@@ -189,15 +188,10 @@ GA_Novo::individuo GA_Novo::GerarSoluGRASP() {
 					break;
 			}
 		}
-
-
-
-
 	}
 
-	//Se com os padrões de corte não supriu o necessário de barras adicione splicing até suprir
-
-	vector<int> EstoqueDisponivel_Aux;
+	//Desnecessário esse último for
+	/*vector<int> EstoqueDisponivel_Aux;
 
 	for (int gamma = 0; gamma < Gamma; gamma++) {
 		int necessario = FormasQueDevemSerGeradas[gamma] - FormasGeradas[gamma];
@@ -226,7 +220,7 @@ GA_Novo::individuo GA_Novo::GerarSoluGRASP() {
 			}
 		}
 	}
-
+*/
 	individuo solucao;
 	solucao.ind = vector<int>(0, 0);
 	solucao.n_vezes = vector<int>(0, 0);
