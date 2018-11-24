@@ -50,10 +50,10 @@ protected:
 		srand(time(NULL));
 		generator.seed(time(NULL));
 
-		TamanhoDaPopulacao = 25;	//50, 100, 150
+		TamanhoDaPopulacao = 50;	//50, 100, 150
 		NGeracoes = 500 * P;		//100P, 300P, 500P, P^2
-		prob_mutacao = 0.01;		//0.01, 0.05, 0.10
-		taxa_elistimo = 0.1;		//0.10, 0.25, 0.50
+		prob_mutacao = 0.05;		//0.01, 0.05, 0.10
+		taxa_elistimo = 0.5;		//0.10, 0.25, 0.50
 
 		//Fixo depois dos primeiros taguchi
 		taxa_restart = 0.2;

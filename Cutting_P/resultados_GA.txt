@@ -123,3 +123,7 @@ Instancia_novas\\cwp001,5.5,9.77156
 Instancia_novas\\cwp001,5.6,9.65355
 Instancia_novas\\cwp001,5.5,8.63649
 Instancia_novas\\numerica,2.3,0.515029
+Instancias\\cwp021,34.75,218.755
+Instancia_novas\\numerica,2.3,1.60909
+Instancia_novas\\numerica,2.3,1.6681
+Instancias\\cwp015,22.95,151.809

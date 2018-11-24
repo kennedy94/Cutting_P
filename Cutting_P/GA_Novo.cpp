@@ -838,6 +838,8 @@ GA_Novo::individuo GA_Novo::cruzamento_unico(vector<individuo> Populacao)
 	while (i == j)
 		j = distribuicao(generator);
 
+
+
 	switch (crossover_media)
 	{
 	case(1):
@@ -986,6 +988,16 @@ void GA_Novo::Algoritmo_Genetico()
 	}
 	selecao(Populacao);
 
+	vector<double> v(0, 0.0);
+	for (auto el : Populacao)
+		v.push_back(el.fitness);
+
+	float average = accumulate(v.begin(), v.end(), 0.0) / v.size();
+	
+	ofstream arquivo_medias("medias.csv");
+	arquivo_medias << Populacao[0].fitness << "," << average << endl;
+
+
 	//mutar(Populacao[0]);
 
 	double fit_antiga = Populacao[0].fitness;
@@ -997,6 +1009,7 @@ void GA_Novo::Algoritmo_Genetico()
 		}*/
 
 		individuo filho = cruzamento_unico(Populacao);
+
 		if (viavel(filho)) {
 			filho.fitness = fitness(filho);
 			Populacao.push_back(filho);
@@ -1017,6 +1030,14 @@ void GA_Novo::Algoritmo_Genetico()
 			sem_melhora = 0;
 		}
 		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
+
+
+		v.clear();
+		for (auto el : Populacao)
+			v.push_back(el.fitness);
+		average = accumulate(v.begin(), v.end(), 0.0) / v.size();
+		arquivo_medias << Populacao[0].fitness << "," << average << endl;
+
 		if (current_elapsed_seconds.count() > 3600)
 			break;
 	}
@@ -1032,6 +1053,13 @@ void GA_Novo::Algoritmo_Genetico()
 	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
 	ImprimirVetorSolu(Populacao[0]);
+
+	v.clear();
+	for (auto el : Populacao)
+		v.push_back(el.fitness);
+	average = accumulate(v.begin(), v.end(), 0.0) / v.size();
+	arquivo_medias << Populacao[0].fitness << "," << average << endl;
+	arquivo_medias.close();
 
 }
 
