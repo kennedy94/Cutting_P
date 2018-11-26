@@ -43,8 +43,8 @@ int main(int argc, char *argv[]) {
 		GA_Novo GA(inst);
 		GA.Algoritmo_Genetico();
 	}
-	/*
-	GA_Novo GA(inst);
+
+	/*GA_Novo GA(inst);
 	GA.teste();*/
 
 	return 0;
