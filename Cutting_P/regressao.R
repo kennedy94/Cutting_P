@@ -1,18 +1,24 @@
 
 data = read.csv(file.choose())
-#plot(data)
+library(phia)
+library(tree)
+plot(data)
 
-modelo = lm(DESEM ~ TP + NG + MUT + TER,data)
-modelo = lm(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
-modelo = lm(SNR ~ TP + NG + MUT + RST + AS + CRS + TER,data)
-anova(modelo)
+modelo = lm(SNR2 ~ TP + NG + MUT + TER, data)
+modelo = lm(SNR ~ TP + NG + MUT + TER,data)
+modelo = lm(SNRT ~ NG + RST + AS,data)
+
+summary(aov(modelo))
 summary(anova(modelo))
 #aov(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
-interaction.plot(x.factor = data$MUT,
-                 response = data$DESEM,
-                 trace.factor = data$CRS,
-                 fun = mean,
-                 col=c("black","red","green"),  ### Colors for levels of trace var.
-                 pch=c(19, 17, 15),             ### Symbols for levels of trace var.
-                 fixed=TRUE,                    ### Order by factor order in data
-                 leg.bty = "o")
+
+#plot
+layout(matrix(c(1,2,3,4,5,6,7,7), 2, 4, byrow = TRUE))
+boxplot(DESEM ~ TP, data, xlab="TP")
+boxplot(DESEM ~ NG, data, xlab="NG")
+boxplot(DESEM ~ RST, data, xlab="RST")
+boxplot(DESEM ~ AS, data, xlab="AS")
+boxplot(DESEM ~ CRS, data, xlab="CRS")
+boxplot(DESEM ~ TER, data, xlab="TER")
+boxplot(DESEM ~ MUT, data, xlab="MUT")
+

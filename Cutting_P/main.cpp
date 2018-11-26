@@ -39,13 +39,13 @@ int main(int argc, char *argv[]) {
 	GA.funcaoteste();
 	}*/
 
-	/*for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 1; i++) {
 		GA_Novo GA(inst);
 		GA.Algoritmo_Genetico();
-	}*/
-
+	}
+	/*
 	GA_Novo GA(inst);
-	GA.teste();
+	GA.teste();*/
 
 	return 0;
 }

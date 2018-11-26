@@ -997,7 +997,18 @@ void GA_Novo::Algoritmo_Genetico()
 	double fit_antiga = Populacao[0].fitness;
 	int sem_melhora = 0;
 
+	vector<double> fitnesses(0, 0.0);
+	for (auto elemento : Populacao)
+		fitnesses.push_back(elemento.fitness);
+	float average = accumulate(fitnesses.begin(), fitnesses.end(), 0.0) / fitnesses.size();
+	ofstream arquivo("Geracoes1.csv");
+	arquivo << 0 << "," << average << "," << Populacao[0].fitness << endl;
+
+
+	
+
 	for (int i = 0; i < NGeracoes; i++) {
+
 		/*if (i % 1000 == 0) {
 			cout << "Geracao" << i << ": " << Populacao[0].fitness << endl;
 		}*/
@@ -1025,7 +1036,16 @@ void GA_Novo::Algoritmo_Genetico()
 		chrono::duration<double> current_elapsed_seconds = chrono::system_clock::now() - start;
 		if (current_elapsed_seconds.count() > 3600)
 			break;
+
+
+		fitnesses.clear();
+		for (auto elemento : Populacao)
+			fitnesses.push_back(elemento.fitness);
+			
+		average = accumulate(fitnesses.begin(), fitnesses.end(), 0.0) / fitnesses.size();
+		arquivo << i+1 << "," << average << "," << Populacao[0].fitness << endl;
 	}
+
 
 	for (auto &viz : Populacao)
 		viz = melhor_vizinho(viz);
@@ -1038,6 +1058,15 @@ void GA_Novo::Algoritmo_Genetico()
 	ImprimirArquivo(Populacao[0], elapsed_seconds.count());
 
 	ImprimirVetorSolu(Populacao[0]);
+
+
+	fitnesses.clear();
+	for (auto elemento : Populacao)
+		fitnesses.push_back(elemento.fitness);
+
+	average = accumulate(fitnesses.begin(), fitnesses.end(), 0.0) / fitnesses.size();
+	arquivo << NGeracoes+1 << "," << average << "," << Populacao[0].fitness << endl;
+	arquivo.close();
 
 }
 
