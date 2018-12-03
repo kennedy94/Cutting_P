@@ -10,7 +10,7 @@ Problema::Problema(const char* filename) {
 	stringstream ss,ss2,ss3;
 	ss << filename << ".cutpat";
 	padroes_cut = ss.str();
-	ss2 << filename << ".pat";
+	ss2 << filename << ".packpat";
 	padroes_pack = ss2.str();
 	ss3 << filename << ".spl";
 	padroes_spl = ss3.str();
