@@ -2,8 +2,11 @@
 data = read.csv(file.choose())
 library(phia)
 library(tree)
-plot(data)
+plot(time_solv ~ tamanho,data)
+par(new=TRUE)
+plot(time_GS ~ tamanho,data)
 
+help("plot")
 modelo = lm(SNR2 ~ TP + NG + MUT + TER, data)
 modelo = lm(DESEM ~ MUT+  TP + NG + TER,data)
 modelo = lm(SNRT ~ NG + RST + AS,data)

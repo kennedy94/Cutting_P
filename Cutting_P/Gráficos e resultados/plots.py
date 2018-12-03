@@ -6,20 +6,48 @@ Created on Fri Nov 30 10:49:40 2018
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
+#import numpy as np
 import pandas as pd
+
+dados = pd.read_csv("medias.csv")
+dados.head()
+plot = dados.plot(kind = "line", grid = True,
+           color = ['gray','black'], style = '-')
+plt.xscale('symlog', linthreshy=0.015)
+#plt.yticks(np.arange(0, 4000, step=500))
+#plt.show()
+plt.savefig('tempo_ga_cplex_log.png', dpi=250)
+
+
+
+
 
 dados = pd.read_csv("tempos_ga_cplex.csv")
 plot = dados.plot(kind = "line", grid = True,
            color = ['gray','black'], style = '.-')
-plt.yscale('symlog', linthreshy=0.05)
-plt.yticks(np.arange(0, 1, step=0.2))
+plt.yscale('symlog', linthreshy=0.015)
+#plt.yticks(np.arange(0, 4000, step=500))
+plot.set_xlabel('Instance')
+plot.set_ylabel('time (s)')
+plt.savefig('tempo_ga_cplex_log.png', dpi=250)
 plt.show()
 
+
+
+dados = pd.read_csv("tempos_ga_cplex.csv")
+plot = dados.plot(kind = "line", grid = True,
+           color = ['gray','black'], style = '.-')
+#plt.yscale('symlog', linthreshy=0.015)
+#plt.yticks(np.arange(0, 4000, step=500))
+plot.set_xlabel('Instance')
+plot.set_ylabel('time (s)')
+plt.savefig('tempo_ga_cplex.png', dpi=250)
+plt.show()
+
+
+
 dados = pd.read_csv("comparacao_GA_CPLEX.csv")
-
-
-
+dados.head()
 plot = dados.plot(kind = "line", grid = True,
            color = ['gray','black'], style = '.-')
 
