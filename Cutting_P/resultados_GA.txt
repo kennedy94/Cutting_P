@@ -127,3 +127,5 @@ Instancias\\cwp021,34.75,218.755
 Instancia_novas\\numerica,2.3,1.60909
 Instancia_novas\\numerica,2.3,1.6681
 Instancias\\cwp015,22.95,151.809
+Instancias\\cwp031,50.95,227.417
+Instancias\\cwp021,36.1,105.256

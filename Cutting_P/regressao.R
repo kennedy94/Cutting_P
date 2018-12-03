@@ -5,12 +5,19 @@ library(tree)
 plot(data)
 
 modelo = lm(SNR2 ~ TP + NG + MUT + TER, data)
-modelo = lm(SNR ~ TP + NG + MUT + TER,data)
+modelo = lm(DESEM ~ MUT+  TP + NG + TER,data)
 modelo = lm(SNRT ~ NG + RST + AS,data)
+
+#modelo = lm(DESEM ~ TP + NG + MUT + RST +  AS + CRS + TER,data)
+modelo = lm(DESEM ~ MUT + CRS,data)
+anova(modelo)
+nova = anova(modelo)
+
+capture.output(nova,file="anova.txt")
 
 summary(aov(modelo))
 summary(anova(modelo))
-#aov(DESEM ~ TP + NG + MUT + RST + AS + CRS + TER,data)
+
 
 #plot
 layout(matrix(c(1,2,3,4,5,6,7,7), 2, 4, byrow = TRUE))

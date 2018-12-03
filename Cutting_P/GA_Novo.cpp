@@ -1070,6 +1070,11 @@ void GA_Novo::teste()
 	individuo pai = GerarSoluGRASP();
 	individuo mae = GerarSoluGRASP();
 	ImprimirVetorSolu(pai);
+
+	mutar(pai);
+	ImprimirVetorSolu(pai);
+	
+
 	ImprimirVetorSolu(mae);
 
 	ImprimirVetorSolu(cruzar(pai, mae));
